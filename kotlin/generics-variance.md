@@ -1,6 +1,6 @@
 ---
 id: kotlin-generics-variance
-title: Generics & Variance (thử cập nhật)
+title: Generics & Variance
 domain: kotlin
 tags: [kotlin, generics, variance, type-erasure, reified]
 collections: [interview-fundamental]
