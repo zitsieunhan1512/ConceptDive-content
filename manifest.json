@@ -1,0 +1,462 @@
+{
+ "version": 1,
+ "generatedAt": "2026-10-22T01:36:35+00:00",
+ "sourceCommit": "f99e17a",
+ "files": [
+  {
+   "path": "android/activity-lifecycle.md",
+   "sha256": "677329f0c4772ddb2ab59b104e54e5d884de634fc371e4e5b024f2d456b2cd54",
+   "size": 6458
+  },
+  {
+   "path": "android/ble-android-pitfalls.md",
+   "sha256": "e7c24d043144db6f683be534f6b1fd0acb0fb4ad82a2263bfdf908161a519af5",
+   "size": 6399
+  },
+  {
+   "path": "android/ble-gatt-model.md",
+   "sha256": "2bd35f8148135d250373c1d03538ec92a7eb267be10d6ec0a88e0ff2d0d1d1ec",
+   "size": 6387
+  },
+  {
+   "path": "android/context-application-vs-activity.md",
+   "sha256": "81810519ebd946bab677be153456878fe9c117d52201bf6dc4054762a76fbbc4",
+   "size": 6941
+  },
+  {
+   "path": "android/diagrams/activity-lifecycle-process-death.png",
+   "sha256": "eda3bbe5b047c41fcb1355dea23dd8449956f045ca5925a5c09ffa0240f28dee",
+   "size": 219313
+  },
+  {
+   "path": "android/diagrams/anr-watchdog-thresholds.png",
+   "sha256": "54144db9e77d3112008ce2265e64271fca07f6289b0f69ad0bbc0d3307ed5bb9",
+   "size": 238848
+  },
+  {
+   "path": "android/diagrams/ble-command-queue-busy.png",
+   "sha256": "a3ee4fa5db687b0177a95981a1149748c254ff97f099e84dd75a5f35e299cab4",
+   "size": 211617
+  },
+  {
+   "path": "android/diagrams/ble-gatt-hierarchy.png",
+   "sha256": "c415c68a2eed3b9c79d4c2260e95d65d38d6681988c81b00ed941b3450718a11",
+   "size": 215722
+  },
+  {
+   "path": "android/diagrams/context-activity-vs-application.png",
+   "sha256": "a58a4f1bb11424682628283f39ac51e709a4be8f63e83ba7efbed9ba03df4292",
+   "size": 251501
+  },
+  {
+   "path": "android/diagrams/fragment-vs-view-lifecycle.png",
+   "sha256": "cc3790bf17fc6ce48915dbb3e83553a367ccd2af0409d98e5fb1debacb78a100",
+   "size": 261233
+  },
+  {
+   "path": "android/diagrams/gc-roots-reachability-graph.png",
+   "sha256": "b5008f8d1fd84727070a14f9f30290dc4c9bdc96d82a9519ab3979aff1aac250",
+   "size": 237223
+  },
+  {
+   "path": "android/diagrams/handler-looper-message-queue-loop.png",
+   "sha256": "3974fbd46d7496d75646058549dbe8ec81e0599f5646a79e06bb2f1fe53293c5",
+   "size": 248167
+  },
+  {
+   "path": "android/diagrams/memory-leak-activity-tree.png",
+   "sha256": "157b0cad5d4869f31deaa06933d848fdda9e9c06f654391dc7a7745c6dbd155f",
+   "size": 224054
+  },
+  {
+   "path": "android/diagrams/recyclerview-viewholder-recycling.png",
+   "sha256": "91679c755c8f6a6b80d4cd7eeffc912744cc49eddeb20661f5a6946bb156cc25",
+   "size": 252084
+  },
+  {
+   "path": "android/diagrams/samsung-mdc-packet-frame.png",
+   "sha256": "8d96a2545f88c86b42f06fb43e9a2edc3e276cd0d547597d9125a98f686988a1",
+   "size": 242332
+  },
+  {
+   "path": "android/diagrams/savedstate-process-death-binder.png",
+   "sha256": "7b024e029fdf83b44d4e35d8a931ff4b286bcf5ca0eb46d7680e31228e39938f",
+   "size": 268378
+  },
+  {
+   "path": "android/diagrams/state-holder-repeat-on-lifecycle.png",
+   "sha256": "83f85f514cee5bab2bc35cebc737b9f14bf11f41dbc854178b1036334b3c7e9a",
+   "size": 284532
+  },
+  {
+   "path": "android/diagrams/tcp-stream-framing-accumulator.png",
+   "sha256": "7c79c500749c45b7392354b9dce3bc9d6b5e5ca125a96e7f22f70b0d4a853abe",
+   "size": 260016
+  },
+  {
+   "path": "android/diagrams/viewmodel-store-retention.png",
+   "sha256": "7f190c3604f4916518ac1c2b39854bb59c95e1b3f18dfc8bf0011ca225710a56",
+   "size": 249494
+  },
+  {
+   "path": "android/fragment-lifecycle.md",
+   "sha256": "7a8bda25b14691ff165ae23b6c48124f943738f45ce34944377aa1279909c238",
+   "size": 6028
+  },
+  {
+   "path": "android/gc-roots.md",
+   "sha256": "3c2bcf52cc788faf216ffd48b9e7f23620bc953378f20eaa9105eff1afeef378",
+   "size": 7423
+  },
+  {
+   "path": "android/handler-looper-message-queue.md",
+   "sha256": "36fc57c345b2ca7e39cdc1a085dce1e26d8880c169277914262bd7b9e7f4e716",
+   "size": 6013
+  },
+  {
+   "path": "android/main-thread-and-anr.md",
+   "sha256": "5d107ae45a0d1c853c5ae6733e6b60721e5f8785c8af8c2f512a1f9331972a07",
+   "size": 6181
+  },
+  {
+   "path": "android/memory-leak.md",
+   "sha256": "239d76e3174b3271c56d37de837856035b251c505ea4263046a93fd1c463a74f",
+   "size": 6489
+  },
+  {
+   "path": "android/process-death-and-saved-state.md",
+   "sha256": "715239cd2a72fdbb781fdee5aba7c818c39e6106316d62264ae3b4948e6669db",
+   "size": 6178
+  },
+  {
+   "path": "android/recyclerview-and-diffutil.md",
+   "sha256": "7fe118816d3069b497af7eb76d096cb7e4e8234962d3c612a8b5a23b532ec0ba",
+   "size": 6467
+  },
+  {
+   "path": "android/samsung-mdc-protocol.md",
+   "sha256": "7165133680c03fc290ba3e92c1b23d6b97c77a3eddb9c1d63a72b46f849b03fd",
+   "size": 6426
+  },
+  {
+   "path": "android/state-holders.md",
+   "sha256": "a07dd2fe803d7fd01798c8afca28a131bda9cbc240465f2211fb3e8c66a51bc9",
+   "size": 6883
+  },
+  {
+   "path": "android/tcp-stream-framing.md",
+   "sha256": "0dbce6a54fda52549a1bf25c7e8b5c596d29c62df305d47e3171b0adba6c2f46",
+   "size": 6478
+  },
+  {
+   "path": "android/viewmodel.md",
+   "sha256": "80d4bd4dfa99a4b49ec3eda0c08447239259d597be01b754ab70e7a3a669edd8",
+   "size": 6729
+  },
+  {
+   "path": "architecture/clean-architecture-and-use-cases.md",
+   "sha256": "f3b76b11ed08cd5f66f4c0a976e38505e69119ed20d39efb3f754d6cb07e8da1",
+   "size": 6152
+  },
+  {
+   "path": "architecture/dependency-injection.md",
+   "sha256": "1a5d3efb534389df4a9a5006803cbff617d431706edb309ba21c7f108af6a822",
+   "size": 6421
+  },
+  {
+   "path": "architecture/diagrams/clean-architecture-dependency-rule.png",
+   "sha256": "3c0a1a0b3e7695924510ca17adc3950792b0efcac548ce14efdbd2ac70baf5e5",
+   "size": 206687
+  },
+  {
+   "path": "architecture/diagrams/dependency-injection-testing-isolation.png",
+   "sha256": "da443fdfc0ca8348cd90c041c27ef33826b912764ff34bd5c64128204b3fc188",
+   "size": 220941
+  },
+  {
+   "path": "architecture/diagrams/mvi-unidirectional-data-flow.png",
+   "sha256": "1053c21fdea5923a283ba33d96d3eb4f5ae324c2fd417c33cb420c8f55246e6c",
+   "size": 199459
+  },
+  {
+   "path": "architecture/diagrams/offline-first-ssot-flow.png",
+   "sha256": "402974e93a03eb07bb161106c098274aa25a1d5716f050f9b3680064c286e694",
+   "size": 215277
+  },
+  {
+   "path": "architecture/diagrams/state-vs-event-lifecycle.png",
+   "sha256": "068fbe435dbd9b067075a5a27b1864e2c176e8c1d95e728436d21abf2918b710",
+   "size": 238362
+  },
+  {
+   "path": "architecture/mvvm-vs-mvi.md",
+   "sha256": "c4461966d8e44efa57814d765c8d10565f04798d7b2f4e2881105871201866e7",
+   "size": 6994
+  },
+  {
+   "path": "architecture/offline-first-repository.md",
+   "sha256": "1526ec880616d56ba0eff1709a38844dbe9b56f7afc99cf79775939964d5d28c",
+   "size": 6142
+  },
+  {
+   "path": "architecture/state-vs-event.md",
+   "sha256": "4f0efe2c0e6c48f96bc99ad346b5bbc0c4a3c168005a5de561c7365d9b8fe90e",
+   "size": 7155
+  },
+  {
+   "path": "collections.json",
+   "sha256": "82fb33196bc91daf4ca1f4aaaa5c108e2e7407d41077fb83e82ee7792a399c95",
+   "size": 87
+  },
+  {
+   "path": "compose/compose-side-effects.md",
+   "sha256": "d14077245660b81a6f2409be9d90565ae45ecc764075cdfd6d786ea77f076b73",
+   "size": 6308
+  },
+  {
+   "path": "compose/diagrams/compose-lifecycle-side-effects.png",
+   "sha256": "b760c07b07a7e082e8910ab81cb72fe695be1ba6d100e2812fe67d892a9b8989",
+   "size": 233623
+  },
+  {
+   "path": "compose/diagrams/recomposition-slot-table-gap-buffer.png",
+   "sha256": "30ccba121152d311f7fc7cae1f45ca78991d63f2e586daf7b5baba3c39f2043e",
+   "size": 243165
+  },
+  {
+   "path": "compose/recomposition-and-state.md",
+   "sha256": "877dca8b277fd8021d774370655fb01ddcb2cd886e17d5d964f688cb3b36a034",
+   "size": 6227
+  },
+  {
+   "path": "jvm/diagrams/race-condition-memory-barriers.png",
+   "sha256": "ff9d6dde57d8034a19de09c3dc6b1a643f37717a0b044ebbeba4076520639d85",
+   "size": 217823
+  },
+  {
+   "path": "jvm/diagrams/stack-vs-heap-memory.png",
+   "sha256": "7e20228ed3ad3cdab5f774d323fd1bb123390932f18be4eac3258badbc432519",
+   "size": 242951
+  },
+  {
+   "path": "jvm/diagrams/thread-context-switch.png",
+   "sha256": "3e80c9857843129b4340928bf863204684883309e99a3cb58510a4d6a7ba2ed5",
+   "size": 203459
+  },
+  {
+   "path": "jvm/diagrams/virtual-method-dispatch.png",
+   "sha256": "9c8528a695846299a055b0005b9901b85f09a94163e8d295561385751f64c1e1",
+   "size": 180437
+  },
+  {
+   "path": "jvm/race-condition-memory-model.md",
+   "sha256": "5f41ca18e09fc9713cfc0b04415ce46a8d9856a99d6b0932cea8ae26f5dcb576",
+   "size": 6381
+  },
+  {
+   "path": "jvm/stack-vs-heap.md",
+   "sha256": "7d6af01e1b9a4ef495565226208892df0cd45fc52f100c69e2b5bc239baabeaf",
+   "size": 6477
+  },
+  {
+   "path": "jvm/thread.md",
+   "sha256": "a1a06a9579d9cca239a3f4da3b0d60a99f49356b73a06dd1b45e2ff82c722a62",
+   "size": 6913
+  },
+  {
+   "path": "jvm/virtual-method-dispatch.md",
+   "sha256": "142c96a442f91e6722807ea8b43c01d455c6e7f63aba85b3860383b3568f0be2",
+   "size": 6966
+  },
+  {
+   "path": "kotlin/coroutine-context-and-dispatchers.md",
+   "sha256": "c0fd0175a0747168e16a74330d2c027c29c29d9bfb29634d81d22c27e9ab697f",
+   "size": 6335
+  },
+  {
+   "path": "kotlin/coroutine-state-machine.md",
+   "sha256": "3d0eb549fcafcfcb088f9ad3beff16529b4fb10d4cbb53a81cda360a0ed3c26f",
+   "size": 7620
+  },
+  {
+   "path": "kotlin/coroutines.md",
+   "sha256": "443baee12e0290c948eec6c59644958efe5a17f1a5d6ce005c19126d7f7d98d0",
+   "size": 7049
+  },
+  {
+   "path": "kotlin/diagrams/coroutine-context-dispatcher-intercept.png",
+   "sha256": "5c8be6a5d47cd00140201d3db8f763f20bf165465b49987a8e3bd106317e8607",
+   "size": 150808
+  },
+  {
+   "path": "kotlin/diagrams/coroutine-state-machine.png",
+   "sha256": "1a1c2c39149924adb6daf883443d84c3bc77e3634df7efc548a26b5d9bd69fd7",
+   "size": 178651
+  },
+  {
+   "path": "kotlin/diagrams/coroutine-suspend.png",
+   "sha256": "a16a4303f7b70fa1a283bde92bdbb24cf930ac1360d032f7ba4438f04ce5bce9",
+   "size": 108137
+  },
+  {
+   "path": "kotlin/diagrams/extension-static-dispatch.png",
+   "sha256": "43fdd62992f3457d2674462bee076cf22ea84a9220e294d416f9a07ee62f14b9",
+   "size": 202907
+  },
+  {
+   "path": "kotlin/diagrams/flow-flowon-channel.png",
+   "sha256": "2acbe282594b0d2fd24c04cede41c832d4b3a0767c310c95044753efc14d0458",
+   "size": 185186
+  },
+  {
+   "path": "kotlin/diagrams/generics-variance-directions.png",
+   "sha256": "0dfd2516cda33f133a0efacfa2330f768c0f1a66754f5d523b76c1bf5f31925e",
+   "size": 179344
+  },
+  {
+   "path": "kotlin/diagrams/hashset-bucket-lookup.png",
+   "sha256": "6746fbc819fabc57c9a912466cb21467c8d8d06eef6ecdbea4e238a92567522f",
+   "size": 162993
+  },
+  {
+   "path": "kotlin/diagrams/inline-bytecode-expansion.png",
+   "sha256": "cbbe686c041d8ab1c421298fb686e231bd749abb876df73d07df39f4a6b4baae",
+   "size": 182825
+  },
+  {
+   "path": "kotlin/diagrams/job-tree.png",
+   "sha256": "90fe2372156722ef681ad45fc3a6e5d5862cbd1b8311100ef97a9d2f60949911",
+   "size": 99807
+  },
+  {
+   "path": "kotlin/diagrams/kotlin-compilation-pipeline.png",
+   "sha256": "d4d6b5b72670aece30384b4607bf7662bfc98e7a2184eb17b44f12a89b9b2b9f",
+   "size": 165117
+  },
+  {
+   "path": "kotlin/diagrams/lateinit-vs-lazy-mechanisms.png",
+   "sha256": "b00a5677f0a9f88766b3a5ccb9b5ab12126ea58b85cc9ffdf058be290e98e831",
+   "size": 232090
+  },
+  {
+   "path": "kotlin/diagrams/null-safety-type-hierarchy.png",
+   "sha256": "7bae38079d6de051ad85c34a6c6178dedb82cddf202a20fd7c18abcea6883d1e",
+   "size": 196692
+  },
+  {
+   "path": "kotlin/diagrams/scope-functions-matrix.png",
+   "sha256": "ead21bc50dc98c7fab39c69391439b88576539b9bc9ea7653576c2b7ce16d560",
+   "size": 196574
+  },
+  {
+   "path": "kotlin/diagrams/sealed-hierarchy-exhaustive.png",
+   "sha256": "ee27ef125104eddb67464ead12544108be1288ae9a09a6464997912c0b3c3419",
+   "size": 195647
+  },
+  {
+   "path": "kotlin/diagrams/stateflow-conflation-buffer.png",
+   "sha256": "5e7ceb88a70d2b357f681dedd2d42c2894c2bdad19632c6295e515bde71c9f2c",
+   "size": 176425
+  },
+  {
+   "path": "kotlin/diagrams/val-vs-const-bytecode.png",
+   "sha256": "80f57f3e120362ef7e19a9e539cb07b54fe8ba6c74a76d601067ae987ba98851",
+   "size": 201962
+  },
+  {
+   "path": "kotlin/equals-hashcode.md",
+   "sha256": "1575930e88920ee9890e537f0a887ed783c00cd8bc465a3953e1cbe37e6a3ee7",
+   "size": 6365
+  },
+  {
+   "path": "kotlin/extension-and-object.md",
+   "sha256": "d57b19fdb59ffd167ab04a750ce10bb36df506d49b53daa4347ca3747b6f173c",
+   "size": 5961
+  },
+  {
+   "path": "kotlin/flow-under-the-hood.md",
+   "sha256": "f690d254b869637db2e86aa6862d92e38e0c16953cfd6b6a98d88280ffd73614",
+   "size": 5972
+  },
+  {
+   "path": "kotlin/generics-variance.md",
+   "sha256": "50bcbd7d72c93d891209c50b2d1ccfc0254243b42ac0e4a497c299db6c77a376",
+   "size": 6825
+  },
+  {
+   "path": "kotlin/inline-function.md",
+   "sha256": "4da0fbd86bfa39484a658bf5e158716efe72fe452f2095da6915d96eb19466de",
+   "size": 6691
+  },
+  {
+   "path": "kotlin/lateinit-vs-lazy.md",
+   "sha256": "3f89cab9b8f17b3bcbc3c398c23e630a8a85d284bfa6d8b0fa49d4944134cbf6",
+   "size": 6355
+  },
+  {
+   "path": "kotlin/null-safety.md",
+   "sha256": "de061b2afec764467b3d06ab0502ceb4fd798d7b0122630eb2e5807ba86ab307",
+   "size": 6387
+  },
+  {
+   "path": "kotlin/scope-functions.md",
+   "sha256": "13744d6b7c117349817fa7ee4126ad1a4daa2c8692ac8a00b8f1a7c49406e8ad",
+   "size": 6536
+  },
+  {
+   "path": "kotlin/sealed-vs-data-class.md",
+   "sha256": "f6d040d99e129de49813c01276fabbf3958397b613e916f6983f3aa10e28320f",
+   "size": 7037
+  },
+  {
+   "path": "kotlin/stateflow-vs-sharedflow.md",
+   "sha256": "5a2889a4f46b92aa25aa83b1fa5239dff705adf65249c5cbe38106e5d1fa0868",
+   "size": 6813
+  },
+  {
+   "path": "kotlin/structured-concurrency.md",
+   "sha256": "1480bb8d8756fe38bf3720a8962ff470fbb3d700d28e0c0f321cbebea03bb6b3",
+   "size": 6535
+  },
+  {
+   "path": "kotlin/val-vs-const.md",
+   "sha256": "aecbc841bb32d750b7c87524667cd613162d0c41ad69212ac9abbedffc784414",
+   "size": 7763
+  },
+  {
+   "path": "kotlin/why-kotlin-over-java.md",
+   "sha256": "b1384a30ea2041efd548078d11b998c14ff67182d59025efbd2fb41f3de732ae",
+   "size": 7950
+  },
+  {
+   "path": "oop/abstract-class-vs-interface.md",
+   "sha256": "08dc5a92a13fb4f3474808e83263c844a8c22605953363343875537675336db1",
+   "size": 7997
+  },
+  {
+   "path": "oop/composition-over-inheritance.md",
+   "sha256": "e2514f557eb67fe0f8edfa8e141d7ae6f3cdf6f6be419c7d2747e7a4ff1f074c",
+   "size": 6716
+  },
+  {
+   "path": "oop/diagrams/abstract-class-vs-interface.png",
+   "sha256": "d98f67bf50b77d76b168bd917a5a5e690612311d218c1675b9553e02a9ac918a",
+   "size": 195528
+  },
+  {
+   "path": "oop/diagrams/composition-fragile-base-class.png",
+   "sha256": "5f1fa764f7b20980242cfca58294b4ff5cbe018cf8a08f6927be132d2267a37c",
+   "size": 206976
+  },
+  {
+   "path": "oop/four-pillars.md",
+   "sha256": "cd81d5427dd8679c30d343bb24bf1a37925be7cd6f2dfa30b5af82b45e611195",
+   "size": 7690
+  },
+  {
+   "path": "oop/solid.md",
+   "sha256": "aab0decf66997d6a9761cfb614d6e18cc810996c6d8bff23607e4fc0bc9cbc0c",
+   "size": 6507
+  }
+ ]
+}
