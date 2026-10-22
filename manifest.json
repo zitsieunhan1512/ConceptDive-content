@@ -1,7 +1,7 @@
 {
  "version": 1,
- "generatedAt": "2026-10-22T01:36:35+00:00",
- "sourceCommit": "f99e17a",
+ "generatedAt": "2026-10-22T03:16:15+00:00",
+ "sourceCommit": "f0628f6",
  "files": [
   {
    "path": "android/activity-lifecycle.md",
@@ -380,8 +380,8 @@
   },
   {
    "path": "kotlin/generics-variance.md",
-   "sha256": "50bcbd7d72c93d891209c50b2d1ccfc0254243b42ac0e4a497c299db6c77a376",
-   "size": 6825
+   "sha256": "7b4b03e57bce29a4af180b6fe1695fa79d82d446bb425a4994c12207278bcca5",
+   "size": 6846
   },
   {
    "path": "kotlin/inline-function.md",
