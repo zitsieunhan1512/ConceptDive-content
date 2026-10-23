@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ConceptDive · Chính sách quyền riêng tư</title>
+<style>
+  :root { --bg:#faf8f4; --fg:#2b2a28; --muted:#6b675f; --accent:#a8432f; --rule:#e4dfd6; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#1d1c1a; --fg:#ece8e1; --muted:#a8a296; --accent:#e07a62; --rule:#3a3733; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:1.7rem; margin:0 0 4px; } h2 { font-size:1.15rem; margin:32px 0 8px; }
+  .meta { color:var(--muted); font-size:.9rem; } a { color:var(--accent); }
+  hr { border:0; border-top:1px solid var(--rule); margin:40px 0; } li { margin:4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Chính sách quyền riêng tư</h1>
+<p class="meta">Ứng dụng ConceptDive (Android) · Cập nhật ngày 23/10/2026</p>
+
+<p>ConceptDive là ứng dụng học khái niệm kỹ thuật bằng cách nghe, xem sơ đồ và tự kiểm tra. Ứng dụng không yêu cầu tài khoản và nhà phát triển không vận hành máy chủ nào thu nhận dữ liệu của bạn.</p>
+
+<h2>Những gì ứng dụng không làm</h2>
+<ul>
+  <li>Không thu thập thông tin cá nhân, không yêu cầu đăng ký hay đăng nhập.</li>
+  <li>Không có quảng cáo, không có công cụ phân tích hay theo dõi hành vi.</li>
+  <li>Không gửi bài viết, ghi chú hay tiến độ học của bạn về cho nhà phát triển.</li>
+</ul>
+
+<h2>Dữ liệu lưu trên máy</h2>
+<ul>
+  <li>Bài bạn thêm, bài tải từ thư viện GitHub, ghi chú, tiến độ đọc, kết quả tự kiểm tra và cài đặt được lưu trong bộ nhớ của ứng dụng trên máy bạn.</li>
+  <li>Nếu bạn bật sao lưu của Android, hệ thống có thể sao lưu tệp cài đặt của ứng dụng (gồm bài bạn thêm và tiến độ học) vào tài khoản Google của bạn. Mô hình giọng đọc, âm thanh đã tạo và token GitHub không nằm trong bản sao lưu này.</li>
+  <li>Bạn có thể tự xuất hoặc nhập tệp sao lưu (<code>conceptdive-backup.json</code>) tới nơi bạn chọn.</li>
+  <li>Gỡ ứng dụng hoặc xoá dữ liệu ứng dụng trong cài đặt Android sẽ xoá toàn bộ dữ liệu trên máy.</li>
+</ul>
+
+<h2>Khi nào ứng dụng dùng mạng</h2>
+<p>Ứng dụng chỉ kết nối mạng khi bạn dùng các tính năng sau, và chỉ tới các địa chỉ cần cho tính năng đó:</p>
+<ul>
+  <li><strong>Thư viện từ GitHub:</strong> tải danh sách bài, bài viết và ảnh sơ đồ từ repo bạn thêm, qua GitHub (<code>api.github.com</code>, <code>raw.githubusercontent.com</code>) hoặc CDN jsDelivr (<code>cdn.jsdelivr.net</code>) với repo công khai.</li>
+  <li><strong>Tải giọng đọc AI:</strong> tải tệp mô hình từ Hugging Face và GitHub khi bạn bấm tải.</li>
+  <li><strong>Mở liên kết:</strong> khi bạn bấm "Gửi sang ChatGPT", "Góp ý bài này" hoặc một liên kết, ứng dụng mở ứng dụng hoặc trình duyệt tương ứng; nội dung bạn gửi đi do bạn chủ động chia sẻ.</li>
+</ul>
+
+<h2>Token GitHub</h2>
+<p>Với repo riêng tư, bạn có thể nhập token chỉ đọc. Token được mã hoá bằng Android Keystore, chỉ lưu trên máy và chỉ được gửi kèm yêu cầu tới GitHub. Bạn có thể xoá token hoặc nguồn bất cứ lúc nào trong màn "Nguồn GitHub".</p>
+
+<h2>Giọng đọc</h2>
+<p>Giọng đọc AI chạy hoàn toàn trên máy. Giọng hệ thống dùng bộ đọc văn bản sẵn có của Android ở chế độ không cần mạng. Văn bản bài không được gửi lên máy chủ để tạo giọng.</p>
+
+<h2>Bộ nhớ tạm và chia sẻ</h2>
+<p>Ứng dụng chỉ đọc bộ nhớ tạm khi bạn mở màn "Thêm bài" và ô dán đang trống, để gợi ý dán bài vừa chép. Nội dung chỉ được dán khi bạn bấm. Nội dung bạn chia sẻ vào ứng dụng từ ứng dụng khác chỉ được lưu khi bạn bấm lưu.</p>
+
+<h2>Trẻ em</h2>
+<p>Ứng dụng không hướng tới trẻ em dưới 13 tuổi.</p>
+
+<h2>Liên hệ</h2>
+<p>Câu hỏi hoặc góp ý về chính sách này: <a href="https://github.com/zitsieunhan1512/ConceptDive-content/issues">mở issue trên GitHub</a>.</p>
+
+<hr>
+
+<h1>Privacy Policy (English summary)</h1>
+<p class="meta">ConceptDive for Android · Updated October 23, 2026</p>
+<ul>
+  <li>No account, no ads, no analytics or tracking. The developer runs no server that receives your data.</li>
+  <li>Your articles, notes, progress and settings stay on your device. If Android backup is enabled, the system may back up the app's settings file (including your own articles and progress) to your Google account; voice models, generated audio and GitHub tokens are excluded.</li>
+  <li>The app uses the network only when you sync a GitHub library (GitHub, jsDelivr), download a voice model (Hugging Face, GitHub) or open a link you tap.</li>
+  <li>GitHub tokens for private repos are encrypted with Android Keystore, stored only on the device and sent only to GitHub.</li>
+  <li>Speech is generated on the device; the system voice is used in offline mode. Article text is not sent to any server for speech.</li>
+  <li>The clipboard is read only on the "Add article" screen when the paste box is empty, and is pasted only when you tap.</li>
+  <li>Not directed at children under 13.</li>
+  <li>Contact: <a href="https://github.com/zitsieunhan1512/ConceptDive-content/issues">GitHub issues</a>.</li>
+</ul>
+</main>
+</body>
+</html>
