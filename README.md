@@ -25,3 +25,15 @@ Bài viết và sơ đồ trong repo được cấp phép [Creative Commons Attr
 ---
 
 Nguồn bài là thư mục `content/` của repo app, xuất bản bằng `publish_content.py`; đừng sửa trực tiếp ở đây.
+
+---
+
+## English
+
+Sample library for the ConceptDive Android app: articles explaining Android, Kotlin, JVM, OOP and architecture concepts, with diagrams. Articles in this repo are written in Vietnamese.
+
+- **Use it in the app:** open the **Library** tab → **GitHub sources**, paste `https://github.com/zitsieunhan1512/ConceptDive-content` and pick the articles you want.
+- **Write your own library:** any GitHub repo with Markdown articles works, in Vietnamese or English. The article format is described in the app's format guide.
+- **Feedback:** [open an issue](https://github.com/zitsieunhan1512/ConceptDive-content/issues), or use **Feedback** inside an article.
+- **License:** [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) — you may read, share and adapt with attribution, not for commercial use. Full text in `LICENSE`.
+- **Privacy:** [ConceptDive privacy policy](https://zitsieunhan1512.github.io/ConceptDive-content/privacy-policy.html#en)

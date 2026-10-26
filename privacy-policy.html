@@ -17,7 +17,7 @@
 <body>
 <main>
 <h1>Chính sách quyền riêng tư</h1>
-<p class="meta">Ứng dụng ConceptDive (Android) · Cập nhật ngày 23/10/2026</p>
+<p class="meta">Ứng dụng ConceptDive (Android) · Cập nhật ngày 26/10/2026 · <a href="#en">English</a></p>
 
 <p>ConceptDive là ứng dụng học khái niệm kỹ thuật bằng cách nghe, xem sơ đồ và tự kiểm tra. Ứng dụng không yêu cầu tài khoản và nhà phát triển không vận hành máy chủ nào thu nhận dữ liệu của bạn.</p>
 
@@ -61,18 +61,48 @@
 
 <hr>
 
-<h1>Privacy Policy (English summary)</h1>
-<p class="meta">ConceptDive for Android · Updated October 23, 2026</p>
+<h1 id="en">Privacy Policy</h1>
+<p class="meta">ConceptDive for Android · Updated October 26, 2026</p>
+
+<p>ConceptDive is an app for learning technical concepts by listening, viewing diagrams and testing yourself. It requires no account, and the developer runs no server that receives your data.</p>
+
+<h2>What the app does not do</h2>
 <ul>
-  <li>No account, no ads, no analytics or tracking. The developer runs no server that receives your data.</li>
-  <li>Your articles, notes, progress and settings stay on your device. If Android backup is enabled, the system may back up the app's settings file (including your own articles and progress) to your Google account; voice models, generated audio and GitHub tokens are excluded.</li>
-  <li>The app uses the network only when you sync a GitHub library (GitHub, jsDelivr), download a voice model (Hugging Face, GitHub) or open a link you tap.</li>
-  <li>GitHub tokens for private repos are encrypted with Android Keystore, stored only on the device and sent only to GitHub.</li>
-  <li>Speech is generated on the device; the system voice is used in offline mode. Article text is not sent to any server for speech.</li>
-  <li>The clipboard is read only on the "Add article" screen when the paste box is empty, and is pasted only when you tap.</li>
-  <li>Not directed at children under 13.</li>
-  <li>Contact: <a href="https://github.com/zitsieunhan1512/ConceptDive-content/issues">GitHub issues</a>.</li>
+  <li>It does not collect personal information and never asks you to sign up or sign in.</li>
+  <li>It has no ads and no analytics or behavior tracking.</li>
+  <li>It does not send your articles, notes or learning progress to the developer.</li>
 </ul>
+
+<h2>Data stored on your device</h2>
+<ul>
+  <li>Articles you add, articles downloaded from GitHub libraries, notes, reading progress, self-check results and settings are stored in the app's storage on your device.</li>
+  <li>If Android backup is turned on, the system may back up the app's settings file (including the articles you added and your progress) to your Google account. Voice models, generated audio and GitHub tokens are not part of this backup.</li>
+  <li>You can export or import a backup file (<code>conceptdive-backup.json</code>) to a location you choose.</li>
+  <li>Uninstalling the app or clearing its data in Android settings removes all data on the device.</li>
+</ul>
+
+<h2>When the app uses the network</h2>
+<p>The app connects to the network only when you use the features below, and only to the addresses those features need:</p>
+<ul>
+  <li><strong>GitHub libraries:</strong> downloads the article list, articles and diagram images from repositories you add, through GitHub (<code>api.github.com</code>, <code>raw.githubusercontent.com</code>) or, for public repositories, the jsDelivr CDN (<code>cdn.jsdelivr.net</code>).</li>
+  <li><strong>AI voice downloads:</strong> downloads model files from Hugging Face and GitHub when you tap download.</li>
+  <li><strong>Opening links:</strong> when you tap "Send to ChatGPT", "Feedback" or a link, the app opens the matching app or browser; anything you send there is shared by you.</li>
+</ul>
+
+<h2>GitHub tokens</h2>
+<p>For private repositories you can enter a read-only token. The token is encrypted with Android Keystore, stored only on your device and sent only with requests to GitHub. You can remove the token or the source at any time on the "GitHub sources" screen.</p>
+
+<h2>Voices</h2>
+<p>AI voices run entirely on your device. The system voice uses Android's built-in text-to-speech in offline mode. Article text is never sent to a server to generate speech.</p>
+
+<h2>Clipboard and sharing</h2>
+<p>The app reads the clipboard only when you open the "Add article" screen and the paste box is empty, to suggest pasting an article you just copied. Content is pasted only when you tap. Content shared into the app from another app is saved only when you tap save.</p>
+
+<h2>Children</h2>
+<p>The app is not directed at children under 13.</p>
+
+<h2>Contact</h2>
+<p>Questions or feedback about this policy: <a href="https://github.com/zitsieunhan1512/ConceptDive-content/issues">open an issue on GitHub</a>.</p>
 </main>
 </body>
 </html>
