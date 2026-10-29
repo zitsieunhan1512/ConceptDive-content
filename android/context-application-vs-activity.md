@@ -6,6 +6,10 @@ tags: [android, context, memory-leak, lifecycle]
 collections: [interview-fundamental]
 related: [android-activity-lifecycle, android-memory-leak, android-viewmodel]
 created: 2026-09-15
+sources:
+  - Context API reference — Android Developers | https://developer.android.com/reference/android/content/Context
+  - ContextThemeWrapper API reference — Android Developers | https://developer.android.com/reference/android/view/ContextThemeWrapper
+  - Application API reference — Android Developers | https://developer.android.com/reference/android/app/Application
 diagrams: [Cơ chế|context-activity-vs-application.png|Activity có Theme và Window Token mở Dialog hợp lệ; Application thiếu token ném BadTokenException nhưng an toàn cho Singleton]
 ---
 

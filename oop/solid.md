@@ -5,6 +5,10 @@ domain: oop
 tags: [oop, solid, clean-architecture, software-design]
 collections: [interview-fundamental]
 related: [oop-four-pillars, architecture-dependency-injection]
+sources:
+  - SOLID principles — Wikipedia | https://en.wikipedia.org/wiki/SOLID
+  - Single-responsibility principle — Wikipedia | https://en.wikipedia.org/wiki/Single-responsibility_principle
+  - Dependency inversion principle — Wikipedia | https://en.wikipedia.org/wiki/Dependency_inversion_principle
 diagrams: [Cơ chế|solid.png|Năm nguyên tắc SOLID, mỗi nguyên tắc một câu ý chính và một ví dụ]
 created: 2026-09-07
 ---

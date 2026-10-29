@@ -5,6 +5,10 @@ domain: kotlin
 tags: [kotlin, type-system, oop, data-modeling]
 collections: [interview-fundamental]
 related: [kotlin-equals-hashcode, android-state-holders]
+sources:
+  - Sealed classes and interfaces — Kotlin | https://kotlinlang.org/docs/sealed-classes.html
+  - Data classes — Kotlin Documentation | https://kotlinlang.org/docs/data-classes.html
+  - Whats new in Kotlin 1.5.0 | https://kotlinlang.org/docs/whatsnew15.html
 diagrams: [Cơ chế|sealed-hierarchy-exhaustive.png|Sealed interface đóng kín cây kế thừa giúp compiler kiểm tra vét cạn trong when; data class tự sinh mã theo giá trị]
 created: 2026-09-07
 ---

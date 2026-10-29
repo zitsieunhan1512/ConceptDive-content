@@ -6,6 +6,11 @@ tags: [android, looper, handler, message-queue, main-thread, epoll]
 collections: [interview-fundamental]
 related: [thread, android-activity-lifecycle, kotlin-coroutines, android-process-death-and-saved-state]
 created: 2026-09-15
+sources:
+  - Processes and threads overview — Android | https://developer.android.com/guide/components/processes-and-threads
+  - Looper API reference — Android Developers | https://developer.android.com/reference/android/os/Looper
+  - Handler API reference — Android Developers | https://developer.android.com/reference/android/os/Handler
+  - MessageQueue API reference — Android Developers | https://developer.android.com/reference/android/os/MessageQueue
 diagrams: [Cơ chế|handler-looper-message-queue-loop.png|Handler gửi tin vào MessageQueue có rào cản đồng bộ, Looper liên tục lấy tin hoặc ngủ đông bằng epoll_wait nhường CPU]
 ---
 

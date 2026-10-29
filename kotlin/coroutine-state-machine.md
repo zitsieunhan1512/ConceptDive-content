@@ -5,6 +5,10 @@ domain: kotlin
 tags: [kotlin, coroutines, compiler, bytecode]
 collections: []
 related: [kotlin-coroutines, android-activity-lifecycle, kotlin-inline-function]
+sources:
+  - Kotlin Specification: Asynchronous programming with coroutines | https://kotlinlang.org/spec/asynchronous-programming-with-coroutines.html
+  - Kotlin Coroutines KEEP design proposal | https://github.com/Kotlin/KEEP/blob/master/proposals/coroutines.md
+  - Continuation-passing style — Wikipedia | https://en.wikipedia.org/wiki/Continuation-passing_style
 diagrams: [Cơ chế|coroutine-state-machine.png|Trình biên dịch sinh switch-case theo biến label, nhả luồng khi gặp COROUTINE_SUSPENDED và phục hồi qua resumeWith]
 created: 2026-09-08
 ---

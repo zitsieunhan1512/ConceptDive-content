@@ -5,6 +5,11 @@ domain: kotlin
 tags: [concurrency, asynchronous, kotlin, state-machine]
 collections: [interview-fundamental, hay-quen]
 related: [android-activity-lifecycle, android-state-holders, kotlin-coroutine-state-machine]
+sources:
+  - Coroutines overview — Kotlin Documentation | https://kotlinlang.org/docs/coroutines-overview.html
+  - Coroutines basics — Kotlin Documentation | https://kotlinlang.org/docs/coroutines-basics.html
+  - Kotlin coroutines on Android | https://developer.android.com/kotlin/coroutines
+  - Coroutine — Wikipedia | https://en.wikipedia.org/wiki/Coroutine
 diagrams: [Cơ chế|coroutine-suspend.png|Hàm suspend cất biến vào Continuation, trả COROUTINE_SUSPENDED để thread làm việc khác, rồi chạy tiếp ở nhãn 1 khi resumeWith được gọi.]
 created: 2026-09-07
 ---

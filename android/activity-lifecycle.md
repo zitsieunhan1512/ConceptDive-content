@@ -6,6 +6,10 @@ tags: [android, mobile, operating-system, lifecycle, memory-management]
 collections: [interview-fundamental]
 related: [android-memory-leak, android-viewmodel]
 created: 2026-09-07
+sources:
+  - The activity lifecycle — Android Developers | https://developer.android.com/guide/components/activities/activity-lifecycle
+  - Low memory killer daemon — AOSP | https://source.android.com/docs/core/perf/lmkd
+  - Activity API reference — Android Developers | https://developer.android.com/reference/android/app/Activity
 diagrams: [Cơ chế|activity-lifecycle-process-death.png|Activity che khuất lưu Bundle, LMKD tăng điểm oom_score_adj và gửi SIGKILL khi cạn RAM]
 ---
 

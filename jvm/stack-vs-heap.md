@@ -6,6 +6,10 @@ tags: [jvm, memory, art, performance]
 collections: [interview-fundamental]
 related: [kotlin-coroutine-state-machine, android-gc-roots, thread, android-memory-leak]
 created: 2026-09-21
+sources:
+  - JVMS Chapter 2: JVM Structure | https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html
+  - Managing Bitmap Memory — Android Developers | https://developer.android.com/topic/performance/graphics/manage-memory
+  - Call stack — Wikipedia | https://en.wikipedia.org/wiki/Call_stack
 diagrams: [Cơ chế|stack-vs-heap-memory.png|Khung ngăn xếp luồng neo giữ đối tượng Heap qua GC Root, trường nguyên thuỷ nằm trọn vẹn trên Heap]
 ---
 

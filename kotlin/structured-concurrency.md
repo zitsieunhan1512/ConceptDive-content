@@ -5,6 +5,11 @@ domain: kotlin
 tags: [kotlin, coroutines, structured-concurrency, job, supervisor-job]
 collections: [interview-fundamental]
 related: [kotlin-coroutines, kotlin-coroutine-context-and-dispatchers, thread]
+sources:
+  - Coroutines basics: Structured concurrency — Kotlin | https://kotlinlang.org/docs/coroutines-basics.html
+  - Job API reference — kotlinx.coroutines | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-job/
+  - SupervisorJob API reference — kotlinx.coroutines | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-supervisor-job.html
+  - Structured concurrency — Wikipedia | https://en.wikipedia.org/wiki/Structured_concurrency
 diagrams: [Cơ chế|job-tree.png|Khi async getNews ném lỗi, coroutineScope nhận lỗi và huỷ async getUser; huỷ viewModelScope thì tín hiệu huỷ lan xuống cả cây.]
 created: 2026-10-01
 ---

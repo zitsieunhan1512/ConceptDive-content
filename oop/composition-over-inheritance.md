@@ -6,6 +6,10 @@ tags: [oop, architecture, design-pattern, composition, inheritance, delegation]
 collections: [interview-fundamental]
 related: [oop-abstract-class-vs-interface, oop-four-pillars, oop-solid, architecture-dependency-injection]
 created: 2026-10-01
+sources:
+  - Implementation by delegation — Kotlin Documentation | https://kotlinlang.org/docs/delegation.html
+  - Composition over inheritance — Wikipedia | https://en.wikipedia.org/wiki/Composition_over_inheritance
+  - Fragile base class — Wikipedia | https://en.wikipedia.org/wiki/Fragile_base_class
 diagrams: [Cơ chế|composition-fragile-base-class.png|Kế thừa HashSet làm addCount bị đếm trùng do gọi nội bộ, còn lắp ghép ủy quyền bảo toàn tính đóng gói]
 ---
 

@@ -5,6 +5,10 @@ domain: kotlin
 tags: [kotlin, flow, coroutines, reactive, cold-stream, backpressure]
 collections: [interview-fundamental]
 related: [kotlin-coroutines, kotlin-stateflow-vs-sharedflow, kotlin-coroutine-context-and-dispatchers]
+sources:
+  - Asynchronous Flow — Kotlin Documentation | https://kotlinlang.org/docs/coroutines-flow.html
+  - Flow API reference — kotlinx.coroutines | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-flow/
+  - Kotlin flows on Android | https://developer.android.com/kotlin/flow
 diagrams: [Cơ chế|flow-flowon-channel.png|flowOn tách luồng phát và luồng nhận thành hai coroutine độc lập nối qua Channel buffer để bảo toàn ngữ cảnh]
 created: 2026-09-15
 ---

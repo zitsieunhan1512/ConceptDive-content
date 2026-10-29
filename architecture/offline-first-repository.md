@@ -6,6 +6,10 @@ tags: [architecture, offline-first, repository, ssot, room, caching]
 collections: [interview-fundamental]
 related: [architecture-clean-architecture-and-use-cases, kotlin-flow-under-the-hood, architecture-state-vs-event]
 created: 2026-09-15
+sources:
+  - Build an offline-first app — Android | https://developer.android.com/topic/architecture/data-layer/offline-first
+  - Data layer — Android App Architecture | https://developer.android.com/topic/architecture/data-layer
+  - Save data using Room — Android | https://developer.android.com/training/data-storage/room
 diagrams: [Cơ chế|offline-first-ssot-flow.png|Cơ sở dữ liệu cục bộ là nguồn chân lý duy nhất phát Flow lên UI, mạng chỉ nạp dữ liệu ngầm vào DB]
 ---
 

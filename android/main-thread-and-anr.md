@@ -6,7 +6,12 @@ tags: [android, performance, thread, anr]
 collections: [interview-fundamental]
 related: [android-handler-looper-message-queue, thread, kotlin-coroutine-context-and-dispatchers]
 created: 2026-10-01
-diagrams: [Cơ chế|anr-watchdog-thresholds.png|Hệ thống giám sát mốc thời gian: chạm 5s, Broadcast 5s, Service 20s; vượt ngưỡng kích hoạt ANR và lưu tệp traces]
+sources:
+  - ANRs — App quality Android Developers | https://developer.android.com/topic/performance/vitals/anr
+  - Processes and threads overview — Android | https://developer.android.com/guide/components/processes-and-threads
+  - StrictMode API reference — Android Developers | https://developer.android.com/reference/android/os/StrictMode
+  - Diagnose and fix ANRs | https://developer.android.com/topic/performance/anrs/diagnose-and-fix-anrs
+diagrams: [Cơ chế|anr-watchdog-thresholds.png|Hệ thống giám sát mốc thời gian: chạm 5s, Broadcast 10s (nền 60s), Service 20s (nền 200s); vượt ngưỡng kích hoạt ANR và lưu tệp traces]
 ---
 
 ## Bản 30 giây

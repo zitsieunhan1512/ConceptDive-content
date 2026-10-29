@@ -5,6 +5,10 @@ domain: oop
 tags: [oop, paradigm, software-design]
 collections: [interview-fundamental]
 related: [oop-solid, jvm-virtual-method-dispatch, oop-abstract-class-vs-interface]
+sources:
+  - Object-oriented programming — Wikipedia | https://en.wikipedia.org/wiki/Object-oriented_programming
+  - Information hiding (David Parnas) — Wikipedia | https://en.wikipedia.org/wiki/Information_hiding
+  - Simula — Wikipedia | https://en.wikipedia.org/wiki/Simula
 diagrams: [Cơ chế|four-pillars.png|Bốn trụ cột OOP: đóng gói giấu dữ liệu, trừu tượng chỉ lộ vài hàm, kế thừa nhận sẵn trường và hàm, đa hình chọn hàm lúc chạy]
 created: 2026-09-07
 ---

@@ -6,6 +6,10 @@ tags: [jvm, oop, bytecode, performance]
 collections: []
 related: [oop-four-pillars, oop-solid, kotlin-inline-function]
 created: 2026-09-08
+sources:
+  - JVMS Chapter 6: invokevirtual instruction | https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html
+  - Virtual method table — Wikipedia | https://en.wikipedia.org/wiki/Virtual_method_table
+  - Dynamic dispatch — Wikipedia | https://en.wikipedia.org/wiki/Dynamic_dispatch
 diagrams: [Cơ chế|virtual-method-dispatch.png|Lệnh invokevirtual đọc con trỏ Header sang vtable trong Metaspace rồi nhảy tới mã máy thực thi]
 ---
 

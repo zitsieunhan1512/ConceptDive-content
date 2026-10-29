@@ -5,6 +5,11 @@ domain: kotlin
 tags: [kotlin, coroutines, coroutine-context, dispatchers, continuation-interceptor]
 collections: [interview-fundamental]
 related: [kotlin-coroutines, kotlin-coroutine-state-machine, thread, kotlin-flow-under-the-hood]
+sources:
+  - Coroutine context and dispatchers — Kotlin | https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html
+  - CoroutineContext API reference — Kotlin | https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/
+  - ContinuationInterceptor API reference — Kotlin | https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-continuation-interceptor/
+  - CoroutineDispatcher API reference — kotlinx.coroutines | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-dispatcher/
 diagrams: [Cơ chế|coroutine-context-dispatcher-intercept.png|ContinuationInterceptor bọc Continuation thành DispatchedContinuation rồi đẩy vào hàng đợi thread pool]
 created: 2026-09-15
 ---

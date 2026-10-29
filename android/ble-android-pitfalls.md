@@ -6,6 +6,11 @@ tags: [android, ble, bluetooth, concurrency, pitfalls]
 collections: [interview-fundamental]
 related: [android-ble-gatt-model, kotlin-coroutines]
 created: 2026-09-21
+sources:
+  - Connect to a GATT server — Android | https://developer.android.com/develop/connectivity/bluetooth/ble/connect-gatt-server
+  - BluetoothGatt API reference — Android Developers | https://developer.android.com/reference/android/bluetooth/BluetoothGatt
+  - BluetoothDevice API reference — Android Developers | https://developer.android.com/reference/android/bluetooth/BluetoothDevice
+  - Bluetooth permissions — Android Developers | https://developer.android.com/develop/connectivity/bluetooth/bt-permissions
 diagrams: [Cơ chế|ble-command-queue-busy.png|Giao thức ATT bật cờ mDeviceBusy từ chối lệnh tiếp theo, callback Binder mở khóa và close giải phóng slot native]
 ---
 

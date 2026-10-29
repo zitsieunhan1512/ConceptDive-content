@@ -6,7 +6,12 @@ tags: [compose, recomposition, state, remember, derived-state]
 collections: [interview-fundamental]
 related: [compose-side-effects, android-viewmodel, kotlin-stateflow-vs-sharedflow]
 created: 2026-09-15
-diagrams: [Cơ chế|recomposition-slot-table-gap-buffer.png|Duyệt bảng khe nhớ Slot Table qua composer, chỉ chạy lại RecomposeScope cục bộ và bỏ qua nếu Stable]
+sources:
+  - State and Jetpack Compose — Android | https://developer.android.com/develop/ui/compose/state
+  - Thinking in Compose — Android Developers | https://developer.android.com/develop/ui/compose/mental-model
+  - Lifecycle of composables — Android Developers | https://developer.android.com/develop/ui/compose/lifecycle
+  - Strong skipping mode | https://developer.android.com/develop/ui/compose/performance/stability/strongskipping
+diagrams: [Cơ chế|recomposition-slot-table-gap-buffer.png|Compose ghi giao diện vào sổ Slot Table, chỉ gọi lại RecomposeScope đã đọc State vừa đổi và bỏ qua hàm có tham số không đổi]
 ---
 
 ## Bản 30 giây

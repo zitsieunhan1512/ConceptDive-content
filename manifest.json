@@ -1,27 +1,27 @@
 {
  "version": 1,
- "generatedAt": "2026-10-29T03:22:36+00:00",
- "sourceCommit": "f4f04af",
+ "generatedAt": "2026-10-29T04:28:57+00:00",
+ "sourceCommit": "049b483",
  "files": [
   {
    "path": "android/activity-lifecycle.md",
-   "sha256": "796f1dd222c70d1c6d6dfedd1d35da5481dcf31d59450e89ef4f7149719f9dc8",
-   "size": 6855
+   "sha256": "dc3ff113ca24de72e1cfb3f2320f277121a844b15c103d8f069dd155f4cee087",
+   "size": 7193
   },
   {
    "path": "android/ble-android-pitfalls.md",
-   "sha256": "50c20f71ce797d1d0e69432339d6d822fd19386734a45d78d92e000850d86859",
-   "size": 6927
+   "sha256": "9006c6ecc5e2173319b184aba638cd611e0e7a03fcacc542dbbc8972e4aa1415",
+   "size": 7453
   },
   {
    "path": "android/ble-gatt-model.md",
-   "sha256": "a74e74cf4203ddf3adc19fadbbc41b0f241689f8366e895529035f8798914cfe",
-   "size": 6429
+   "sha256": "bd503607cda12b44f9fb635ce8850be4cfe7ad9e49eba51b4af1fc6213273cea",
+   "size": 6768
   },
   {
    "path": "android/context-application-vs-activity.md",
-   "sha256": "f103f6f0c96a4f76a15208abc4bd8e9183072408ba87aa8b032e9c15d5a1b5bd",
-   "size": 7199
+   "sha256": "ede3dc5345993832db7ed88d5e5dbd17aaac5c764a6d038321a8e56e47022866",
+   "size": 7578
   },
   {
    "path": "android/diagrams/activity-lifecycle-process-death.png",
@@ -100,68 +100,68 @@
   },
   {
    "path": "android/fragment-lifecycle.md",
-   "sha256": "a38f799ef283cf9a37dfe5c590d5560b83f4f06a2f725cc5e2aaef592d813e32",
-   "size": 6507
+   "sha256": "bc95b1a1698cab3a26385c31609df789064b214c24e7428482c8aea13ed7b8f1",
+   "size": 6844
   },
   {
    "path": "android/gc-roots.md",
-   "sha256": "85b1737a9707260a4dc8ec88d4f5726fc9743025bb0a965901478a3795093451",
-   "size": 7459
+   "sha256": "5ce24215c581504d376f802ccd0cd0fa816f03f2b26a79042c2ef808b778ff2c",
+   "size": 7782
   },
   {
    "path": "android/handler-looper-message-queue.md",
-   "sha256": "5504ba65188c0c23a17fbab3053230908d72fc539c4d1c737e09750dfba97a21",
-   "size": 6374
+   "sha256": "123e4d04acdf381e5cfaf5a62a884fd6c9812e045257aa0ecad0c043b51a4ac8",
+   "size": 6839
   },
   {
    "path": "android/main-thread-and-anr.md",
-   "sha256": "c86fee7e30ff036985f8cf36d85b8b48e27863595455a8465804dd56f213783e",
-   "size": 6500
+   "sha256": "ee8e6b7b998f4ffda71b58fd8b0f9002bcd3074c233b13aa758f69327ea7d5c6",
+   "size": 6977
   },
   {
    "path": "android/memory-leak.md",
-   "sha256": "c3722bb30858a959ee4b8a0c80cc8d6a9679adde1f6150d8d3c3f3cde7b34ca8",
-   "size": 7009
+   "sha256": "ede06e4920a6c5c4e8d467aa8d195469c6c9b3e6567527bfc93901b2e16d129c",
+   "size": 7355
   },
   {
    "path": "android/process-death-and-saved-state.md",
-   "sha256": "b125a7297f3c92ff04116c64dd8850d1f57565328af3c9d5d80e5ed36dfcffec",
-   "size": 6232
+   "sha256": "c28a5fa5fa12f2beb17f8a4d7863af2653bea0bcbb29b3c4ae7289dc13a2b6ed",
+   "size": 6639
   },
   {
    "path": "android/recyclerview-and-diffutil.md",
-   "sha256": "f92334b3067f2cb73bc694927e24bfd596719d9902bc739fc20f7ab498b528e7",
-   "size": 6774
+   "sha256": "fcc11569c507d028a4a35fd117bf694642b5d5ba787605c34bf51a4f92b158c9",
+   "size": 7161
   },
   {
    "path": "android/samsung-mdc-protocol.md",
-   "sha256": "45bd7e87443f931ce65f8059c78dcdeed4fa4ab7076b8e7a533234e977208b41",
-   "size": 6257
+   "sha256": "0a04994e78e431f6cb1d2a53bae3ce32bd34eaeb605389ce5a9aee2f98b90401",
+   "size": 6519
   },
   {
    "path": "android/state-holders.md",
-   "sha256": "3ad01933e127232aaff1a367a16f11496b31bff050ea0919bb2a545bc0e673f5",
-   "size": 7563
+   "sha256": "136217bef4fa5c6a45ebea939b3926a660eeb0d87f3944913b6a3a5513b48f9d",
+   "size": 8048
   },
   {
    "path": "android/tcp-stream-framing.md",
-   "sha256": "730d6a0948d95a1005874b94d790a05abfe4548f3efbad8f065abab8d0104e5d",
-   "size": 6526
+   "sha256": "f9672bcdb60ca5d8f62fbcf4afa08bb78aebd0476d550ade2bef18ce458a7341",
+   "size": 6847
   },
   {
    "path": "android/viewmodel.md",
-   "sha256": "7a6884c6fd0850b684a9c1bf55e1be0676816b20d8747c9992f9d13e1149cb10",
-   "size": 7329
+   "sha256": "30abe09e7102634dc20ba50f800e558d5fb6f8bcbac9d135e728e6a3a8b1233b",
+   "size": 7709
   },
   {
    "path": "architecture/clean-architecture-and-use-cases.md",
-   "sha256": "baa83f975d3bd5c6f5129e88b6494f8fec88115080a8a18ba5d8ceec9e928388",
-   "size": 6319
+   "sha256": "d4cf86f9742299eb6f371bc67ddcef1423e96573d5ed143e0dad666e2b2bb34f",
+   "size": 6655
   },
   {
    "path": "architecture/dependency-injection.md",
-   "sha256": "c55404edb5c52535c60e66d3dd06725e20d87aa49b2b574b1f6155ef1a4f7b94",
-   "size": 6855
+   "sha256": "5778e4127ebcafa41d054254b6bc1eeef6373cc5c4555736fd1b234eed4b34db",
+   "size": 7155
   },
   {
    "path": "architecture/diagrams/clean-architecture-dependency-rule.png",
@@ -190,18 +190,18 @@
   },
   {
    "path": "architecture/mvvm-vs-mvi.md",
-   "sha256": "59c45f0afd6cfaeb00f584366a45120775e70559ca104672504fc3a9aed3520c",
-   "size": 7436
+   "sha256": "59b0f305da1663bdf1329fec1152875bd641e7b39ade2d6870f7988348c47680",
+   "size": 7814
   },
   {
    "path": "architecture/offline-first-repository.md",
-   "sha256": "95b25ddb08072d0d90cd3eddaba9d6ace554eea05632c0a0fbd9d993c75aaa10",
-   "size": 6172
+   "sha256": "08038fde03ff2708d11c9fa59cf04d0ab3f4b91b4e4aeb6583912c8b7e29c83f",
+   "size": 6502
   },
   {
    "path": "architecture/state-vs-event.md",
-   "sha256": "41f4d5a7c69b8b8279da0b05d720bfdf167df675334db5b725dcd23ab7543d4b",
-   "size": 7626
+   "sha256": "b75909196bd5a0b7a220a81a85b05bcf64c33801a71acd1c738c84ae9d4892e4",
+   "size": 7934
   },
   {
    "path": "collections.json",
@@ -210,8 +210,8 @@
   },
   {
    "path": "compose/compose-side-effects.md",
-   "sha256": "14fcec716e52ec52933dba2a1c3f598368a627b64d24d5a8c0dda2fa65af8b05",
-   "size": 6014
+   "sha256": "31bcca491e0e533691154f645e8e560e49d4250dce251c11f9938171ffa20118",
+   "size": 6251
   },
   {
    "path": "compose/diagrams/compose-lifecycle-side-effects.png",
@@ -225,8 +225,8 @@
   },
   {
    "path": "compose/recomposition-and-state.md",
-   "sha256": "5574e762ba0049821ab6ed7c89b58e60b4401deffb5a11a076922cbfbfbb7c02",
-   "size": 6289
+   "sha256": "90b8dc4e14e21fa993e01b01c517d78f3a09ca33c877940a9414d2d82bcd1db6",
+   "size": 6769
   },
   {
    "path": "jvm/diagrams/race-condition-memory-barriers.png",
@@ -250,38 +250,38 @@
   },
   {
    "path": "jvm/race-condition-memory-model.md",
-   "sha256": "517bc4245b1284b79cd82a83e121729f6fa6e170f82bef3d62005f119954e43f",
-   "size": 6319
+   "sha256": "96f2f415d7b0b7978eb18638d4c4ae72c516ca40793747dff7382c192dd7be2d",
+   "size": 6615
   },
   {
    "path": "jvm/stack-vs-heap.md",
-   "sha256": "dea828ea0531dbdc4f668bf0d75084615356ccf2a0e6db30a6f91adc239ae113",
-   "size": 6923
-  },
-  {
-   "path": "jvm/thread.md",
-   "sha256": "088bce94ff0b55887e6a3ed12ea064fdc482208876c46b64ca1fa25051bc6cac",
+   "sha256": "a22caedcec82f0c71a0f4a061d6f4ab48965527c882ffbcd2a5b24305a22c861",
    "size": 7226
   },
   {
+   "path": "jvm/thread.md",
+   "sha256": "f981523b8287ed0eb4dec130637b9514250482a4841c4134dff4ba669b889563",
+   "size": 7541
+  },
+  {
    "path": "jvm/virtual-method-dispatch.md",
-   "sha256": "85a9371da0e98385468d1eddac2fbc1daa65fad1520d2a0f90b5c5e7a5063439",
-   "size": 7558
+   "sha256": "cbbd599e49a0bda19bf1496c8790e1ec400d40eeb1b8c8f780af3ee5d99d6c2b",
+   "size": 7854
   },
   {
    "path": "kotlin/coroutine-context-and-dispatchers.md",
-   "sha256": "e6c9eefbe841fef2cdb353451eb2c9e358295855d02bc902b935c4064ef85001",
-   "size": 6381
+   "sha256": "0d14ad80cc092ce1eb2cb4069189204c702de6b2cb24e8b397e732cab597e0ee",
+   "size": 6961
   },
   {
    "path": "kotlin/coroutine-state-machine.md",
-   "sha256": "2c9d67d17f5c55e4e13983d61e21f39369a929cbb689250fea4cf1c786636f99",
-   "size": 8071
+   "sha256": "b049424bd4a30053108dffe1fb63c2b3532c0f27b90b53fdf8f918f894ac09d9",
+   "size": 8439
   },
   {
    "path": "kotlin/coroutines.md",
-   "sha256": "b42ade7c2ed84365a77291e6a1f4a5f782c3417ba967a240ccb2d817491dbc8c",
-   "size": 7878
+   "sha256": "898e25317e6b559423cd74218fbf655f9f2dc57ff405cf4b721cf418c90856f8",
+   "size": 8244
   },
   {
    "path": "kotlin/diagrams/coroutine-context-dispatcher-intercept.png",
@@ -365,78 +365,78 @@
   },
   {
    "path": "kotlin/equals-hashcode.md",
-   "sha256": "77bef1c0ae85d4ff5694da5a0147076a853efebfe74ec43ccd9b8323661dfcf7",
-   "size": 7303
+   "sha256": "7f94a8df423c80799925048a3830b7917aabdce098a390f0d244cbb035ef8466",
+   "size": 7664
   },
   {
    "path": "kotlin/extension-and-object.md",
-   "sha256": "01597e06f17135273da2e779e25d2652e0ae6107a9295e2e930bc97b7022d643",
-   "size": 6558
+   "sha256": "385e64483970190e299a84fbb803f40aeadefeb0713a8fbef88f3dbef24c5602",
+   "size": 6872
   },
   {
    "path": "kotlin/flow-under-the-hood.md",
-   "sha256": "f03a16b12dd0bf7d8f5fba16c0b2ee5d32cc026966b3a495d7afdb258a49d14c",
-   "size": 6622
+   "sha256": "0273a035bc608c7ca9d5c76cca32a46cd3f8c18d77b38a2d0fc3a723d4292f80",
+   "size": 6950
   },
   {
    "path": "kotlin/generics-variance.md",
-   "sha256": "8ca02aa797daf30eadaa93174f18b16ebc217c63c449350a7d377852c1c51bb1",
-   "size": 7084
+   "sha256": "e3d855935bb312bb9be2697ccaf42b82bfbaa86b492b3c38b465701aedecee0f",
+   "size": 7373
   },
   {
    "path": "kotlin/inline-function.md",
-   "sha256": "443572cd4b6e53121e4dc20cd727c14efe10dd6d702406f07290c2d414788a75",
-   "size": 6477
+   "sha256": "5416f04b61984313f2b8244acdb19a6b656be28009818205ea07b41db0d3169b",
+   "size": 6677
   },
   {
    "path": "kotlin/lateinit-vs-lazy.md",
-   "sha256": "9528b8c5cad02fe311918c381b1d3eb59941464287ef6d77e0680665341e5c74",
-   "size": 6800
+   "sha256": "b5a8cdeec95013afa873cdf0a2aa5b243403046d41af2c2eb5278f24fe57b120",
+   "size": 7148
   },
   {
    "path": "kotlin/null-safety.md",
-   "sha256": "a4f2a623ead0d35ba1e284e920b780b37d92d8eaa9fa9f98132c6572da535866",
-   "size": 6388
+   "sha256": "78ccb9dfd7af3079e573d8d0ec551d7fbfdea7c1d59dcf80c9c3960b00c2d9c4",
+   "size": 6654
   },
   {
    "path": "kotlin/scope-functions.md",
-   "sha256": "dc168440eeaa7e21131732d9e5c6ee6a886a0d08bf70d311b136e1d72b9d09a3",
-   "size": 7010
+   "sha256": "ee4ba9cc1722f3daede8d8d7d77490c00cd84c224afd2be4b27f08a9df3aa25f",
+   "size": 7406
   },
   {
    "path": "kotlin/sealed-vs-data-class.md",
-   "sha256": "22577eb36237e165aa7f67ac90a8c60f991ac378a6e01dc7db8f5c71a78e7af8",
-   "size": 7162
+   "sha256": "012d3db7e74ca3b3ac5b4de1adce00d45b16fca7d650edab6aa3bc28ebcd0f74",
+   "size": 7432
   },
   {
    "path": "kotlin/stateflow-vs-sharedflow.md",
-   "sha256": "4edee17fb2f2b9c17333f325cf2fb3d6cb5866fde470a49599fbbe2f5aea97ef",
-   "size": 6589
+   "sha256": "4b9442d46da2854393c82d7d5446a1f3d09f3ce15ca179c7995d7115f48bee8b",
+   "size": 7029
   },
   {
    "path": "kotlin/structured-concurrency.md",
-   "sha256": "f0f6faa506fc42c69698f23f42c7c11c1fa08e3654b360fd8da9a005614bd01c",
-   "size": 6465
+   "sha256": "6074700b857a160823551f98efd0334f4921a064be017109aa8cbd45fd3d2977",
+   "size": 6989
   },
   {
    "path": "kotlin/val-vs-const.md",
-   "sha256": "a3c35be4469370c3c3c88176ccbd83b375c89f09bce5c68c82ff7fe7bb8c17b0",
-   "size": 7437
+   "sha256": "8cd1e1f39c128bf35c9e5de7666ba7863cf4f3870e88a3e50603667f1a5f17a2",
+   "size": 7651
   },
   {
    "path": "kotlin/why-kotlin-over-java.md",
-   "sha256": "aba7284163c395fd95dc57287ac45146c66166e0801c2b347a47f2c0f2f8d10c",
-   "size": 7868
+   "sha256": "a77e1359705201a57a487f2713f2a4934bce619c78f55c45202276cc13bc2a6b",
+   "size": 8281
   },
   {
    "path": "oop/abstract-class-vs-interface.md",
-   "sha256": "e1b49b9cb6fead2b88c4dabe5a1c40eeca47f1a0c4d9782600a96717037b583f",
-   "size": 7837
+   "sha256": "56049d9b683f430c3ac62e7005c69822732f6509c363603ca3677b5f337ae417",
+   "size": 8130
   },
   {
    "path": "oop/composition-over-inheritance.md",
-   "sha256": "86912a4043938f580becc677422527c4b6c39684db965f6ed9eea6695e4734fb",
-   "size": 6586
+   "sha256": "dad0b8fe54d25e1c93f96a1f2936e7c7936d580c9e6130036f26b8f89242dc36",
+   "size": 6895
   },
   {
    "path": "oop/diagrams/abstract-class-vs-interface.png",
@@ -460,13 +460,13 @@
   },
   {
    "path": "oop/four-pillars.md",
-   "sha256": "99e370283ae85545f5271ba9c38c149626cdf3cd7d18bd63ce0db6314c619df9",
-   "size": 7948
+   "sha256": "bd1f5ddaec6fa889da4f639abd43c3151c60d499824e64cb85a45d5f00367f8d",
+   "size": 8230
   },
   {
    "path": "oop/solid.md",
-   "sha256": "8f4d6372bcbcba301d24d8197bf20d1986f4b550a1ea493529a197086585d440",
-   "size": 6797
+   "sha256": "7069ca4298154cab84db7271839d31a49b1a2afe5c7b1ceaba37d3c520e5b1df",
+   "size": 7105
   }
  ]
 }

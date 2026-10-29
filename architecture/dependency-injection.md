@@ -6,6 +6,10 @@ tags: [architecture, dependency-injection, testing, modularity]
 collections: [interview-fundamental]
 related: [oop-solid]
 created: 2026-09-07
+sources:
+  - Dependency injection in Android | https://developer.android.com/training/dependency-injection
+  - Inversion of Control and Dependency Injection | https://martinfowler.com/articles/injection.html
+  - Dependency injection — Wikipedia | https://en.wikipedia.org/wiki/Dependency_injection
 diagrams: [Cơ chế|dependency-injection-testing-isolation.png|Tiêm phụ thuộc qua constructor giúp cô lập kiểm thử bằng cách tráo đổi bản giả lập không sửa code]
 ---
 

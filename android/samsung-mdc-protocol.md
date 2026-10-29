@@ -6,6 +6,10 @@ tags: [protocol, iot, hardware]
 collections: []
 related: [android-tcp-stream-framing, android-ble-android-pitfalls, kotlin-coroutine-context-and-dispatchers]
 created: 2026-09-21
+sources:
+  - Tài liệu giao thức Samsung MDC | https://github.com/vgavro/samsung-mdc
+  - Chuẩn truyền thông nối tiếp RS-232 | https://en.wikipedia.org/wiki/RS-232
+  - Tổng kiểm tra Checksum — Wikipedia | https://en.wikipedia.org/wiki/Checksum
 diagrams: [Cơ chế|samsung-mdc-packet-frame.png|Cấu trúc gói gửi và phản hồi qua RS-232C/TCP; mã phát sóng 0xFE không ACK và tổng kiểm tra khử dấu bằng and 0xFF]
 ---
 

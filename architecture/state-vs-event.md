@@ -6,6 +6,10 @@ tags: [architecture, state-machine, event-driven, distributed-systems]
 collections: []
 related: [android-state-holders, android-viewmodel, architecture-mvvm-vs-mvi, kotlin-stateflow-vs-sharedflow]
 created: 2026-09-09
+sources:
+  - UI events — Android App Architecture | https://developer.android.com/topic/architecture/ui-layer/events
+  - Two Generals Problem — Wikipedia | https://en.wikipedia.org/wiki/Two_Generals%27_Problem
+  - Idempotence in computer science — Wikipedia | https://en.wikipedia.org/wiki/Idempotence
 diagrams: [Cơ chế|state-vs-event-lifecycle.png|State có tính lũy đẳng đọc lại vô hại, Event chỉ kích hoạt tác vụ phụ một lần và phải xóa null sau khi dùng]
 ---
 

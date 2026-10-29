@@ -6,6 +6,10 @@ tags: [android, ble, bluetooth, iot, networking]
 collections: [interview-fundamental]
 related: [android-ble-android-pitfalls, kotlin-coroutines]
 created: 2026-09-21
+sources:
+  - Bluetooth Low Energy overview — Android | https://developer.android.com/develop/connectivity/bluetooth/ble/ble-overview
+  - Android 14 behavior changes: MTU 517 | https://developer.android.com/about/versions/14/behavior-changes-all
+  - Bluetooth Low Energy — Wikipedia | https://en.wikipedia.org/wiki/Bluetooth_Low_Energy
 diagrams: [Cơ chế|ble-gatt-hierarchy.png|Cấu trúc phân tầng Profile, Service, Characteristic và ghi cờ kích hoạt vào Descriptor CCCD 0x2902 để nhận thông báo]
 ---
 

@@ -5,6 +5,10 @@ domain: kotlin
 tags: [kotlin, language, oop, bytecode]
 collections: [interview-fundamental]
 related: [jvm-virtual-method-dispatch, oop-four-pillars, kotlin-val-vs-const]
+sources:
+  - Extensions — Kotlin Documentation | https://kotlinlang.org/docs/extensions.html
+  - Object declarations and expressions — Kotlin | https://kotlinlang.org/docs/object-declarations.html
+  - JLS §12.4.2: Class Initialization Procedure | https://docs.oracle.com/javase/specs/jls/se8/html/jls-12.html
 diagrams: [Cơ chế|extension-static-dispatch.png|Hàm mở rộng được phân giải tĩnh theo kiểu khai báo biến tại thời điểm biên dịch, không qua bảng hàm ảo vtable]
 created: 2026-10-01
 ---

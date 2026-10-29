@@ -6,6 +6,10 @@ tags: [architecture, clean-architecture, use-case, domain-layer, dependency-inve
 collections: [interview-fundamental]
 related: [architecture-dependency-injection, architecture-mvvm-vs-mvi, architecture-state-vs-event, architecture-offline-first-repository]
 created: 2026-09-15
+sources:
+  - Domain layer — Android App Architecture | https://developer.android.com/topic/architecture/domain-layer
+  - Guide to app architecture — Android | https://developer.android.com/topic/architecture
+  - The Clean Architecture — Robert Martin | https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
 diagrams: [Cơ chế|clean-architecture-dependency-rule.png|Tầng UI và Data phụ thuộc hướng tâm vào Domain thuần Kotlin theo nguyên lý đảo ngược phụ thuộc]
 ---
 

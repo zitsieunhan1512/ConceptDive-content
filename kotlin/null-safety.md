@@ -5,6 +5,10 @@ domain: kotlin
 tags: [kotlin, type-system, nullability, compiler]
 collections: [interview-fundamental]
 related: [kotlin-sealed-vs-data-class, kotlin-scope-functions, kotlin-why-over-java]
+sources:
+  - Null safety — Kotlin Documentation | https://kotlinlang.org/docs/null-safety.html
+  - Calling Java from Kotlin: Platform types | https://kotlinlang.org/docs/java-interop.html
+  - Null pointer — Wikipedia | https://en.wikipedia.org/wiki/Null_pointer
 diagrams: [Cơ chế|null-safety-type-hierarchy.png|Hệ thống kiểu phân nhánh giữa non-nullable và nullable; Platform Type từ Java là lỗ thủng bypass compile-time]
 created: 2026-09-07
 ---

@@ -6,6 +6,10 @@ tags: [android, memory, garbage-collector, performance]
 collections: []
 related: [android-memory-leak, android-viewmodel, android-activity-lifecycle]
 created: 2026-09-08
+sources:
+  - Debug ART garbage collection — AOSP | https://source.android.com/docs/core/runtime/gc-debug
+  - Overview of memory management — Android | https://developer.android.com/topic/performance/memory-overview
+  - Tracing garbage collection — Wikipedia | https://en.wikipedia.org/wiki/Tracing_garbage_collection
 diagrams: [Cơ chế|gc-roots-reachability-graph.png|Đồ thị từ Thread stack, biến static và JNI; tham chiếu vòng cô lập bị thu hồi, chuỗi neo giữ gây rò rỉ Activity]
 ---
 

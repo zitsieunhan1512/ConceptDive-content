@@ -6,6 +6,10 @@ tags: [architecture, mvvm, mvi, unidirectional-data-flow, state-management]
 collections: [interview-fundamental]
 related: [android-state-holders, android-viewmodel, architecture-state-vs-event]
 created: 2026-09-07
+sources:
+  - UI layer — Android App Architecture | https://developer.android.com/topic/architecture/ui-layer
+  - MutableStateFlow.update API reference — Kotlin | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/update.html
+  - Model–view–viewmodel — Wikipedia | https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel
 diagrams: [Cơ chế|mvi-unidirectional-data-flow.png|Luồng dữ liệu một chiều khép kín: UI phát Intent lên một cửa duy nhất và nhận State bất biến cập nhật qua CAS]
 ---
 
@@ -72,7 +76,7 @@ Không bắt buộc. Compose chỉ cần luồng dữ liệu một chiều: `Sta
 Đúng vậy, trên Android hiện nay hai cách viết này khác nhau rất ít, chủ yếu chỉ khác cách đặt tên. Nói thẳng điểm này khi phỏng vấn là điểm cộng lớn, vì nó cho thấy bạn hiểu cơ chế thật chứ không học vẹt.
 
 **Hỏi:** Màn hình này nên dùng MVVM hay MVI, làm sao biết?
-Bạn nhìn vào số nguồn bắn sự kiện vào màn hình và các trạng thái không được phép xuất hiện cùng lúc. Nếu màn hình nhận tin cùng lúc từ người bấm, socket và mạng, lại cần khóa các trạng thái xung đột thì nên dùng MVI. Còn với form hay [danh sách](concept:android-recyclerview-and-diffutil) một nguồn thì một `UiState` trong MVVM là vừa đẹp, cứ giữ thống nhất theo chuẩn dự án.
+Tuỳ vào số nguồn bắn sự kiện vào màn hình và các trạng thái không được phép xuất hiện cùng lúc. Nếu màn hình nhận tin cùng lúc từ người bấm, socket và mạng, lại cần khóa các trạng thái xung đột thì nên dùng MVI. Còn với form hay [danh sách](concept:android-recyclerview-and-diffutil) một nguồn thì một `UiState` trong MVVM là vừa đẹp, cứ giữ thống nhất theo chuẩn dự án.
 
 ## Ý bắt buộc khi giải thích lại
 - [ ] Giải thích được MVI chỉ là MVVM cộng thêm hai quy tắc: một đối tượng State duy nhất và một hàm nhận onIntent duy nhất.

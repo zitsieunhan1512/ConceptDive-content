@@ -5,7 +5,11 @@ domain: kotlin
 tags: [kotlin, initialization, bytecode, memory]
 collections: [interview-fundamental]
 related: [kotlin-val-vs-const, kotlin-null-safety, android-activity-lifecycle]
-diagrams: [Cơ chế|lateinit-vs-lazy-mechanisms.png|lateinit kiểm tra null trực tiếp trên trường Java; by lazy ủy quyền qua đối tượng SynchronizedLazyImpl với khóa hai lớp]
+sources:
+  - Late-initialized properties — Kotlin Documentation | https://kotlinlang.org/docs/properties.html
+  - Delegated properties (lazy) — Kotlin Documentation | https://kotlinlang.org/docs/delegated-properties.html
+  - Calling Kotlin from Java — Interop | https://kotlinlang.org/docs/java-to-kotlin-interop.html
+diagrams: [Cơ chế|lateinit-vs-lazy-mechanisms.png|lateinit kiểm tra null trên trường Java cùng mức hiển thị với setter; by lazy ủy quyền qua đối tượng SynchronizedLazyImpl với khóa hai lớp]
 created: 2026-09-15
 ---
 

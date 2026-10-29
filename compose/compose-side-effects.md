@@ -6,6 +6,9 @@ tags: [compose, side-effects, launched-effect, coroutines, lifecycle]
 collections: [interview-fundamental]
 related: [compose-recomposition-and-state, kotlin-coroutines, android-activity-lifecycle]
 created: 2026-09-15
+sources:
+  - Side-effects in Compose — Android Developers | https://developer.android.com/develop/ui/compose/side-effects
+  - Lifecycle of composables — Android Developers | https://developer.android.com/develop/ui/compose/lifecycle
 diagrams: [Cơ chế|compose-lifecycle-side-effects.png|Ba điểm neo vòng đời: LaunchedEffect theo cây, DisposableEffect dọn dẹp và rememberCoroutineScope cho sự kiện]
 ---
 

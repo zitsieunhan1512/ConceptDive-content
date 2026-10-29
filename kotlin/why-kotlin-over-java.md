@@ -5,6 +5,11 @@ domain: kotlin
 tags: [kotlin, java, android, compiler, bytecode]
 collections: [interview-fundamental]
 related: [kotlin-null-safety, jvm-virtual-method-dispatch]
+sources:
+  - Android Kotlin-first approach — Android Developers | https://developer.android.com/kotlin/first
+  - Java 8 language features support — Android | https://developer.android.com/studio/write/java8-support
+  - Android runtime (ART) and Dalvik | https://source.android.com/docs/core/runtime
+  - Kotlin (programming language) — Wikipedia | https://en.wikipedia.org/wiki/Kotlin_(programming_language)
 diagrams: [Cơ chế|kotlin-compilation-pipeline.png|Quy trình biên dịch hội tụ về JVM bytecode và hạ cấp sang Dex chạy trên máy ảo ART của Android]
 created: 2026-09-11
 ---

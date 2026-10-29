@@ -6,6 +6,11 @@ tags: [android, architecture, state, flow, livedata]
 collections: [interview-fundamental]
 related: [android-activity-lifecycle, android-viewmodel, architecture-state-vs-event]
 created: 2026-09-07
+sources:
+  - State holders and UI state | https://developer.android.com/topic/architecture/ui-layer/stateholders
+  - StateFlow and SharedFlow on Android | https://developer.android.com/kotlin/flow/stateflow-and-sharedflow
+  - LiveData overview — Android Developers | https://developer.android.com/topic/libraries/architecture/livedata
+  - StateFlow API reference — Kotlin | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-state-flow/
 diagrams: [Cơ chế|state-holder-repeat-on-lifecycle.png|repeatOnLifecycle cổng chặn thu thập StateFlow theo vòng đời STARTED và STOPPED, kết hợp WhileSubscribed 5 giây giữ nguồn phát]
 ---
 

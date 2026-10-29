@@ -6,6 +6,10 @@ tags: [android, ui, performance, list]
 collections: [interview-fundamental]
 related: [android-memory-leak, compose-recomposition-and-state]
 created: 2026-10-01
+sources:
+  - Create dynamic lists with RecyclerView | https://developer.android.com/develop/ui/views/layout/recyclerview
+  - DiffUtil API reference — Android Developers | https://developer.android.com/reference/androidx/recyclerview/widget/DiffUtil
+  - ListAdapter API reference — Android Developers | https://developer.android.com/reference/androidx/recyclerview/widget/ListAdapter
 diagrams: [Cơ chế|recyclerview-viewholder-recycling.png|Ô cuộn tràn màn hình đưa vào bộ đệm tái chế để ô mới dùng lại View cũ, chỉ gọi onBindViewHolder nạp dữ liệu]
 ---
 

@@ -6,6 +6,10 @@ tags: [android, process-death, savedstate, low-memory-killer, viewmodel]
 collections: [interview-fundamental]
 related: [android-viewmodel, android-activity-lifecycle, android-memory-leak, android-handler-looper-message-queue]
 created: 2026-09-15
+sources:
+  - Save UI states — Android Developers | https://developer.android.com/topic/libraries/architecture/saving-states
+  - Saved State module for ViewModel | https://developer.android.com/topic/libraries/architecture/viewmodel/viewmodel-savedstate
+  - TransactionTooLargeException API reference — Android Developers | https://developer.android.com/reference/android/os/TransactionTooLargeException
 diagrams: [Cơ chế|savedstate-process-death-binder.png|Activity ghi Bundle dưới 1MB qua Binder sang system_server trước khi LMKD diệt tiến trình, nạp lại vào SavedStateHandle khi mở lại]
 ---
 

@@ -6,6 +6,10 @@ tags: [android, ui, lifecycle, memory-leak]
 collections: [interview-fundamental]
 related: [android-activity-lifecycle, android-memory-leak, android-viewmodel]
 created: 2026-10-01
+sources:
+  - Fragment lifecycle — Android Developers | https://developer.android.com/guide/fragments/lifecycle
+  - Fragment API reference — Android Developers | https://developer.android.com/reference/androidx/fragment/app/Fragment
+  - View binding — Android Developers | https://developer.android.com/topic/libraries/view-binding
 diagrams: [Cơ chế|fragment-vs-view-lifecycle.png|Khi vào backstack cây View bị huỷ ở onDestroyView trong khi Fragment vẫn sống, bắt buộc dùng viewLifecycleOwner và gán null binding]
 ---
 

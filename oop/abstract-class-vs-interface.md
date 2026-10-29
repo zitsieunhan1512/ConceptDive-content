@@ -6,6 +6,10 @@ tags: [oop, architecture, polymorphic, design-pattern]
 collections: [interview-fundamental]
 related: [oop-four-pillars, jvm-virtual-method-dispatch]
 created: 2026-09-11
+sources:
+  - Interfaces — Kotlin Documentation | https://kotlinlang.org/docs/interfaces.html
+  - Abstract classes — Kotlin Documentation | https://kotlinlang.org/docs/classes.html
+  - Abstract Methods and Classes — Java | https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html
 diagrams: [Cơ chế|abstract-class-vs-interface.png|Lớp trừu tượng sở hữu constructor và backing field trên Heap; giao diện chỉ định hình hợp đồng năng lực không trạng thái]
 ---
 

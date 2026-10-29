@@ -5,6 +5,10 @@ domain: kotlin
 tags: [kotlin, coroutines, flow, reactive, android]
 collections: [interview-fundamental]
 related: [architecture-state-vs-event, android-viewmodel, kotlin-coroutines]
+sources:
+  - StateFlow and SharedFlow on Android | https://developer.android.com/kotlin/flow/stateflow-and-sharedflow
+  - StateFlow API reference — kotlinx.coroutines | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-state-flow/
+  - SharedFlow API reference — kotlinx.coroutines | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-shared-flow/
 diagrams: [Cơ chế|stateflow-conflation-buffer.png|Conflation nuốt giá trị trùng trong StateFlow và cấu hình Replay trong SharedFlow]
 created: 2026-09-15
 ---

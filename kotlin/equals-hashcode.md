@@ -5,6 +5,11 @@ domain: kotlin
 tags: [kotlin, data-structure, hashmap, memory]
 collections: [interview-fundamental]
 related: [kotlin-sealed-vs-data-class]
+sources:
+  - java.lang.Object API reference — Oracle | https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
+  - kotlin.Any API reference — Kotlin | https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/
+  - JEP 180: HashMap Balanced Trees | https://openjdk.org/jeps/180
+  - Hash table — Wikipedia | https://en.wikipedia.org/wiki/Hash_table
 diagrams: [Cơ chế|hashset-bucket-lookup.png|HashSet tính chỉ số ngăn từ hashCode rồi dùng equals so khớp; sửa var làm lệch ngăn dẫn tới mất tích đối tượng]
 created: 2026-09-07
 ---

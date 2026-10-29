@@ -6,6 +6,10 @@ tags: [android, architecture, lifecycle, state-management]
 collections: [interview-fundamental]
 related: [android-state-holders, android-activity-lifecycle, android-memory-leak, architecture-state-vs-event]
 created: 2026-09-07
+sources:
+  - ViewModel overview — Android Developers | https://developer.android.com/topic/libraries/architecture/viewmodel
+  - ViewModel API reference — Android Developers | https://developer.android.com/reference/androidx/lifecycle/ViewModel
+  - ViewModelStore API reference — Android Developers | https://developer.android.com/reference/androidx/lifecycle/ViewModelStore
 diagrams: [Cơ chế|viewmodel-store-retention.png|ComponentActivity chuyển giao ViewModelStore qua onRetainNonConfigurationInstance để Activity mới nhận lại trên Heap khi xoay máy]
 ---
 

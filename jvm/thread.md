@@ -6,6 +6,10 @@ tags: [jvm, thread, concurrency, operating-system, memory]
 collections: []
 related: [kotlin-coroutines, kotlin-coroutine-state-machine]
 created: 2026-09-09
+sources:
+  - Thread API reference — Java SE | https://docs.oracle.com/javase/8/docs/api/java/lang/Thread.html
+  - Java launcher options (-Xss) — Oracle | https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html
+  - Thread (computing) — Wikipedia | https://en.wikipedia.org/wiki/Thread_(computing)
 diagrams: [Cơ chế|thread-context-switch.png|Java Thread ánh xạ 1:1 sang Linux pthread, bộ lập lịch cấp time slice và tổn thất khi hoán đổi ngữ cảnh]
 ---
 

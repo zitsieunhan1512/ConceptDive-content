@@ -6,6 +6,10 @@ tags: [network, protocol, socket]
 collections: [interview-fundamental]
 related: [android-samsung-mdc-protocol, jvm-stack-vs-heap]
 created: 2026-09-21
+sources:
+  - RFC 793: Transmission Control Protocol | https://www.rfc-editor.org/rfc/rfc793
+  - DataInputStream API reference — Java SE | https://docs.oracle.com/javase/8/docs/api/java/io/DataInputStream.html
+  - Transmission Control Protocol — Wikipedia | https://en.wikipedia.org/wiki/Transmission_Control_Protocol
 diagrams: [Cơ chế|tcp-stream-framing-accumulator.png|Dòng byte TCP không giữ ranh giới, ứng dụng đọc 2 byte độ dài rồi dùng readFully gom đủ thân gói]
 ---
 

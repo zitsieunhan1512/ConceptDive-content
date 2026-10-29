@@ -5,6 +5,10 @@ domain: kotlin
 tags: [kotlin, generics, variance, type-erasure, reified]
 collections: [interview-fundamental]
 related: [kotlin-inline-function, kotlin-sealed-vs-data-class, oop-four-pillars]
+sources:
+  - Generics: in, out, where — Kotlin | https://kotlinlang.org/docs/generics.html
+  - Type Erasure — Oracle Java Tutorials | https://docs.oracle.com/javase/tutorial/java/generics/erasure.html
+  - Generics in Java — Wikipedia | https://en.wikipedia.org/wiki/Generics_in_Java
 diagrams: [Cơ chế|generics-variance-directions.png|Chiều quan hệ kế thừa trong Generics: out giữ nguyên chiều (hiệp biến), in đảo ngược chiều (nghịch biến)]
 created: 2026-10-01
 ---

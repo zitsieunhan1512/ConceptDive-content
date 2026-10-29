@@ -5,6 +5,11 @@ domain: kotlin
 tags: [kotlin, idioms, lambda, syntax]
 collections: [interview-fundamental]
 related: [kotlin-inline-function, kotlin-null-safety]
+sources:
+  - Scope functions — Kotlin Documentation | https://kotlinlang.org/docs/scope-functions.html
+  - let function API reference — Kotlin | https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/let.html
+  - apply function API reference — Kotlin | https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/apply.html
+  - What's new in Kotlin 1.1 | https://kotlinlang.org/docs/whatsnew11.html
 diagrams: [Cơ chế|scope-functions-matrix.png|Ma trận 2x2 phân loại scope functions theo đối tượng ngữ cảnh (this/it) và kết quả trả về, cùng hàm độc lập with]
 created: 2026-09-07
 ---

@@ -6,6 +6,10 @@ tags: [android, memory, garbage-collection, performance]
 collections: [interview-fundamental]
 related: [android-activity-lifecycle, android-viewmodel, android-gc-roots, android-context-application-vs-activity]
 created: 2026-09-07
+sources:
+  - Overview of memory management — Android | https://developer.android.com/topic/performance/memory-overview
+  - Capture a heap dump — Android | https://developer.android.com/studio/profile/memory-profiler
+  - Garbage collection (computer science) — Wikipedia | https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)
 diagrams: [Cơ chế|memory-leak-activity-tree.png|Singleton hoặc luồng ngầm neo giữ Activity đã đóng, kéo theo toàn bộ cây View trên Heap gây OutOfMemoryError]
 ---
 

@@ -5,6 +5,9 @@ domain: kotlin
 tags: [kotlin, bytecode, performance, optimization]
 collections: [hay-quen]
 related: [kotlin-scope-functions]
+sources:
+  - Inline functions — Kotlin Documentation | https://kotlinlang.org/docs/inline-functions.html
+  - Higher-order functions and lambdas — Kotlin | https://kotlinlang.org/docs/lambdas.html
 diagrams: [Cơ chế|inline-bytecode-expansion.png|Hàm thường cấp phát đối tượng Function trên Heap; inline function dán thẳng bytecode vào nơi gọi để triệt tiêu chi phí]
 created: 2026-09-07
 ---

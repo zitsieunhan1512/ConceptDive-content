@@ -6,6 +6,10 @@ tags: [jvm, concurrency, race-condition, memory-model, volatile, synchronized]
 collections: [interview-fundamental]
 related: [thread, jvm-stack-vs-heap, kotlin-stateflow-vs-sharedflow]
 created: 2026-10-01
+sources:
+  - JLS Chapter 17: Threads and Locks | https://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html
+  - JSR 133 Java Memory Model FAQ | https://www.cs.umd.edu/~pugh/java/memoryModel/jsr-133-faq.html
+  - Java memory model — Wikipedia | https://en.wikipedia.org/wiki/Java_memory_model
 diagrams: [Cơ chế|race-condition-memory-barriers.png|So sánh rào chắn volatile bảo đảm nhìn thấy, CAS phi khóa nguyên tử và synchronized chiếm monitor lock]
 ---
 

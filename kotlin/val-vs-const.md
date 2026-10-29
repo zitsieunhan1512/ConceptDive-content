@@ -5,6 +5,9 @@ domain: kotlin
 tags: [kotlin, bytecode, performance]
 collections: []
 related: [jvm-virtual-method-dispatch, kotlin-inline-function]
+sources:
+  - Compile-time constants (const val) — Kotlin | https://kotlinlang.org/docs/properties.html
+  - JLS §13.4.9: Final Fields and Constants | https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html
 diagrams: [Cơ chế|val-vs-const-bytecode.png|val sinh getter gọi hàm lúc runtime bảo toàn tương thích nhị phân trong khi const val inlining literal trực tiếp vào bytecode]
 created: 2026-09-10
 ---
