@@ -10,36 +10,30 @@ created: 2026-09-15
 ---
 
 ## Bản 30 giây
-`lateinit var` và `by lazy` giúp trì hoãn việc gán giá trị cho biến khi chưa thể khởi tạo ngay. `lateinit` dùng cho biến có thể thay đổi (`var`), phù hợp khi framework gán giá trị sau như trong vòng đời Android. `by lazy` dùng cho biến chỉ đọc (`val`), chỉ chạy đoạn mã khởi tạo ở lần đầu tiên bạn đọc giá trị.
+Khi viết `Activity` trên Android, nhiều biến chỉ có dữ liệu sau khi `onCreate()` chạy, nên không thể gán ngay lúc khai báo. `lateinit var` dành cho biến gán sau và đổi lại được, còn `by lazy` dành cho biến `val` chỉ tính ở lần đọc đầu. Nhờ hai cách này, bạn không phải khai báo biến có dấu hỏi rồi viết `?.` hay `!!` khắp nơi.
 
 ## Cần biết trước
 - kotlin-null-safety
 - kotlin-val-vs-const
 
 ## Vấn đề buộc nó ra đời
-Trong Java, mọi trường đối tượng đều có thể mang giá trị null ban đầu. Lập trình viên thường gán đối tượng sau trong `onCreate()` của Android hoặc qua Dagger.
+Trong Java, mọi trường của lớp đều mặc định bằng null trước rồi mới gán đối tượng thật trong `onCreate()` hoặc qua thư viện Dagger. Cách làm này rất quen thuộc trên Android suốt nhiều năm.
 
-Khi Kotlin ra đời năm 2011 với hệ thống [null safety](concept:kotlin-null-safety), mọi biến không-null bắt buộc phải có giá trị ngay khi tạo. Điều này gây bế tắc cho Android vì không thể khởi tạo View hay ViewModel trước khi Activity gắn vào hệ thống.
+Khi Kotlin ra đời năm 2011 với [null safety](concept:kotlin-null-safety), mọi biến không-null đều phải gán giá trị ngay lúc tạo đối tượng. Lập trình viên Android bị kẹt, vì lúc tạo `Activity` thì chưa lấy được `View` hay `ViewModel`.
 
-Nếu không có giải pháp, kỹ sư buộc phải để biến có dấu hỏi rồi lạm dụng toán tử ép kiểu `!!`. Nhóm thiết kế Kotlin đã tạo ra `lateinit` và `by lazy` để tháo gỡ vấn đề này.
+Nếu không có lối mở, bạn phải khai báo biến kèm dấu hỏi rồi thêm `!!` ở mọi chỗ dùng. Nhóm thiết kế Kotlin đưa vào `lateinit` và `by lazy` để bạn dời việc gán giá trị sang thời điểm sau.
 
 ## Nó thực sự là cái gì
-`lateinit` KHÔNG phải cú pháp thần kỳ tự tìm cách gán biến. Thực chất, nó chỉ là một trường Java thông thường kèm lời hứa với compiler rằng biến sẽ có dữ liệu trước khi đọc.
-
-Ngược lại, `by lazy` KHÔNG phải một biến thông thường. Nó là cơ chế ủy quyền thuộc tính (*property delegation*), dùng đối tượng bọc để tính giá trị ở lần đọc đầu tiên.
+`lateinit` không có phép tự đi tìm dữ liệu để gán cho biến. Nó chỉ là một trường Java bình thường kèm lời hứa của bạn với compiler rằng biến sẽ được gán trước khi đọc. Ngược lại, `by lazy` không phải là một biến đơn lẻ mà là ủy quyền thuộc tính (*property delegation*). Nó cất khối lệnh khởi tạo vào một đối tượng bọc riêng, đợi lần đầu bạn đọc biến mới lấy ra chạy.
 
 ## Cơ chế
-Ở tầng bytecode JVM, `lateinit` lưu dữ liệu trong một trường Java riêng tư thông thường. Compiler tự động chèn thêm lệnh kiểm tra `if (value == null)` trước mỗi lần đọc để ném lỗi nếu biến chưa gán.
-
-Với `by lazy`, hàm ủy quyền tạo một đối tượng `SynchronizedLazyImpl` trên bộ nhớ Heap để giữ khối mã khởi tạo. Khi đọc lần đầu, nó dùng [khóa kiểm tra hai lớp](concept:jvm-race-condition-memory-model) (*double-checked locking*) để tính giá trị an toàn đa luồng rồi lưu lại.
+Ở bytecode JVM, `lateinit` tạo trường Java cùng mức hiển thị với setter (`lateinit var` là `public` thì trường cũng `public`). Compiler tự chèn câu kiểm tra `if (value == null)` vào hàm đọc để ném lỗi nếu bạn đọc trước khi gán. Còn `by lazy` tạo một đối tượng `SynchronizedLazyImpl` trên Heap để giữ khối lệnh tính giá trị. Ở lần đọc đầu, nó dùng [khóa kiểm tra hai lớp](concept:jvm-race-condition-memory-model) (*double-checked locking*) để tính một lần rồi cất kết quả cho các lần sau.
 
 ## Đánh đổi
-`lateinit` có tốc độ đọc ghi cực nhanh như trường Java gốc. Tuy nhiên, nó không hỗ trợ kiểu nguyên thủy (`Int`, `Boolean`) và không bảo đảm an toàn khi đọc ghi từ nhiều luồng.
-
-`by lazy` mang lại tính bất biến (`val`) và an toàn đa luồng. Đổi lại, bạn tốn thêm bộ nhớ Heap cho đối tượng bọc và chịu chi phí khóa luồng khi khởi tạo.
+`lateinit` đọc ghi trực tiếp vào trường Java nên chạy nhanh và không tốn thêm đối tượng bọc. Đổi lại, nó không dùng được cho kiểu nguyên thủy như `Int` hay `Boolean`, và không tự khóa khi nhiều luồng cùng gán. Còn `by lazy` giữ biến chỉ đọc (`val`) và an toàn đa luồng, nhưng tốn một đối tượng trên Heap cùng khóa ở lần đọc đầu.
 
 ## Nguyên lý gốc
-Nguyên lý khởi tạo lười biếng (*Lazy Initialization*): trì hoãn cấp phát tài nguyên và bộ nhớ cho đến khi thực sự cần dùng. Cơ chế này giúp rút ngắn thời gian khởi động của chương trình.
+Chưa cần dùng tới thì chưa tạo ra, đợi đúng lúc gọi tới lần đầu mới cấp bộ nhớ và tính toán (*Lazy Initialization*).
 
 ## Key insight
 > by lazy không phải là biến thông thường, mà là đối tượng ủy quyền tính toán một lần và đồng bộ luồng trên Heap.
@@ -61,23 +55,22 @@ class UserProfileActivity : AppCompatActivity() {
 ```
 
 ## Bẫy & ranh giới
-`by lazy` mặc định tốn một object bao bọc và chi phí khóa luồng; `lateinit` tốn thêm lệnh so sánh null ở mỗi lần đọc. Không dùng `lateinit` trong môi trường đa luồng vì không có cơ chế khóa bảo vệ. Không dùng `by lazy` cho các đối tượng phụ thuộc vào dữ liệu chỉ có sau khi Activity khởi chạy. Đọc `lateinit` quá sớm sẽ gây lỗi sập `UninitializedPropertyAccessException`, còn `by lazy` phụ thuộc vòng tròn sẽ gây lỗi `StackOverflowError`.
+Mặc định `by lazy` tốn thêm đối tượng bọc trên Heap và khóa đồng bộ, còn `lateinit` tốn một phép kiểm tra null mỗi lần đọc. Đừng dùng `lateinit` khi nhiều luồng cùng gán mà không khóa, và đừng đọc `by lazy` sớm nếu nó cần dữ liệu sau `onCreate()`. Triệu chứng khi gọi `lateinit` lúc chưa gán là app sập ngay với lỗi `UninitializedPropertyAccessException`. Còn nếu hai biến `by lazy` gọi chéo nhau trong khối khởi tạo, app sẽ sập vì lỗi tràn ngăn xếp `StackOverflowError`.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Tại sao lateinit không áp dụng được cho kiểu nguyên thủy như Int hay Boolean?
-Không thể dùng vì kiểu nguyên thủy trong Java không thể mang giá trị null. Trình biên dịch dựa vào giá trị null nội bộ để kiểm tra biến đã khởi tạo hay chưa. Nếu hỗ trợ, ngôn ngữ phải đổi sang kiểu bao bọc (boxed object) gây tốn bộ nhớ.
+Vì ở tầng JVM, compiler dùng giá trị `null` để đánh dấu là biến `lateinit` chưa được gán. Các kiểu nguyên thủy như `int` hay `boolean` trong Java luôn có số mặc định là `0` hoặc `false` chứ không thể mang `null`. Nếu muốn đánh dấu `null`, Kotlin phải bọc chúng thành đối tượng `Integer` trên Heap làm tốn thêm bộ nhớ.
 
 **Hỏi:** Ba chế độ của LazyThreadSafetyMode khác nhau như thế nào?
-Khác nhau ở cơ chế khóa luồng. SYNCHRONIZED dùng khóa an toàn tuyệt đối; PUBLICATION cho nhiều luồng cùng chạy nhưng chỉ lấy kết quả đầu tiên. NONE không có khóa, chạy nhanh nhất và phù hợp nhất cho luồng giao diện Android.
+Chúng khác nhau ở cách xử lý khi nhiều luồng cùng đọc biến ở lần đầu tiên. `SYNCHRONIZED` dùng khóa để chỉ một luồng được tính; `PUBLICATION` cho nhiều luồng cùng tính nhưng chỉ giữ lại kết quả nào xong trước. Còn `NONE` bỏ hẳn khóa nên chạy nhanh nhất, rất hợp cho biến chỉ dùng trên luồng chính Android.
 
 **Hỏi:** Làm sao để kiểm tra một biến lateinit đã được khởi tạo hay chưa mà không bị sập app?
-Dùng cú pháp `this::presenter.isInitialized`. Biến phản chiếu này kiểm tra trực tiếp trường nội bộ mà không kích hoạt ngoại lệ. Cách này chỉ áp dụng được cho thuộc tính có thể truy cập trực tiếp trong cùng một lớp.
+Bạn gọi `this::presenter.isInitialized` để kiểm tra xem trường bên dưới đã khác null hay chưa. Cách viết này đọc thẳng vào trường nội bộ nên không làm nổ lỗi chưa khởi tạo. Lưu ý là bạn chỉ gọi được nó ở bên trong cùng lớp hoặc lớp bọc ngoài gần nhất.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] lateinit là lời hứa với compiler cho var, by lazy là ủy quyền thuộc tính cho val.
-- [ ] Cơ chế bytecode: lateinit kiểm tra null nội bộ, by lazy dùng đối tượng bao bọc có khóa hai lớp.
-- [ ] Đánh đổi: lateinit không hỗ trợ kiểu nguyên thủy, by lazy tốn bộ nhớ Heap và chi phí khóa luồng.
+- [ ] Phân biệt được lateinit (lời hứa gán sau cho biến var) với by lazy (đối tượng ủy quyền tính một lần cho biến val).
+- [ ] Giải thích được bytecode: trường của lateinit có cùng mức hiển thị với setter và kiểm tra null khi đọc, còn by lazy bọc trong SynchronizedLazyImpl.
+- [ ] Nêu được vì sao lateinit không dùng cho Int/Boolean và khi nào nên truyền LazyThreadSafetyMode.NONE cho by lazy trên Android.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu
-

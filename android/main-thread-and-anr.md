@@ -10,44 +10,30 @@ diagrams: [Cơ chế|anr-watchdog-thresholds.png|Hệ thống giám sát mốc t
 ---
 
 ## Bản 30 giây
-Mọi thao tác bấm chạm và vẽ giao diện trên Android đều chạy trên một luồng chính duy nhất. Nếu luồng này bị chặn bởi việc đọc tệp hoặc tải mạng, toàn bộ màn hình sẽ bị đơ cứng. Hệ thống sẽ bật hộp thoại cảnh báo và buộc dừng ứng dụng nếu sự chậm trễ vượt quá ngưỡng cho phép.
+Khi bạn bấm một nút trên màn hình, lệnh bấm và lệnh vẽ lại nút đều xếp hàng chạy trên một luồng chính duy nhất. Nếu bạn đọc file lớn hay gọi mạng ngay trên luồng này, các việc đứng sau sẽ kẹt cứng và màn hình đơ luôn. Quá hạn mà luồng chính chưa rảnh, Android sẽ bật bảng báo lỗi ANR cho người dùng đóng ứng dụng.
 
 ## Cần biết trước
 - android-handler-looper-message-queue
 - thread
 
 ## Vấn đề buộc nó ra đời
-Ngay từ Android 1.0 (2008), Android áp dụng kiến trúc đơn luồng cho giao diện người dùng. Mọi lệnh vẽ màn hình đều phải đi qua hàng đợi tin nhắn của luồng chính. Khi lập trình viên thực hiện tác vụ nặng trên luồng này, ứng dụng hoàn toàn không phản hồi thao tác bấm.
+Từ bản Android 1.0 (2008), toàn bộ giao diện được thiết kế chạy trên một luồng chính duy nhất. Mọi việc vẽ màn hình hay nhận cú chạm đều phải xếp hàng qua hàng đợi của luồng này. Chỉ cần lập trình viên chạy một việc nặng trên luồng chính, màn hình sẽ đứng im không bấm được nữa.
 
-Để bảo vệ trải nghiệm, hệ điều hành bổ sung cơ chế giám sát và kích hoạt lỗi treo ứng dụng. Người dùng thấy một hộp thoại thông báo và có quyền đóng ứng dụng ngay lập tức. Tuy nhiên, việc phát hiện dòng mã gây tắc nghẽn ở giai đoạn phát triển vẫn rất khó khăn.
+Để người dùng không bị kẹt chết ở một ứng dụng đơ, Android đặt đồng hồ canh thời gian phản hồi. Hết giờ mà ứng dụng chưa trả lời, hệ thống hiện bảng báo không phản hồi để người dùng tắt đi. Nhưng lúc đang viết code, lập trình viên vẫn rất khó biết dòng nào vừa lỡ chặn luồng chính.
 
-Tháng 12 năm 2010, kỹ sư Brad Fitzpatrick giới thiệu công cụ StrictMode trên Android 2.3 Gingerbread. Công cụ này lập tức cảnh báo khi phát hiện việc đọc ghi đĩa hoặc gọi mạng trên luồng chính.
+Tháng 12 năm 2010, kỹ sư Brad Fitzpatrick đưa công cụ `StrictMode` vào Android 2.3 Gingerbread. Công cụ này báo ngay trên log mỗi khi bạn đọc ghi đĩa hoặc gọi mạng trên luồng chính.
 
 ## Nó thực sự là cái gì
-Lỗi ngừng phản hồi KHÔNG phải là do điện thoại bị thiếu RAM hay sập luồng.
-
-Thực chất, đó là đòn ngắt bảo vệ của hệ thống khi [hàng đợi tin nhắn](concept:android-handler-looper-message-queue) bị tắc nghẽn.
-
-Hệ điều hành giám sát các mốc thời gian phản hồi thông qua dịch vụ hệ thống.
-
-Nếu luồng chính không hoàn tất sự kiện trong ngưỡng quy định, hệ thống sẽ kích hoạt thông báo treo máy.
+Lỗi ANR (*Application Not Responding*) không phải do máy hết RAM hay luồng bị sập. Đó là còi báo động của hệ thống khi [hàng đợi tin nhắn](concept:android-handler-looper-message-queue) trên luồng chính bị một việc nặng chặn đứng. Dịch vụ hệ thống luôn bấm giờ cho từng sự kiện giao diện hoặc vòng đời đang chạy. Hết hạn mà luồng chính chưa làm xong việc đó để nhận việc mới, Android sẽ bật hộp thoại ANR.
 
 ## Cơ chế
-Sự kiện chạm màn hình hoặc bấm phím sẽ kích hoạt lỗi nếu không xử lý trong 5 giây.
-
-`BroadcastReceiver` có ngưỡng 5 giây nếu app có Activity mở; ngưỡng cụ thể thay đổi theo bản Android.
-
-`Service` của app phải chạy xong `onCreate` và `onStartCommand` trong khoảng 20 giây, theo mặc định AOSP.
-
-Hệ thống lưu vết vào `traces.txt` ở bản cũ hoặc nhiều tệp `anr_*` ở bản mới, lấy qua `adb bugreport`.
+Sự kiện chạm màn hình hoặc bấm phím sẽ bị báo ANR nếu không xử lý xong trong 5 giây. Với `BroadcastReceiver`, hạn là 10 giây ở tiền cảnh (10–20 giây từ Android 14) và 60 giây ở nền, tùy bản Android. Còn `Service` phải chạy xong `onCreate` hay `onStartCommand` trong 20 giây ở tiền cảnh, hoặc 200 giây ở nền. Khi nổ ANR, hệ thống chụp lại stack trace vào `traces.txt` hoặc các tệp `anr_*`, lấy ra bằng lệnh `adb bugreport`.
 
 ## Đánh đổi
-Việc đẩy tác vụ sang luồng phụ đòi hỏi xử lý đồng bộ và chuyển dữ liệu phức tạp hơn.
-
-Bù lại, luồng chính luôn giữ được tốc độ vẽ cao và phản hồi tức thì với người dùng.
+Đưa việc đọc file hay gọi mạng sang luồng phụ thì bạn phải thêm bước chuyển kết quả về luồng chính để vẽ lại. Đổi lại, luồng chính luôn rảnh tay để vẽ khung hình mượt và phản hồi ngay mỗi khi người dùng chạm vào.
 
 ## Nguyên lý gốc
-Nguyên lý giao diện đơn luồng: luồng trực tiếp tương tác với người dùng phải luôn được giải phóng khỏi mọi tác vụ chặn.
+Luồng đang trực tiếp vẽ màn hình và nghe tay người dùng bấm thì không được phép đứng chờ bất kỳ việc nặng nào.
 
 ## Key insight
 > Lỗi ANR không xảy ra vì máy chậm, mà do luồng chính bị chiếm dụng bởi các tác vụ nặng.
@@ -67,23 +53,22 @@ class MainApplication : Application() {
 ```
 
 ## Bẫy & ranh giới
-Gọi mạng trên luồng chính gây sập ngay với `NetworkOnMainThreadException`, còn đọc ghi tệp gây giật hoặc ANR. Bật công cụ StrictMode trên bản phát hành chính thức sẽ làm giảm hiệu năng thực tế của người dùng. Khi gặp lỗi treo máy, triệu chứng điển hình là nhật ký hệ thống xuất hiện thẻ ActivityManager kèm tệp nhật ký truy vết.
+Gọi mạng trên luồng chính làm app sập ngay với `NetworkOnMainThreadException`, còn đọc file hay giải mã JSON lớn sẽ gây giật hoặc ANR. Đừng bật `StrictMode` ở bản phát hành cho người dùng vì việc theo dõi mọi lệnh đọc ghi sẽ làm máy chạy chậm đi. Khi dính ANR, bạn sẽ thấy mục `ActivityManager` báo lỗi trong logcat kèm tệp vết lưu đúng dòng code đang giữ chân luồng chính.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Vì sao một tác vụ đọc file chỉ tốn vài mili-giây trên Main thread vẫn có thể gây ra lỗi ANR?
-Thời gian đọc tệp không cố định vì phụ thuộc vào tải của bộ nhớ flash. Khi bộ nhớ flash đang bận, thao tác này có thể kéo dài hàng giây và chặn đứng luồng chính. Do đó tác vụ vào ra đĩa không bao giờ được coi là an toàn trên luồng giao diện.
+Vì tốc độ đọc file phụ thuộc vào lúc đó chip nhớ flash đang rảnh hay bận. Khi máy đang cài ứng dụng khác hoặc ghi ảnh nền, lệnh đọc một file nhỏ cũng có thể phải chờ vài giây. Vì vậy mọi việc đọc ghi đĩa đều phải đưa sang luồng phụ.
 
 **Hỏi:** Các ngưỡng thời gian kích hoạt ANR phổ biến nhất trên Android là bao lâu?
-Ngưỡng chạm là 5 giây, BroadcastReceiver là 5 giây khi có Activity ở tiền cảnh, và `startForeground` trong 5 giây. Vòng đời Service mặc định theo mã nguồn AOSP là 20 giây, tài liệu mô tả là vài giây. Vượt quá các mốc này, hệ thống sẽ kích hoạt thông báo ứng dụng ngừng phản hồi.
+Chạm và `startForeground` có hạn 5 giây; `BroadcastReceiver` là 10 giây tiền cảnh (10–20 giây từ Android 14) và 60 giây ở nền. Với `Service`, hạn là 20 giây cho dịch vụ tiền cảnh và 200 giây cho dịch vụ nền, tùy bản Android. Quá các mốc này mà hàm chưa trả về, hệ thống sẽ báo ứng dụng ngừng phản hồi.
 
 **Hỏi:** Làm thế nào để điều tra nguyên nhân gốc rễ khi ứng dụng bị lỗi ANR trong sản xuất?
-Kiểm tra báo cáo Android Vitals trên Google Play Console hoặc trích xuất tệp traces bằng lệnh adb bugreport. Tệp vết này lưu toàn bộ trạng thái và vị trí dòng mã của luồng chính tại đúng thời điểm bị treo. Điều này giúp lập trình viên xác định chính xác dòng lệnh đang phong toả luồng.
+Bạn mở mục Android Vitals trên Google Play Console hoặc chạy lệnh `adb bugreport` để lấy tệp vết `traces`. Tệp này ghi lại toàn bộ các hàm mà luồng chính đang chạy dở ngay lúc bị treo. Nhìn vào đỉnh stack trace của luồng `main`, bạn sẽ thấy ngay hàm nào đang đứng chờ khóa hay đọc đĩa.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Kiến trúc đơn luồng của giao diện và nguyên nhân gây nghẽn hàng đợi tin nhắn.
-- [ ] Các ngưỡng thời gian kích hoạt ANR đối với đầu vào, BroadcastReceiver và dịch vụ.
-- [ ] Cách sử dụng StrictMode để phát hiện sớm các tác vụ truy cập đĩa hoặc mạng.
+- [ ] Giải thích được vì sao mọi việc vẽ và nhận chạm đi chung một hàng đợi trên luồng chính nên dễ bị kẹt.
+- [ ] Nêu đúng các mốc thời gian báo ANR cho sự kiện chạm, BroadcastReceiver và Service ở tiền cảnh lẫn nền.
+- [ ] Trình bày được cách bật StrictMode lúc debug và cách đọc tệp traces để tìm dòng code chặn luồng.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu
-

@@ -10,34 +10,34 @@ diagrams: [Cơ chế|ble-gatt-hierarchy.png|Cấu trúc phân tầng Profile, Se
 ---
 
 ## Bản 30 giây
-Bluetooth năng lượng thấp trao đổi dữ liệu qua cấu trúc cây thuộc tính lưu trên thiết bị ngoại vi. Điện thoại kết nối vào để đọc, ghi hoặc đăng ký nhận thông báo biến động từ cảm biến. Mô hình này giúp thiết bị tiết kiệm pin tối đa bằng cách chỉ truyền dữ liệu nhỏ khi có thay đổi.
+Khi bạn kết nối điện thoại với vòng tay đo nhịp tim, BLE không mở sẵn một đường truyền chảy liên tục. Thiết bị ngoại vi lưu dữ liệu thành cây mục nhỏ, và điện thoại chỉ đọc, ghi hoặc chờ báo tin khi số đo đổi. Cách gửi từng mẩu tin ngắn lúc có thay đổi giúp viên pin cúc áo chạy được rất lâu.
 
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
-Bluetooth cổ điển (BR/EDR) được thiết kế cho luồng truyền tải dữ liệu liên tục như tai nghe âm thanh. Nó đòi hỏi duy trì kết nối sóng vô tuyến liên tục, làm cạn sạch pin cúc áo chỉ sau vài ngày hoạt động.
+Bluetooth cổ điển (BR/EDR) được làm cho các luồng dữ liệu chảy liên tục như tai nghe nhạc. Nó bắt hai bên giữ sóng liên tục nên làm cạn viên pin cúc áo chỉ sau vài ngày.
 
-Năm 2006, Nokia giới thiệu công nghệ Wibree hướng tới các thiết bị tiêu thụ năng lượng siêu thấp. Năm 2010, tổ chức Bluetooth SIG chính thức tích hợp Wibree vào chuẩn Bluetooth 4.0 dưới tên gọi BLE.
+Năm 2006, Nokia giới thiệu công nghệ Wibree dành cho những thiết bị cần tiêu thụ thật ít điện. Năm 2010, tổ chức Bluetooth SIG đưa Wibree vào chuẩn Bluetooth 4.0 dưới tên gọi BLE.
 
-BLE cần một mô hình trao đổi dữ liệu phi tập trung, đóng gói dữ liệu thành các trường thuộc tính rời rạc. Giao thức GATT ra đời để chuẩn hóa cấu trúc dữ liệu trên nền giao thức thuộc tính ATT.
+BLE cần cách trao đổi dữ liệu gọn nhẹ, cất từng mẩu thông tin vào các mục riêng lẻ. Giao thức GATT ra đời để sắp xếp các mục dữ liệu đó trên nền giao thức thuộc tính ATT.
 
 ## Nó thực sự là cái gì
-GATT KHÔNG PHẢI là đường ống truyền dữ liệu luồng liên tục như Bluetooth cổ điển. Thực chất, nó là cơ sở dữ liệu thuộc tính trên ngoại vi để điện thoại truy vấn hoặc nhận thông báo biến động.
+GATT không phải là một đường ống chảy liên tục như Bluetooth cổ điển. Nó giống bảng dữ liệu nhỏ nằm ngay trên thiết bị ngoại vi để điện thoại hỏi hoặc chờ báo tin khi có số mới.
 
 ## Cơ chế
-Vai trò GAP phân định Central (quét và kết nối) và Peripheral (quảng bá). Trong GATT, Server lưu trữ bảng thuộc tính còn Client gửi yêu cầu đọc ghi. Dữ liệu phân tầng: Profile gom Service, Service chứa Characteristic, và Characteristic đi kèm Descriptor có mã định danh UUID. Muốn nhận dữ liệu chủ động, GATT Client phải ghi cờ kích hoạt vào Descriptor CCCD mang mã `0x2902` trên Server.
+Tầng GAP chia việc kết nối: `Central` đi quét và nối vào, còn `Peripheral` phát tín hiệu quảng bá. Sang tầng GATT, `Server` giữ bảng dữ liệu còn `Client` gửi lệnh đọc hoặc ghi. Bảng này xếp thành 3 tầng mang mã `UUID`: `Profile` gom các `Service`, `Service` chứa `Characteristic`, và mỗi `Characteristic` gắn thêm `Descriptor`. Muốn thiết bị tự báo tin mới, `Client` phải ghi cờ bật thông báo vào `Descriptor` CCCD mã `0x2902` trên `Server`.
 
 ## Đánh đổi
-BLE giúp cảm biến chạy hàng năm chỉ với pin cúc áo nhờ gói tin nhỏ ngắt quãng. Đổi lại, băng thông rất thấp và gói ATT MTU mặc định 23 byte chỉ chở được 20 byte dữ liệu. Truyền dữ liệu lớn hơn đòi hỏi cơ chế Long Write hoặc thương lượng `requestMtu` (tự đặt 517 từ Android 14).
+Nhờ chỉ gửi những gói tin ngắn lúc cần, BLE giúp cảm biến chạy hàng năm bằng một viên pin cúc áo. Đổi lại, tốc độ truyền rất thấp và gói tin `ATT MTU` mặc định 23 byte chỉ chở được 20 byte dữ liệu. Muốn gửi gói dài hơn, bạn phải dùng Long Write hoặc gọi `requestMtu` để xin gói lớn hơn (Android 14 tự xin mức 517 byte).
 
 ## Nguyên lý gốc
-Nguyên lý máy khách và máy chủ thuộc tính: chia nhỏ trạng thái thành các điểm nguyên tử thay vì duy trì luồng truyền.
+Thay vì giữ dòng chảy liên tục, thiết bị tách trạng thái thành từng ô nhỏ, ô nào đổi mới gửi.
 
 ## Key insight
 > Bật thông báo BLE không chỉ gọi hàm trên Android: bạn bắt buộc phải ghi cờ kích hoạt vào descriptor CCCD của thiết bị.
 
 ## Ví von
-GATT như bảng thông báo ở sảnh chung cư: mỗi tầng là một Service, mỗi căn hộ là một Characteristic. Bạn phải bấm chuông đăng ký nhận tin (ghi CCCD) thì chủ nhà mới chủ động báo tin mỗi khi có thư mới.
+GATT giống bảng hộp thư ở sảnh chung cư: mỗi tầng là một `Service`, mỗi căn hộ là một `Characteristic`. Bạn phải gạt công tắc đăng ký ở cửa hộp thư (ghi CCCD) thì chủ nhà mới báo cho bạn mỗi khi có thư mới.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -52,25 +52,25 @@ descriptor?.let {
 ```
 
 ## Bẫy & ranh giới
-Chỉ gọi `setCharacteristicNotification` mà quên ghi CCCD `0x2902` là [bẫy BLE](concept:android-ble-android-pitfalls) khiến app không bao giờ nhận được dữ liệu từ ngoại vi. Write Without Response tuy nhanh nhưng dễ rơi rớt gói tin trên tầng ATT do không có phản hồi xác nhận. Chống chỉ định dùng BLE cho truyền tải âm thanh hoặc video vì giới hạn MTU và chu kỳ sóng sẽ bóp nghẹt băng thông. Triệu chứng nghẽn là dữ liệu bị cắt vụn thành 20 byte khiến tầng ứng dụng giải mã sai lệch và gây trễ nghiêm trọng.
+Nếu bạn chỉ gọi `setCharacteristicNotification` mà quên ghi CCCD `0x2902`, bạn sẽ dính [bẫy BLE](concept:android-ble-android-pitfalls) làm app không nhận được gói tin nào. Kiểu Write Without Response vẫn được tầng liên kết xác nhận gói, nhưng bỏ phản hồi ATT nên ghi dồn nhanh sẽ tràn bộ đệm. Cũng đừng tự truyền âm thanh hay video qua đặc tính GATT, vì âm thanh trên BLE phải đi qua kênh riêng của LE Audio. Khi gửi quá cỡ mà chưa xin tăng `MTU`, gói tin sẽ bị cắt còn 20 byte hoặc lệnh ghi trả lỗi bận.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Vai trò GAP khác gì vai trò GATT trong một kết nối BLE?
-GAP quản lý việc quảng bá và kết nối (Central quét và kết nối, Peripheral quảng bá). GATT quản lý việc trao đổi dữ liệu sau kết nối (Server giữ cơ sở dữ liệu thuộc tính, Client gửi lệnh truy vấn). Hai cặp vai trò này hoàn toàn độc lập với nhau.
+GAP lo chuyện tìm nhau và bắt tay: `Central` đi quét và kết nối, còn `Peripheral` phát quảng bá. GATT lo chuyện đọc ghi dữ liệu sau khi đã nối xong: `Server` giữ bảng dữ liệu, còn `Client` gửi lệnh hỏi. Hai cặp vai trò này tách biệt nhau.
 
 **Hỏi:** Tại sao gửi mảng 50 byte qua Characteristic lại bị cắt cụt còn 20 byte?
-Vì kích thước gói ATT MTU mặc định của kết nối BLE chỉ có 23 byte. Ba byte đầu tiên dành cho tiêu đề ATT, nên phần dữ liệu ứng dụng thực tế chỉ còn vỏn vẹn 20 byte.
+Vì gói tin `ATT MTU` mặc định của một kết nối BLE chỉ dài 23 byte. Mất 3 byte đầu cho phần tiêu đề ATT, nên chỗ chứa dữ liệu của bạn chỉ còn đúng 20 byte.
 
 **Hỏi:** Làm thế nào để gửi gói tin BLE lớn hơn 20 byte mà không phải cắt mảng thủ công?
-Bạn có thể dùng Long Write hoặc gọi `gatt.requestMtu(517)` để tăng kích thước gói tin. Từ Android 14, hệ điều hành tự động thương lượng mức 517 byte ngay khi có yêu cầu MTU đầu tiên.
+Bạn có thể dùng cơ chế Long Write hoặc gọi `gatt.requestMtu(517)` để xin nới rộng gói tin. Từ Android 14, hệ điều hành tự xin mức 517 byte ngay ở yêu cầu `MTU` đầu tiên.
 
 **Hỏi:** Notify khác gì Indicate khi thiết bị ngoại vi truyền dữ liệu về điện thoại?
-Notify bắn dữ liệu mà không cần điện thoại phản hồi xác nhận ở tầng ATT, giúp đạt tốc độ truyền cao hơn. Indicate bắt buộc điện thoại gửi gói tin xác nhận trước khi gửi gói tiếp theo, đảm bảo tin cậy nhưng tốc độ chậm hơn.
+Với `Notify`, thiết bị cứ gửi dữ liệu mà không chờ điện thoại xác nhận ở tầng ATT nên gửi được nhanh hơn. Với `Indicate`, điện thoại phải trả lời đã nhận xong gói trước thì thiết bị mới gửi tiếp gói sau, chậm hơn nhưng chắc chắn.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Phân biệt rạch ròi GAP (Central/Peripheral) với GATT (Client/Server).
-- [ ] Cơ chế kích hoạt Notify bắt buộc ghi cờ vào CCCD 0x2902 ngoài việc gọi hàm Android SDK.
-- [ ] Giới hạn ATT MTU mặc định 23 byte (20 byte dữ liệu), cơ chế Long Write và requestMtu.
+- [ ] Phân biệt được vai trò kết nối của GAP (Central/Peripheral) với vai trò dữ liệu của GATT (Client/Server).
+- [ ] Giải thích được vì sao bật Notify phải vừa gọi hàm Android SDK vừa ghi cờ vào Descriptor CCCD 0x2902.
+- [ ] Nêu được giới hạn gói ATT MTU mặc định 23 byte (chở 20 byte dữ liệu) và cách tăng bằng requestMtu.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

@@ -10,35 +10,35 @@ created: 2026-09-07
 ---
 
 ## Bản 30 giây
-Mở quá nhiều luồng hệ điều hành sẽ làm cạn kiệt RAM và gây sập ứng dụng. Coroutine cắt nhỏ hàm thành các điểm dừng, lưu trạng thái vào Heap và nhả luồng cho việc khác. Nhờ đó, vài luồng duy nhất có thể luân phiên gánh hàng chục nghìn tác vụ cùng lúc.
+Nếu mỗi lần gọi API hay đọc dữ liệu bạn lại tạo một luồng mới, bộ nhớ RAM sẽ nhanh chóng cạn sạch. Coroutine cắt hàm của bạn tại các điểm chờ, cất biến dở dang vào bộ nhớ Heap rồi nhường luồng cho việc khác chạy. Nhờ vậy, chỉ vài luồng sẵn có cũng đủ thay phiên nhau chạy hàng chục nghìn công việc cùng lúc.
 
 ## Cần biết trước
 - thread
 
 ## Vấn đề buộc nó ra đời
-Năm 1958, Melvin Conway nghĩ ra coroutine khi viết trình biên dịch COBOL trên máy Burroughs 220. Năm 1963, ông chính thức công bố thuật ngữ này trên tạp chí CACM.
+Năm 1958, Melvin Conway đặt ra khái niệm coroutine khi viết một chương trình hợp ngữ (assembler). Năm 1963, ông công bố bài báo trên tạp chí CACM dùng coroutine để thiết kế trình biên dịch COBOL.
 
-Nửa thế kỷ sau, JetBrains đối mặt giới hạn tài nguyên luồng của hệ điều hành. Mỗi thread chiếm trước một megabyte địa chỉ ảo và tiêu tốn tài nguyên quản lý của kernel. Tạo hàng nghìn thread gây cạn kiệt giới hạn hệ thống và làm CPU tê liệt vì chi phí hoán đổi ngữ cảnh.
+Nửa thế kỷ sau, lập trình viên vướng phải giới hạn của luồng hệ điều hành. Mỗi `thread` giữ trước khoảng một megabyte bộ nhớ ảo và tốn tài nguyên quản lý của nhân hệ điều hành. Tạo hàng nghìn `thread` sẽ làm hết bộ nhớ và làm CPU mất nhiều thời gian đổi qua lại giữa các luồng.
 
-Callback và RxJava thời đó giải quyết được luồng nhưng làm code vỡ vụn và khó debug. JetBrains cần giải pháp chạy bất đồng bộ tuần tự mà không tạo thêm thread của hệ điều hành.
+Dùng callback hay RxJava tránh được việc tạo nhiều luồng nhưng lại làm code đứt đoạn và rất khó đọc khi lỗi. JetBrains cần một cách viết code chạy từ trên xuống tự nhiên mà không phải xin thêm luồng của hệ điều hành.
 
 ## Nó thực sự là cái gì
-Coroutine KHÔNG phải là thread nhẹ do hệ điều hành quản lý. Thực chất, nó là một [máy trạng thái](concept:kotlin-coroutine-state-machine) do compiler sinh ra tại lúc build kèm một object Continuation trên Heap để lưu điểm dừng.
+Coroutine không phải là một luồng nhẹ do hệ điều hành tạo ra hay quản lý. Nó là [máy trạng thái](concept:kotlin-coroutine-state-machine) do trình biên dịch tạo lúc build, kèm đối tượng `Continuation` trên Heap để nhớ chỗ vừa dừng.
 
 ## Cơ chế
-Khi gặp từ khóa `suspend`, compiler chèn tham số ẩn `Continuation` và sinh khối switch-case quản lý trạng thái. Tại điểm dừng, hàm cất các biến sống qua điểm ngắt vào `Continuation` và trả về `COROUTINE_SUSPENDED` để nhả thread. Khi tác vụ xong, `resumeWith()` được gọi để nạp lại dữ liệu và nhảy tới nhãn lệnh tiếp theo. Mã chạy tiếp trên thread do Dispatcher phân bổ.
+Khi thấy từ khóa `suspend`, trình biên dịch thêm tham số `Continuation` vào cuối hàm và chia thân hàm thành các nhánh đánh số. Tới điểm chờ, hàm cất các biến còn cần dùng sau đó vào đối tượng `Continuation` rồi trả về `COROUTINE_SUSPENDED` để nhả luồng. Khi việc chờ đã xong, hàm `resumeWith()` được gọi để lấy lại biến và nhảy tới đúng nhánh kế tiếp. Đoạn code sau đó chạy trên luồng nào là do `Dispatcher` chỉ định.
 
 ## Đánh đổi
-Bạn có được cú pháp tuần tự và khả năng chạy hàng chục nghìn tác vụ trên số ít thread. Đổi lại, hàm suspend chỉ gọi được từ hàm suspend khác. Vết ngăn xếp (stacktrace) bị xáo trộn do compiler biến đổi luồng điều khiển. Nếu chạy mã chặn luồng không đúng Dispatcher, các luồng trong pool sẽ bị chiếm dụng gây nghẽn.
+Bạn viết được code bất đồng bộ thẳng một mạch từ trên xuống và chạy hàng chục nghìn việc trên vài luồng ít ỏi. Đổi lại, hàm `suspend` chỉ gọi được từ một hàm `suspend` khác hoặc bên trong một coroutine. Khi có lỗi, stack trace nhìn ngắn hơn vì trình biên dịch đã cắt hàm thành các chặng rời nhau. Nếu bạn đặt lệnh đọc file chặn luồng vào nhầm `Dispatcher`, cả nhóm luồng ở đó sẽ bị kẹt theo.
 
 ## Nguyên lý gốc
-Biến đổi Continuation-Passing Style: chia luồng thực thi thành các trạng thái rời rạc có thể đóng băng và phục hồi bất kỳ lúc nào.
+Chia một hàm dài thành nhiều chặng nhỏ theo kiểu Continuation-Passing Style để dừng ở bất kỳ chặng nào và gọi chạy tiếp về sau.
 
 ## Key insight
 > Coroutine không phải thread nhẹ nào cả; nó chỉ biết nhường lượt, còn chạy song song hay không là do Dispatcher.
 
 ## Ví von
-Thay vì bắt một người đứng xếp hàng suốt hai tiếng, bạn lấy số thứ tự rồi rời đi. Khi đến lượt, bất kỳ nhân viên nào rảnh cũng có thể gọi số tiếp tục phục vụ bạn.
+Thay vì bắt bạn đứng chôn chân trước quầy suốt hai tiếng chờ làm thủ tục, quầy đưa bạn tấm phiếu ghi số thứ tự. Bạn ra ghế ngồi làm việc khác, khi tới số thì bất kỳ nhân viên nào đang rảnh cũng gọi bạn lên làm tiếp được.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -54,29 +54,28 @@ fun loadData() {
 ```
 
 ## Bẫy & ranh giới
-Tác vụ nền bị đình trệ hoặc chạy rất chậm là triệu chứng gọi mã chặn luồng trong `Dispatchers.Default`. Bẫy thứ hai là nuốt `CancellationException` trong khối `catch (e: Exception)`, làm vô hiệu hóa cơ chế hủy tự động. Hãy liên kết coroutine với [Activity Lifecycle](concept:android-activity-lifecycle) và [State Holders](concept:android-state-holders). Chống chỉ định khởi tạo coroutine trong vòng lặp lớn vì gây áp lực cấp phát đối tượng Continuation trên Heap cho Garbage Collector.
+Đừng tạo coroutine mới trong vòng lặp triệu lần, vì mỗi lần cấp thêm đối tượng trên Heap và tốn công dọn rác. Cũng đừng gọi lệnh đọc đĩa hay chờ mạng chặn luồng trong `Dispatchers.Default`, vì các tác vụ nền khác sẽ đứng im chờ theo. Khi bắt lỗi bằng `catch (e: Exception)`, nếu bạn nuốt luôn `CancellationException` thì coroutine sẽ không dừng lại được khi màn hình đã đóng. Hãy gắn coroutine với [Activity Lifecycle](concept:android-activity-lifecycle) và [State Holders](concept:android-state-holders) để tự hủy đúng lúc.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Bọc hàm chặn luồng vào `withContext(Dispatchers.Default)` là an toàn không sợ đơ app?
-Không phải. `Dispatchers.Default` có số luồng giới hạn đúng bằng số nhân CPU, chỉ dành riêng cho tính toán nặng. Chạy mã chặn luồng ở đây sẽ chiếm dụng các luồng tính toán gây nghẽn; bạn phải dùng `Dispatchers.IO`.
+Không đúng. `Dispatchers.Default` chỉ mở số luồng bằng số nhân CPU của máy, dành riêng cho việc tính toán nặng. Đưa lệnh đọc file hay chờ mạng chặn luồng vào đây sẽ giam hết số luồng đó; bạn phải dùng `Dispatchers.IO`.
 
 **Hỏi:** `supervisorScope` khác gì `coroutineScope` khi một coroutine con bị lỗi sập?
-Khác ở chiều lan truyền lỗi sang các coroutine anh em. Trong `coroutineScope`, một tác vụ con ném lỗi sẽ làm sập cả phạm vi và huỷ hết các việc còn lại. Với `supervisorScope`, các nhánh khác vẫn chạy, nhưng lỗi chưa bắt của một `launch` con vẫn tới exception handler và có thể làm sập app.
+Khác ở chỗ lỗi có làm hủy luôn các coroutine anh em đang chạy cùng hay không. Trong `coroutineScope`, chỉ cần một việc con ném lỗi là cả phạm vi dừng lại và hủy hết các việc con còn lại. Trong `supervisorScope`, các nhánh anh em vẫn chạy tiếp, nhưng lỗi chưa bắt của khối `launch` con vẫn báo lên handler và làm sập app.
 
 **Hỏi:** Tại sao coroutine đang chạy vòng lặp tính toán thì lệnh `job.cancel()` lại không có tác dụng?
-Vì việc huỷ coroutine mang tính hợp tác chứ không ép buộc tức thì. Nếu vòng lặp chỉ tính toán CPU thuần tuý mà không gọi hàm suspend, coroutine không có cơ hội kiểm tra lệnh huỷ. Bạn phải chủ động chèn `yield()` hoặc kiểm tra cờ `isActive` trong mỗi vòng lặp để dừng đúng lúc.
+Vì lệnh hủy chỉ bật một cờ báo dừng, còn coroutine phải tự kiểm tra cờ đó mới dừng lại. Vòng lặp chỉ tính toán thuần mà không gọi hàm `suspend` nào thì không có điểm dừng để kiểm tra cờ hủy. Bạn cần gọi `yield()` hoặc kiểm tra biến `isActive` trong mỗi vòng lặp để thoát ra kịp thời.
 
 **Hỏi:** Nên chọn `launch` hay `async` khi kích hoạt một coroutine mới?
-Tuỳ vào việc bạn có cần nhận lại giá trị kết quả hay không. Hãy dùng `launch` cho tác vụ chạy rồi quên như ghi dữ liệu hay bắn sự kiện phân tích. Dùng `async` khi bạn muốn gọi `await()` để gom nhiều kết quả tính toán hoặc gọi mạng song song.
+Tùy xem bạn có cần lấy kết quả trả về từ công việc đó hay không. Dùng `launch` cho những việc làm xong là thôi như lưu lịch sử hay gửi sự kiện thống kê. Dùng `async` khi bạn cần gọi `await()` để lấy kết quả trả về, nhất là lúc gọi 2 API song song rồi gộp dữ liệu.
 
 **Hỏi:** Vì sao bắt ngoại lệ bằng `catch (e: Exception)` lại có thể làm hỏng cơ chế huỷ coroutine?
-Vì `CancellationException` cũng là một lớp con của `Exception`. Khối `catch` chung sẽ vô tình nuốt mất tín hiệu huỷ, khiến coroutine cứ chạy ngầm mãi. Bạn phải ném lại `CancellationException` hoặc chỉ bắt đúng lớp ngoại lệ cần xử lý như `IOException`.
+Vì coroutine dùng chính ngoại lệ `CancellationException` để báo tin hủy và thoát khỏi hàm đang chạy. Do `CancellationException` là lớp con của `Exception`, khối `catch` chung sẽ bắt luôn cả tín hiệu hủy này làm coroutine cứ chạy tiếp. Bạn chỉ nên bắt đúng lỗi cần xử lý như `IOException`, hoặc kiểm tra nếu là `CancellationException` thì ném trả lại.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Giới hạn của OS thread: chiếm trước bộ nhớ ảo và tê liệt CPU do chi phí hoán đổi ngữ cảnh.
-- [ ] Bản chất: compiler sinh state machine và lưu biến sống qua điểm ngắt vào object Continuation trên Heap.
-- [ ] Bẫy chạy code chặn luồng làm nghẽn Dispatchers.Default và bẫy nuốt CancellationException.
+- [ ] Giải thích được vì sao tạo hàng nghìn OS thread làm tốn bộ nhớ ảo và mất thời gian đổi ngữ cảnh CPU.
+- [ ] Trình bày được cách trình biên dịch biến hàm suspend thành máy trạng thái và cất biến vào đối tượng Continuation trên Heap.
+- [ ] Chỉ ra được bẫy gọi lệnh chặn luồng trong Dispatchers.Default và bẫy nuốt mất CancellationException trong khối catch.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu
-
