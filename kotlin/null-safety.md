@@ -10,31 +10,31 @@ created: 2026-09-07
 ---
 
 ## Bản 30 giây
-Truy cập dữ liệu null là nguyên nhân gây sập ứng dụng phổ biến nhất. Kotlin phân tách rõ kiểu có thể null và không thể null ngay trong hệ thống kiểu. Trình biên dịch bắt buộc xử lý giá trị null từ sớm, bảo vệ chương trình trước khi mã thực thi.
+Khi gọi API mà một trường trả về `null`, ứng dụng rất dễ sập nếu bạn quên kiểm tra. Kotlin tách rõ kiểu có thể null và kiểu không thể null ngay từ lúc bạn khai báo biến. Compiler bắt bạn xử lý trường hợp `null` trước khi biên dịch xong nên lỗi không lọt tới tay người dùng.
 
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
-Năm 1965, Tony Hoare tạo ra con trỏ null trên ngôn ngữ ALGOL W. Ông thiết kế null đơn giản vì nó quá dễ cài đặt vào compiler thời đó.
+Năm 1965, Tony Hoare đưa con trỏ null vào ngôn ngữ ALGOL W chỉ vì cách đó rất dễ làm trong compiler.
 
-Thiết kế này khiến lỗi `NullPointerException` bùng nổ, làm bốc hơi hàng triệu giờ làm việc của kỹ sư toàn cầu.
+Từ quyết định đó, lỗi `NullPointerException` xuất hiện khắp nơi và làm tốn hàng triệu giờ gỡ lỗi của lập trình viên.
 
-Trong Java và Android, `NullPointerException` luôn là nguyên nhân số một gây sập ứng dụng. Khi tạo Kotlin, JetBrains đặt mục tiêu dẹp bỏ triệt để lỗi này ngay từ khâu biên dịch.
+Trên Java và Android, `NullPointerException` luôn là lỗi làm sập ứng dụng nhiều nhất. Khi làm Kotlin, JetBrains muốn bắt hết lỗi này ngay lúc biên dịch chứ không đợi tới lúc chạy.
 
 ## Nó thực sự là cái gì
-Null safety KHÔNG phải là việc xóa sổ giá trị null khỏi bộ nhớ. Thực chất, nó là cơ chế chuyển việc kiểm tra rỗng từ thời điểm chạy (runtime) về thời điểm biên dịch (compile-time).
+Null safety không làm giá trị `null` biến mất khỏi bộ nhớ máy tính. Nó chỉ dời việc kiểm tra `null` từ lúc ứng dụng đang chạy (runtime) về lúc bạn đang viết code (compile-time).
 
 ## Cơ chế
-Kotlin chia kiểu dữ liệu thành hai nhánh: không thể null (`String`) và có thể null (`String?`). Trong mã thuần Kotlin, compiler kiểm soát tính an toàn hoàn toàn tại compile-time mà không tốn chi phí runtime. Compiler chèn các lệnh `Intrinsics` ở đầu hàm không riêng tư để phòng vệ khi gọi chéo với Java. Với kiểu có thể null, compiler ép lập trình viên dùng toán tử an toàn `?.`, Elvis `?:` hoặc smart cast.
+Kotlin chia mỗi kiểu thành hai nhánh: không nhận `null` (`String`) và có thể nhận `null` (`String?`). Trong code thuần Kotlin, compiler kiểm tra hết lúc biên dịch nên lúc chạy không tốn thêm bước nào. Ở đầu các hàm không phải `private`, compiler chèn thêm lệnh `Intrinsics` để chặn `null` truyền từ code Java sang. Với biến có dấu hỏi, compiler bắt bạn dùng dấu `?.`, toán tử Elvis `?:` hoặc kiểm tra trước để smart cast.
 
 ## Đánh đổi
-Mã nguồn thuần Kotlin gần như triệt tiêu hoàn toàn nguy cơ sập app do null. Đổi lại, bạn phải viết cú pháp chặt chẽ hơn và liên tục xử lý giá trị dự phòng. Tấm khiên này bị thủng khi giao tiếp Java qua kiểu nền tảng trong [Vì sao Kotlin thay Java trên Android](concept:kotlin-why-over-java). Bù lại, các [Scope functions](concept:kotlin-scope-functions) như let kết hợp dấu hỏi giúp biến đổi dữ liệu rỗng vô cùng an toàn và tiện lợi.
+Code thuần Kotlin giúp bạn tránh được hầu hết lỗi sập app vì `null`. Đổi lại, bạn phải khai báo kiểu kỹ hơn và luôn viết sẵn nhánh xử lý khi thiếu dữ liệu. Lớp bảo vệ này vẫn thủng khi gọi sang code Java qua kiểu `Platform Type` trong [Vì sao Kotlin thay Java trên Android](concept:kotlin-why-over-java). Bù lại, các [Scope functions](concept:kotlin-scope-functions) như `let` đi cùng dấu `?.` giúp bạn xử lý biến có thể `null` rất gọn.
 
 ## Nguyên lý gốc
-Nguyên lý bắt lỗi sớm (Fail-Fast): chuyển việc bắt lỗi từ lúc người dùng chạy app về lúc lập trình viên đang gõ phím.
+Bắt lỗi ngay lúc đang gõ code để lỗi không lọt sang lúc người dùng đang mở app (Fail-Fast).
 
 ## Key insight
-> Null safety chuyển việc bắt lỗi rỗng từ runtime về compile-time nhờ hệ thống kiểu phân nhánh, nhưng sẽ thủng khi gọi sang Java.
+> Null safety dời việc bắt lỗi `null` từ lúc chạy về lúc biên dịch nhờ tách kiểu, nhưng vẫn thủng ở biên giới với Java.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -48,28 +48,28 @@ val empty = formatName(null)
 ```
 
 ## Bẫy & ranh giới
-Toán tử `!!` là hành vi tự tay vô hiệu hóa tấm khiên bảo vệ của compiler. Bẫy nguy hiểm nhất là gọi hàm Java trả về Platform Type (`String!`) không có chú thích `@Nullable`. Nếu bạn gán thẳng vào biến không dấu hỏi, app sẽ sập `NullPointerException` tức thì lúc chạy. Chống chỉ định dùng `!!` trong mã nguồn chính; hãy dùng Elvis `?:` hoặc ném ngoại lệ tường minh với thông điệp rõ ràng.
+Khi bạn gõ `!!`, bạn tự tắt lớp kiểm tra của compiler và chịu rủi ro sập app. Bẫy hay gặp nhất là gọi hàm Java thiếu `@Nullable`, lúc đó Kotlin nhận về `Platform Type` (`String!`). Nếu bạn gán thẳng kết quả đó vào biến không có dấu hỏi mà Java trả về `null`, app sẽ ném `NullPointerException` ngay. Đừng dùng `!!` trong code chạy thật, hãy dùng `?:` để lấy giá trị mặc định hoặc tự ném lỗi có ghi rõ lý do.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Viết 100% mã bằng Kotlin thì ứng dụng không bao giờ bị lỗi `NullPointerException` nữa đúng không?
-Không phải. Ứng dụng vẫn sập nếu bạn lạm dụng toán tử `!!` hoặc thư viện parse JSON đổ `null` vào biến không-null. Ngoài ra, các thư viện Android SDK viết bằng Java thiếu chú thích cũng có thể âm thầm tuồn `null` vào.
+Không phải. Ứng dụng vẫn sập nếu bạn dùng `!!` hoặc thư viện đọc JSON nhét `null` thẳng vào biến không có dấu hỏi. Ngoài ra, các hàm trong Android SDK viết bằng Java thiếu chú thích cũng có thể trả `null` về cho bạn.
 
 **Hỏi:** Ký hiệu dấu chấm than `String!` (Platform Type) từ Java nghĩa là gì?
-Đó là kiểu nền tảng do Kotlin không rõ biến phía Java có thể null hay không. Khi mã Java thiếu chú thích `@Nullable` hay `@NonNull`, compiler thả lỏng kiểm soát cho bạn tự chọn kiểu. Nếu bạn chọn kiểu không-null mà Java trả về `null`, app sẽ sập `NullPointerException` lập tức.
+Đó là kiểu đến từ Java khi hàm bên đó không ghi rõ `@Nullable` hay `@NonNull`. Vì compiler Kotlin không biết biến đó có `null` hay không, nó để bạn tự quyết định. Nếu bạn gán vào biến không dấu hỏi mà hàm Java trả về `null`, ứng dụng sẽ sập `NullPointerException` ngay.
 
 **Hỏi:** Tại sao đã kiểm tra `if (item != null)` rồi mà compiler vẫn không cho smart cast thuộc tính `var`?
-Vì thuộc tính `var` có thể bị sửa đổi giá trị bất kỳ lúc nào. Một luồng khác hoặc hàm ghi đè có thể đổi giá trị thành `null` ngay giữa lúc kiểm tra và sử dụng. Để sửa lỗi, bạn hãy gán giá trị đó vào một biến cục bộ `val` trước khi kiểm tra rỗng.
+Vì biến `var` của class có thể bị gán lại bằng `null` bất cứ lúc nào. Một luồng khác có thể đổi nó thành `null` ngay sau dòng `if` của bạn. Để dùng được, bạn hãy chép nó sang một biến cục bộ `val` hoặc dùng `item?.let` rồi mới xử lý.
 
 **Hỏi:** Có trường hợp nào được phép dùng toán tử ép buộc `!!` không?
-Tuỳ vào việc bạn viết mã chạy app hay viết kiểm thử. Trong unit test khi dữ liệu giả đã dàn dựng chắc chắn có giá trị, dùng `!!` giúp code gọn gàng. Trong mã sản phẩm chính, hãy luôn dùng toán tử Elvis `?:` hoặc ném ngoại lệ có thông điệp rõ ràng.
+Tuỳ vào việc bạn viết code ứng dụng hay viết bài test. Trong unit test với dữ liệu mẫu chắc chắn khác `null`, bạn dùng `!!` để sai là báo đỏ ngay. Còn trong code chạy thật, bạn hãy dùng `?:` hoặc `requireNotNull` kèm câu báo lỗi rõ ràng.
 
 **Hỏi:** Các lệnh `Intrinsics.checkNotNullParameter` do compiler sinh ra có làm chậm app Kotlin không?
-Không đáng kể. Đây chỉ là một phép so sánh địa chỉ với `null` siêu nhanh ở đầu hàm để chặn mã bẩn từ Java. Hàm private không bị chèn vì mã Java không gọi tới được, còn hàm `internal` vẫn bị chèn như hàm public.
+Không đáng kể. Đó chỉ là một lệnh so sánh với `null` rất nhẹ ở đầu hàm để chặn `null` từ phía Java truyền sang. Hàm `private` không có lệnh này vì Java không gọi được, còn hàm `public` và `internal` thì có.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Bản chất: chuyển kiểm tra null từ thời điểm chạy về thời điểm biên dịch qua hệ thống kiểu.
-- [ ] Compiler chèn kiểm tra Intrinsics ở đầu hàm không riêng tư phòng vệ cho Java interop.
-- [ ] Bẫy Platform Type (T!) từ Java và bẫy lạm dụng toán tử ép buộc hai chấm than (!!).
+- [ ] Giải thích được cách Kotlin dời việc kiểm tra null từ lúc chạy về lúc biên dịch bằng cách tách kiểu T và T?.
+- [ ] Nêu được vì sao compiler chèn lệnh Intrinsics ở đầu các hàm không phải private để chặn null từ Java.
+- [ ] Chỉ ra được bẫy Platform Type (T!) khi gọi hàm Java thiếu chú thích và tác hại của toán tử !!.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

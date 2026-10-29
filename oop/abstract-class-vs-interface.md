@@ -10,35 +10,35 @@ diagrams: [Cơ chế|abstract-class-vs-interface.png|Lớp trừu tượng sở 
 ---
 
 ## Bản 30 giây
-Khi tái sử dụng mã nguồn, lập trình viên phân vân giữa việc kế thừa lớp hay dùng giao diện. Giao diện trao quyền sở hữu nhiều hợp đồng năng lực nhưng tuyệt đối không được nắm giữ dữ liệu. Lớp trừu tượng cho phép lưu trữ trạng thái nhưng trói buộc đối tượng vào một phả hệ cha con duy nhất.
+Khi viết phần dùng chung cho nhiều lớp, bạn thường phân vân giữa kế thừa `abstract class` hay cài đặt `interface`. `Interface` cho phép một lớp nhận nhiều hợp đồng hành vi cùng lúc nhưng không được tạo ô nhớ lưu biến. Còn `abstract class` giữ được biến trạng thái trên Heap nhưng bắt lớp con dùng mất suất kế thừa duy nhất.
 
 ## Cần biết trước
 - oop-four-pillars
 
 ## Vấn đề buộc nó ra đời
-Thập niên 1980, C++ cho phép đa kế thừa khiến chương trình đối mặt thảm họa kim cương (Diamond Problem). Khi hai lớp cha cùng chứa một biến, lớp con kế thừa cả hai sẽ gây xung đột dữ liệu không thể phân giải.
+Thập niên 1980, C++ cho phép một lớp kế thừa nhiều lớp cha nên dẫn đến bài toán kim cương (Diamond Problem). Khi hai lớp cha cùng có một biến trùng tên, lớp con kế thừa cả hai sẽ không biết dùng biến nào.
 
-Năm 1995, James Gosling thiết kế Java chỉ cho phép đơn kế thừa lớp nhằm triệt tiêu hoàn toàn xung đột trạng thái. Đồng thời, ông tách riêng giao diện (interface) không mang trạng thái để một lớp có thể tự do đón nhận nhiều năng lực.
+Năm 1995, James Gosling thiết kế Java chỉ cho phép kế thừa một lớp để dẹp hẳn lỗi đụng độ biến trạng thái. Cùng lúc đó, ông tách riêng `interface` không giữ biến để một lớp nhận được nhiều khả năng hành vi.
 
-Java 8 năm 2014 và Kotlin năm 2016 bổ sung hàm có thân vào giao diện. Cải tiến này làm mờ ranh giới mã lệnh, khiến nhiều người ngộ nhận hai khái niệm đã tương đương nhau.
+Đến Java 8 (2014) và Kotlin (2016), `interface` cũng viết được hàm có thân lệnh. Thay đổi này làm nhiều bạn tưởng nhầm hai thứ đã giống hệt nhau.
 
 ## Nó thực sự là cái gì
-Khác biệt KHÔNG PHẢI là việc có chứa mã lệnh hay không vì giao diện hiện đại đã cho phép hàm có thân. Thực chất đây là ranh giới sở hữu bộ khởi tạo constructor và biến thành viên lưu trữ dữ liệu (backing field). Lớp trừu tượng định hình danh tính thực thể (IS-A), còn giao diện chỉ đóng gói hợp đồng khả năng hành vi (CAN-DO).
+Khác biệt không nằm ở chuyện hàm có thân lệnh hay không, vì `interface` nay đã viết được thân hàm. Điểm khác thật sự là quyền có `constructor` và quyền giữ ô nhớ lưu biến (`backing field`) trên Heap. `Abstract class` cho biết đối tượng thuộc dòng họ nào (IS-A), còn `interface` chỉ gắn thêm khả năng làm việc (CAN-DO).
 
 ## Cơ chế
-Lớp trừu tượng cấp phát vùng nhớ thực thể trên Heap chứa các biến và gọi constructor để thiết lập trạng thái ban đầu. Giao diện không sở hữu trường dữ liệu nên hoàn toàn không tham gia vào cấu trúc cấp phát bộ nhớ của đối tượng. Khi chạy, máy ảo phát lệnh bytecode invokevirtual để đọc bảng con trỏ hàm theo chỉ số cố định cho lớp trừu tượng. Với giao diện, máy ảo phải dùng lệnh invokeinterface để tra bảng giao diện itable động qua [Virtual method dispatch](concept:jvm-virtual-method-dispatch).
+`Abstract class` cấp ô nhớ trên Heap để chứa biến và gọi `constructor` gán giá trị ban đầu. `Interface` không có trường dữ liệu nên không chiếm thêm ô nhớ nào trong đối tượng. Lúc chạy, máy ảo dùng lệnh `invokevirtual` nhảy thẳng tới vị trí cố định trong bảng `vtable` để gọi hàm của `abstract class`. Còn gọi hàm qua `interface` thì máy ảo dùng `invokeinterface` để dò bảng `itable` qua [Virtual method dispatch](concept:jvm-virtual-method-dispatch).
 
 ## Đánh đổi
-Giao diện mang lại sự linh hoạt tối đa khi một lớp có thể cài đặt vô số hợp đồng hành vi khác nhau. Đổi lại, lệnh invokeinterface tốn thêm chu kỳ CPU để dò tìm bảng itable và không thể chia sẻ trạng thái chung. Lớp trừu tượng giúp tái sử dụng biến và chạy hàm nhanh, nhưng làm mất suất kế thừa đơn duy nhất của lớp con.
+Dùng `interface` rất linh hoạt vì một lớp có thể ghép bao nhiêu hợp đồng hành vi tùy ý. Đổi lại, lệnh `invokeinterface` tốn thêm bước dò bảng `itable` và không giữ được biến trạng thái chung. Còn `abstract class` cho dùng chung biến và gọi hàm nhanh hơn, nhưng lấy mất suất kế thừa duy nhất của lớp con.
 
 ## Nguyên lý gốc
-Đa thừa kế an toàn với hợp đồng nhưng nguy hiểm với trạng thái. Hệ thống tách danh tính khỏi năng lực. Thứ mang dữ liệu thì chỉ được nhận một; thứ chỉ hứa hành vi thì nhận bao nhiêu cũng được.
+Kế thừa nhiều nơi chỉ an toàn với lời hứa hành vi, còn rất nguy hiểm khi mang theo biến dữ liệu. Vì vậy ngôn ngữ tách riêng danh tính và khả năng làm việc. Thứ giữ biến trên bộ nhớ thì chỉ được nhận một cha, còn thứ chỉ hứa hành vi thì nhận bao nhiêu cũng được.
 
 ## Key insight
-> Khác biệt giữa abstract class và interface không nằm ở mã lệnh, mà ở quyền sở hữu constructor và trường lưu trữ trạng thái.
+> Khác biệt giữa `abstract class` và `interface` không nằm ở thân hàm, mà ở quyền có `constructor` và ô nhớ `backing field`.
 
 ## Ví von
-Lớp trừu tượng giống như Căn cước công dân xác định danh tính bản thể duy nhất với các đặc điểm nhân dạng cố định. Giao diện giống như bằng lái xe hay thẻ thư viện, một công dân có thể mang theo nhiều chứng chỉ năng lực tùy ý.
+`Abstract class` giống căn cước công dân: mỗi người chỉ có một bản ghi rõ dòng máu và đặc điểm riêng. `Interface` giống bằng lái xe hay thẻ thư viện: một người có thể thi lấy bao nhiêu chứng chỉ tùy thích.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -52,28 +52,28 @@ val action = "${d.name}: ${d.sound()}, ${d.fly()}"
 ```
 
 ## Bẫy & ranh giới
-Bẫy lạm dụng lớp trừu tượng để gom mã dùng chung khiến lớp con lãng phí mất suất kế thừa đơn duy nhất. Bẫy giả định giao diện không thể có mã lệnh sẽ dẫn đến việc tạo các lớp bao bọc trung gian không cần thiết. Chống chỉ định kế thừa lớp khi chỉ cần chia sẻ năng lực hành vi mà không cần quản lý vòng đời biến trạng thái. Triệu chứng cấu trúc là phả hệ kế thừa phân tầng quá sâu gây hiệu ứng Fragile Base Class làm vỡ hành vi lớp con.
+Nếu bạn tạo `abstract class` chỉ để gom vài hàm tiện ích, lớp con sẽ mất oan suất kế thừa duy nhất. Ngược lại, tưởng `interface` không viết được thân hàm sẽ làm bạn đẻ thêm các lớp bọc trung gian thừa thãi. Đừng kế thừa lớp khi chỉ cần chia sẻ hành vi mà không giữ biến trạng thái nào. Triệu chứng là cây kế thừa sâu nhiều tầng, sửa một dòng ở lớp cha làm hỏng dây chuyền lớp con (Fragile Base Class).
 
 ## Câu hỏi thực chiến
 **Hỏi:** Từ khi Interface cho phép viết hàm có thân thì Abstract Class đã hoàn toàn vô dụng?
-Không phải. Giao diện có thể chứa hàm có thân nhưng tuyệt đối không được phép sở hữu constructor hay biến lưu dữ liệu (backing field). Khi cần quản lý trạng thái nội tại hoặc vòng đời khởi tạo biến, Abstract Class vẫn là công cụ bắt buộc.
+Không phải. `Interface` viết được hàm có thân nhưng vẫn không được có `constructor` hay ô nhớ lưu biến (`backing field`). Khi bạn cần giữ biến trạng thái chung hoặc chạy logic khởi tạo, `abstract class` vẫn là lựa chọn bắt buộc.
 
 **Hỏi:** Làm sao biết khi nào nên tạo Interface, khi nào nên kế thừa Abstract Class?
-Dùng Interface khi mô tả năng lực hành vi, dùng Abstract Class khi định nghĩa danh tính kèm trạng thái nội tại. Ví dụ năng lực in ấn hoặc lắng nghe sự kiện nên là Interface để lớp con giữ lại suất đơn kế thừa. Ngược lại, nếu các lớp con có chung phả hệ nguồn gốc và cần chia sẻ biến trạng thái, hãy dùng Abstract Class.
+Hãy dùng `interface` khi gắn thêm khả năng làm việc, và dùng `abstract class` khi các lớp cùng một dòng họ có biến chung. Ví dụ khả năng bấm chọn hay gửi log nên viết thành `interface` để lớp con giữ lại suất kế thừa. Ngược lại, nếu các lớp con cùng bản chất và cần dùng chung biến trạng thái thì mới kế thừa `abstract class`.
 
 **Hỏi:** Vì sao trên JVM, gọi hàm qua Interface lại chậm hơn gọi hàm qua Abstract Class?
-Chỉ chậm hơn chút ít khi chưa được JIT tối ưu. `invokeinterface` phải dò bảng riêng (itable trên HotSpot, IMT trên ART), còn `invokevirtual` tra chỉ số cố định trong vtable. Khi điểm gọi chỉ gặp một vài kiểu, JIT inline luôn và khác biệt gần như biến mất.
+Nó chỉ chậm hơn một chút khi đoạn code đó chưa được trình biên dịch JIT tối ưu. Lệnh `invokeinterface` phải dò tìm trong bảng `itable` (hoặc `IMT` trên ART), còn `invokevirtual` lấy ngay theo vị trí cố định trong `vtable`. Khi chỗ gọi thực tế chỉ gặp một vài lớp cụ thể, JIT sẽ chép thẳng hàm vào nên tốc độ gần như bằng nhau.
 
 **Hỏi:** Một lớp kế thừa hai Interface có hàm trùng tên và cùng có thân mã lệnh thì xử lý thế nào?
-Trình biên dịch bắt buộc lớp con phải ghi đè lại hàm đó để tự giải quyết xung đột. Trong thân hàm ghi đè, bạn có thể chỉ định rõ gọi thân hàm của bên nào bằng cú pháp `super<T>.ham()`. Quy tắc minh bạch này giúp loại bỏ hoàn toàn nguy cơ mơ hồ lệnh của thảm hoạ kim cương trong C++.
+Trình biên dịch sẽ báo lỗi ngay và bắt lớp con phải tự viết lại (`override`) hàm bị trùng đó. Bên trong hàm viết lại, bạn chỉ rõ muốn gọi bản của bên nào bằng cú pháp `super<T>.ham()`. Nhờ bắt chọn rõ ràng lúc biên dịch, ngôn ngữ tránh được cảnh nhập nhằng của bài toán kim cương trong C++.
 
 **Hỏi:** Có nên tạo BaseViewModel hay BaseFragment dạng Abstract Class để dùng chung code không?
-Không nên lạm dụng. Tạo các lớp Base gom mã chung thường dẫn đến bẫy Fragile Base Class và trói buộc lớp con vào phả hệ cồng kềnh. Thay vì kế thừa, kiến trúc hiện đại ưu tiên [lắp ghép](concept:oop-composition-over-inheritance) các lớp tiện ích nhỏ độc lập vào nơi cần dùng.
+Không nên lạm dụng. Nhét đủ thứ hàm dùng chung vào một lớp `Base` rất dễ làm sửa lớp cha thì vỡ lớp con (Fragile Base Class). Thay vì kế thừa, bạn nên [lắp ghép](concept:oop-composition-over-inheritance) các lớp nhỏ độc lập vào đúng màn hình nào thực sự cần.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Phân định rõ ràng: abstract class sở hữu constructor và backing field lưu trạng thái, interface chỉ định nghĩa hợp đồng hành vi.
-- [ ] Nói ra được trong hai câu: hai lớp cha cùng một field thì con không biết lấy bản nào. Hợp đồng không mang dữ liệu nên nhận bao nhiêu cũng không xung đột.
-- [ ] Nêu bản chất bytecode: invokevirtual tra vtable theo index cố định, invokeinterface tra itable động qua [Virtual method dispatch](concept:jvm-virtual-method-dispatch).
+- [ ] Phân biệt được: abstract class có constructor và ô nhớ backing field trên Heap, còn interface chỉ giữ hợp đồng hành vi.
+- [ ] Giải thích được bài toán kim cương: hai lớp cha có cùng biến thì con bị đụng độ, còn hợp đồng không biến thì ghép thoải mái.
+- [ ] Nêu được cơ chế bytecode: invokevirtual tra vtable theo vị trí cố định, còn invokeinterface dò bảng itable qua [Virtual method dispatch](concept:jvm-virtual-method-dispatch).
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

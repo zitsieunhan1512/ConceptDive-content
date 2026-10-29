@@ -10,35 +10,35 @@ diagrams: [Cơ chế|virtual-method-dispatch.png|Lệnh invokevirtual đọc con
 ---
 
 ## Bản 30 giây
-Khi gọi hàm đa hình, máy tính không biết trước phương thức của lớp con nào sẽ thực sự chạy. Máy ảo giải quyết việc này bằng cách tra cứu bảng danh bạ địa chỉ hàm gắn với lớp. Nhờ đó, chương trình gọi đúng hàm lớp con tại thời điểm chạy mà không cần sửa mã nguồn cũ.
+Khi bạn gọi `payment.process()` trên biến kiểu cha, lúc dịch code máy tính chưa biết đối tượng thật là lớp con nào. Máy ảo giải quyết bằng cách gắn cho mỗi lớp một bảng danh bạ chứa địa chỉ các hàm, gọi là `vtable`. Lúc chạy, nó chỉ cần nhìn vào đối tượng để tra bảng và nhảy tới đúng hàm của lớp con.
 
 ## Cần biết trước
 - oop-four-pillars
 
 ## Vấn đề buộc nó ra đời
-Năm 1967, Ole-Johan Dahl và Kristen Nygaard phát minh ngôn ngữ Simula 67 với khái niệm lớp kế thừa và phương thức ảo đầu tiên.
+Năm 1967, Ole-Johan Dahl và Kristen Nygaard tạo ra ngôn ngữ Simula 67 với khái niệm kế thừa lớp và hàm ảo đầu tiên.
 
-Trong ngôn ngữ C, lập trình viên phải tự lưu con trỏ hàm vào từng `struct` để xử lý đa hình. Khi có nhiều hàm, nhân bản con trỏ trên mỗi biến làm bùng nổ RAM và dễ sập do trỏ nhầm địa chỉ.
+Trong ngôn ngữ C, muốn làm đa hình, bạn phải tự cất các con trỏ hàm vào bên trong từng biến `struct`. Khi tạo hàng triệu biến thuộc lớp nhiều hàm, việc lặp lại con trỏ gây tốn RAM và dễ trỏ nhầm.
 
-Năm 1983, Bjarne Stroustrup tạo ra vtable trong C++, rồi James Gosling đưa vào máy ảo JVM năm 1995. Vtable gom các con trỏ hàm vào bảng duy nhất cho mỗi lớp, triệt tiêu sự lãng phí bộ nhớ trên từng đối tượng.
+Năm 1983, Bjarne Stroustrup đưa `vtable` vào C++, rồi James Gosling mang cơ chế này vào máy ảo JVM năm 1995. Nhờ gom con trỏ hàm vào bảng chung cho từng lớp, mỗi đối tượng không phải ôm theo danh sách hàm.
 
 ## Nó thực sự là cái gì
-Đa hình động KHÔNG PHẢI phép màu tự động chọn hàm lúc chạy. Thực chất nó là mảng con trỏ hàm nằm trong Class Metadata thuộc vùng nhớ Metaspace ngoài Heap. Trình biên dịch gán một chỉ số cố định cho mỗi hàm ảo và phát lệnh bytecode `invokevirtual` tại điểm gọi. Máy ảo đọc chỉ số này để truy xuất địa chỉ hàm thực tế từ mảng và nhảy tới thực thi.
+Đa hình động không phải phép màu tự đoán hàm lúc chạy, mà là một mảng chứa các con trỏ hàm gọi là `vtable`. Bảng này nằm trong phần thông tin lớp (`Class Metadata`) ở vùng nhớ Metaspace bên ngoài Heap. Lúc biên dịch, mỗi hàm ảo được đánh một số thứ tự cố định và chỗ gọi hàm sinh ra lệnh bytecode `invokevirtual`. Khi chạy tới đó, máy ảo lấy địa chỉ hàm tại đúng ô số thứ tự trong mảng `vtable` rồi nhảy vào chạy.
 
 ## Cơ chế
-Header của đối tượng trên Heap chứa con trỏ trỏ tới cấu trúc lớp nằm trong vùng nhớ Metaspace. Lệnh `invokevirtual` dereference hai lần: từ Heap sang Metaspace lấy vtable, rồi từ vtable tới mã máy. Trình JIT dùng inline cache lưu thẳng đích gọi để bỏ qua bước tra vtable nếu chỉ có một lớp. Trên Android ART, cấu trúc `ArtMethod` và vtable cũng nằm tại vùng nhớ native LinearAlloc tương tự Metaspace.
+Phần đầu (`header`) của mỗi đối tượng trên Heap có giữ một con trỏ chỉ sang thông tin lớp ở vùng Metaspace. Gặp lệnh `invokevirtual`, CPU đi từ đối tượng sang Metaspace tìm `vtable`, rồi từ ô trong `vtable` nhảy tới mã máy. Nếu điểm gọi chỉ gặp một lớp con, trình JIT dùng bộ nhớ đệm (`inline cache`) nhớ địa chỉ đích để khỏi tra bảng. Trên Android ART, cấu trúc `ArtMethod` và bảng `vtable` cũng nằm ở vùng nhớ native `LinearAlloc` tương tự như Metaspace.
 
 ## Đánh đổi
-Bạn có được kiến trúc mã nguồn linh hoạt tuyệt đối theo [Bốn tính chất OOP](concept:oop-four-pillars) và [SOLID](concept:oop-solid). Đổi lại, chương trình mất thêm hai bước đọc bộ nhớ gián tiếp cho mỗi lần gọi hàm. Lời gọi qua bảng cản trở tối ưu inline hàm khi có quá nhiều lớp con cùng chia sẻ một điểm gọi.
+Nhờ tra bảng lúc chạy, bạn truyền được các lớp con khác nhau vào cùng một hàm theo [Bốn tính chất OOP](concept:oop-four-pillars) và [SOLID](concept:oop-solid). Đổi lại, mỗi lần gọi hàm ảo tốn thêm hai bước đọc bộ nhớ gián tiếp qua con trỏ. Khi chỗ gọi nhận quá nhiều lớp con, trình biên dịch không thể chép thẳng thân hàm (`inline`) vào đó nữa.
 
 ## Nguyên lý gốc
-Nguyên lý tầng trung gian gián tiếp (Indirection). Mọi bài toán kiến trúc đều giải quyết được bằng một tầng trung gian, nhưng luôn phải trả giá bằng độ trễ truy xuất.
+Muốn tránh khóa cứng vào một lớp cụ thể thì đặt bảng tra cứu ở giữa. Đổi lại, mỗi lần gọi phải bước qua bảng đó (Indirection).
 
 ## Key insight
 > Vtable đánh đổi hai bước đọc bộ nhớ gián tiếp để lấy khả năng hoán đổi hành vi hàm linh hoạt lúc chạy.
 
 ## Ví von
-Giống như danh bạ điện thoại tại sảnh lễ tân tòa nhà lớn. Thay vì nhớ số riêng từng phòng, bạn tra cứu vị trí cố định trên bảng để lấy số máy nhánh. Bạn gọi được đúng người nhưng phải tốn thêm thời gian cho một bước kết nối trung gian.
+Giống như bảng danh bạ ở quầy lễ tân tòa nhà lớn. Thay vì thuộc số từng người, bạn chỉ nhìn ô cố định của phòng đó trên bảng để lấy số máy lẻ. Bạn luôn gọi đúng người mới chuyển vào phòng, nhưng tốn thêm một nhịp nhìn bảng.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -53,28 +53,28 @@ fun checkout(p: Payment): Int {
 ```
 
 ## Bẫy & ranh giới
-Tầng gián tiếp từng cứu rỗi RAM nay trở thành nút thắt cổ chai của CPU trong các vòng lặp nặng. Điểm gọi megamorphic làm JIT đầu hàng, vô hiệu hóa inline cache và không thể inline hàm. Chống chỉ định mở rộng kế thừa sâu trong các đoạn mã đòi hỏi xử lý thời gian thực. Hãy tận dụng triết lý `final by default` của Kotlin để trình biên dịch chủ động tối ưu hóa gộp mã nguồn trực tiếp.
+Trong vòng lặp chạy hàng triệu lần, điểm gọi nhận từ 3 lớp con trở lên sẽ rơi vào đa hình quá mức (`megamorphic`). Lúc này JIT xóa `inline cache`, không chép thẳng thân hàm được mà phải tra bảng `vtable` ở từng vòng. Đừng chia cây kế thừa quá nhiều nhánh cho những hàm tính toán nặng cần chạy liên tục theo thời gian thực. Hãy giữ mặc định `final` của Kotlin và chỉ mở `open` khi thật sự cần ghi đè để trình biên dịch gọi thẳng nhanh nhất.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Trong Kotlin, mọi lời gọi hàm đều phải tra qua vtable có đúng không?
-Không phải. Hàm Kotlin mặc định là `final`, nên JIT hoặc AOT biết chắc chỉ có một đích để gọi thẳng, thậm chí inline luôn. Bytecode vẫn là `invokevirtual`; chỉ hàm `open` hoặc `override` mới thực sự cần tra vtable lúc chạy.
+Không phải. Hàm trong Kotlin mặc định là `final`, nên JIT hoặc AOT gọi thẳng hoặc chép luôn thân hàm vào chỗ gọi. Dù bytecode vẫn ghi là `invokevirtual`, chỉ những hàm bạn đánh dấu `open` hoặc `override` mới thật sự phải tra bảng `vtable` lúc chạy.
 
 **Hỏi:** Gọi hàm qua interface có dùng chung bảng vtable với lớp cha không?
-Không. Gọi qua interface dùng lệnh `invokeinterface` và một bảng riêng: HotSpot gọi là itable, còn ART trên Android dùng IMT. Vì một lớp có thể triển khai nhiều interface theo thứ tự bất kỳ, vị trí hàm không cố định như trên vtable.
+Không. Khi gọi qua biến interface, máy ảo dùng lệnh `invokeinterface` và tra bảng riêng: `itable` trên HotSpot hoặc `IMT` trên ART. Do một lớp cài đặt nhiều interface theo thứ tự bất kỳ, hàm interface không có vị trí cố định như `vtable`.
 
 **Hỏi:** Khi nào việc tra cứu vtable thực sự làm chậm ứng dụng?
-Khi một điểm gọi nóng nhận quá nhiều kiểu đối tượng khác nhau, gọi là megamorphic. Với một hoặc hai kiểu, JIT của HotSpot ghi nhớ và inline luôn thân hàm. Từ ba kiểu trở lên, nó bỏ inline và tra bảng mỗi lần gọi, mất luôn các tối ưu đi kèm.
+Khi một dòng gọi hàm nằm trong vòng lặp nóng mà lại nhận đủ loại đối tượng thuộc từ 3 lớp con trở lên (`megamorphic`). Nếu chỉ gặp 1 hoặc 2 lớp con, trình JIT của HotSpot nhớ luôn địa chỉ và chép thẳng thân hàm vào chỗ gọi. Nhưng từ 3 lớp con trở lên, nó phải tra bảng `vtable` mỗi vòng và mất hết các tối ưu.
 
 **Hỏi:** Dùng abstract class hay interface sẽ có tốc độ gọi hàm nhanh hơn?
-Abstract class thường nhanh hơn một chút khi chưa được JIT tối ưu. Kế thừa đơn cho phép máy ảo gán chỉ số cố định trên vtable và tra cứu bằng một phép cộng offset. Tuy nhiên, trong thực tế trình JIT sẽ tối ưu hoá cả hai nếu điểm gọi chỉ có đúng một lớp con.
+Nếu trình JIT chưa can thiệp tối ưu, gọi qua `abstract class` thường nhanh hơn một nhịp. Vì mỗi lớp chỉ có một cha, máy ảo biết sẵn vị trí ô trên `vtable` và chỉ cần cộng độ lệch (`offset`). Dù vậy, nếu trong lúc chạy chỗ đó chỉ truyền vào đúng một lớp con, trình JIT sẽ tối ưu cả hai nhanh ngang nhau.
 
 **Hỏi:** Tại sao các hàm private hoặc static lại không có tên trong vtable?
-Vì chúng không bao giờ bị lớp con ghi đè. Trình biên dịch xác định được chính xác hàm cần chạy ngay lúc biên dịch mà không cần đợi chương trình chạy. Vì vậy nó phát lệnh gọi trực tiếp: `invokestatic` cho hàm static, còn trên Android hàm private dùng `invoke-direct`.
+Vì hàm `private` và `static` không bao giờ bị lớp con ghi đè. Ngay lúc dịch code, trình biên dịch đã biết đích xác phải gọi hàm nào mà không cần chờ tới lúc chạy. Do đó nó sinh lệnh gọi thẳng luôn: `invokestatic` cho hàm tĩnh, còn trên Android thì hàm `private` dùng lệnh `invoke-direct`.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Giải thích được vtable là mảng con trỏ hàm trong Class Metadata ở Metaspace.
-- [ ] Trình bày được hai bước dereference bộ nhớ khi chạy lệnh bytecode invokevirtual.
-- [ ] Phân tích được tổn thất hiệu năng CPU khi điểm gọi rơi vào trạng thái megamorphic.
+- [ ] Giải thích được vtable là mảng chứa địa chỉ hàm nằm trong phần thông tin lớp ở vùng nhớ Metaspace.
+- [ ] Trình bày được hai bước đọc con trỏ khi chạy lệnh invokevirtual: từ đối tượng sang Metaspace lấy vtable, rồi từ vtable tới mã máy.
+- [ ] Phân tích được vì sao điểm gọi nhận từ 3 lớp con trở lên (megamorphic) lại làm mất inline cache và chậm vòng lặp.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

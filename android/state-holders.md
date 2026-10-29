@@ -10,21 +10,21 @@ diagrams: [Cơ chế|state-holder-repeat-on-lifecycle.png|repeatOnLifecycle cổ
 ---
 
 ## Bản 30 giây
-Xoay màn hình khiến dữ liệu dễ gây sập app nếu bị gắn chặt vào vòng đời giao diện. State Holders đóng vai trò kho lưu trữ độc lập để giữ dữ liệu bền vững qua các biến cố của hệ thống. Chúng đóng gói logic hiển thị và cung cấp luồng dữ liệu an toàn cho Activity và [Fragment](concept:android-fragment-lifecycle).
+Khi người dùng xoay màn hình, dữ liệu gắn chặt vào giao diện sẽ bị mất hoặc làm sập ứng dụng. `State Holder` đứng tách riêng để giữ dữ liệu an toàn qua những lần màn hình bị hủy và tạo lại. Nó gom logic chuẩn bị dữ liệu hiển thị và phát luồng trạng thái xuống cho Activity hoặc [Fragment](concept:android-fragment-lifecycle) vẽ lên màn hình.
 
 ## Cần biết trước
 - kotlin-coroutines
 - android-activity-lifecycle
 
 ## Vấn đề buộc nó ra đời
-Năm 2017, Google ra mắt LiveData tại Google I/O để dập tắt lỗi observer bắn dữ liệu vào View đã chết. Trước đó, RxJava rất mạnh nhưng không nhận biết được vòng đời Android, khiến dev hay quên hủy đăng ký trong `onDestroy`.
+Năm 2017 tại Google I/O, Google ra mắt `LiveData` để chặn lỗi bắn dữ liệu vào View đã bị hủy. Trước đó, nhiều dự án dùng RxJava hay quên hủy đăng ký trong `onDestroy`, gây rò rỉ bộ nhớ và sập app.
 
-Tuy nhiên, LiveData bị trói chặt vào Main Thread và Android SDK. Nó bất lực trong tầng domain thuần túy hoặc các dự án Kotlin Multiplatform (KMP).
+Tuy nhiên, `LiveData` lại bị cột chặt vào luồng chính Main Thread và thư viện Android SDK. Bạn không thể mang nó xuống tầng domain thuần Kotlin hay dùng chung cho dự án đa nền tảng Kotlin Multiplatform (`KMP`).
 
-Khi Kotlin Coroutines ra đời, JetBrains giới thiệu Flow, SharedFlow và StateFlow. Bộ ba này thay thế LiveData hoàn toàn mà không lệ thuộc vào bất kỳ thư viện Android nào.
+Khi Kotlin Coroutines phổ biến, JetBrains đưa ra bộ ba `Flow`, `SharedFlow` và `StateFlow`. Chúng thay thế trọn vẹn `LiveData` mà không phụ thuộc vào bất kỳ thư viện Android nào.
 
 ## Nó thực sự là cái gì
-StateFlow KHÔNG phải một công nghệ tách rời khỏi SharedFlow. Thực chất, StateFlow chính là một SharedFlow bị khóa cứng các tham số cấu hình để chuyên trách quản lý trạng thái.
+`StateFlow` không phải là một công cụ tách biệt hoàn toàn với `SharedFlow`. Thật ra, `StateFlow` chính là một `SharedFlow` đã khóa sẵn các tham số cấu hình để chuyên giữ trạng thái hiện tại của màn hình.
 
 ```kotlin
 interface StateFlow<out T> : SharedFlow<T> {
@@ -33,16 +33,16 @@ interface StateFlow<out T> : SharedFlow<T> {
 ```
 
 ## Cơ chế
-LiveData chỉ phát dữ liệu khi [Activity Lifecycle](concept:android-activity-lifecycle) ở mức STARTED hoặc RESUMED. Trong khi đó, SharedFlow là kênh phát đa hướng với bộ đệm và khả năng phát lại (replay) tùy biến. StateFlow khóa cứng replay bằng 1, tự lọc giá trị trùng qua `equals`, và bắt buộc có giá trị khởi tạo ban đầu.
+`LiveData` tự biết nhìn [Activity Lifecycle](concept:android-activity-lifecycle) và chỉ phát dữ liệu khi màn hình đang ở trạng thái `STARTED` hoặc `RESUMED`. Ngược lại, `SharedFlow` là kênh phát cho nhiều nơi cùng nghe với bộ đệm và số lượng giá trị phát lại (`replay`) tùy bạn chọn. Còn `StateFlow` là `SharedFlow` đặc biệt với `replay = 1` và có giá trị đầu. Nó tự bỏ qua nếu giá trị mới trùng giá trị cũ qua `equals`.
 
 ## Đánh đổi
-StateFlow giải phóng logic khỏi Android SDK và dùng được trên đa nền tảng KMP. Kết hợp `stateIn(WhileSubscribed)` và `repeatOnLifecycle` giúp tự động dừng nguồn phát ngược dòng khi giao diện ẩn. Đổi lại, `repeatOnLifecycle` dễ viết sai vị trí và LiveData vẫn đơn giản hơn cho mã Java thuần.
+Dùng `StateFlow` giúp bạn tách sạch code khỏi Android SDK để viết unit test nhanh và dùng chung trên `KMP`. Khi ghép `stateIn(WhileSubscribed)` với `repeatOnLifecycle`, luồng dữ liệu phía trên cũng tự tạm nghỉ lúc người dùng ẩn app xuống nền. Đổi lại, bạn phải bọc `repeatOnLifecycle` ở giao diện, còn `LiveData` vẫn gọn hơn cho dự án Java thuần.
 
 ## Nguyên lý gốc
-Nguyên lý [State vs Event](concept:architecture-state-vs-event): sự kiện từ ViewModel được quy về trạng thái, giao diện xử lý xong sẽ báo lại để xoá.
+Theo nguyên lý [State vs Event](concept:architecture-state-vs-event), thông báo từ ViewModel nên là một trường trong trạng thái màn hình. Khi giao diện hiện xong thì báo lại để xóa đi.
 
 ## Key insight
-> [ViewModel](concept:android-viewmodel) không phải nơi gom mọi trạng thái: chỉ dữ liệu nghiệp vụ mới cần sống sót qua thay đổi cấu hình.
+> [ViewModel](concept:android-viewmodel) không phải nơi chứa mọi biến của màn hình: chỉ trạng thái nghiệp vụ cần sống qua lúc xoay máy mới đặt ở đó.
 
 ## Ví von
 State là bảng hiện nhiệt độ phòng, ai bước vào trễ đều thấy cùng nhiệt độ đó. Event là tiếng chuông cửa reo, chỉ ai có mặt lúc chuông kêu mới nghe thấy.
@@ -64,28 +64,28 @@ lifecycleScope.launch {
 ```
 
 ## Bẫy & ranh giới
-Bẫy phổ biến là đưa sự kiện vào StateFlow theo [State vs Event](concept:architecture-state-vs-event) mà quên xoá, khiến Toast bị lặp khi xoay máy. Ngoài ra, gọi `flow.collect` trực tiếp mà thiếu `repeatOnLifecycle` sẽ khiến luồng ngầm tiếp tục thu thập gây hao pin. Chống chỉ định đẩy sự kiện qua SharedFlow hoặc Channel vì không bảo đảm giao nhận khi ViewModel sống lâu hơn giao diện.
+Nếu đưa thông báo vào `StateFlow` theo [State vs Event](concept:architecture-state-vs-event) mà quên xóa sau khi hiện, Toast sẽ bật lại khi xoay máy. Gọi `flow.collect` trong `lifecycleScope.launch` mà thiếu `repeatOnLifecycle` khiến luồng ngầm chạy tiếp khi ẩn app, gây tốn CPU và pin. Cũng đừng bắn thông báo một lần qua `SharedFlow` hay `Channel`, vì sự kiện dễ mất lúc xoay màn hình.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Có nên bỏ hết LiveData để chuyển sang StateFlow trong mọi dự án không?
-Không nhất thiết. Với dự án Java cũ chạy thuần trên Android, LiveData vẫn đáp ứng tốt và ít nguy cơ mắc bẫy quản lý vòng đời luồng. Bạn chỉ nên chuyển sang StateFlow khi dự án dùng Kotlin hoàn toàn, cần làm đa nền tảng hoặc xử lý chuỗi luồng phức tạp.
+Không cần thiết. Với dự án Java cũ chỉ chạy trên Android, `LiveData` vẫn làm tốt và ít sợ quên bọc vòng đời. Bạn nên dùng `StateFlow` khi dự án viết bằng Kotlin, cần biến đổi luồng dữ liệu bằng Coroutines hoặc chia sẻ code sang `KMP`.
 
 **Hỏi:** Dùng StateFlow hay SharedFlow để bắn Toast thông báo, làm sao biết?
-StateFlow, theo hướng dẫn chính thức của Android. Đưa thông báo vào UiState, giao diện hiển thị xong thì gọi hàm `userMessageShown()` để xoá giá trị về `null`. Dùng SharedFlow hoặc Channel không bảo đảm giao sự kiện khi giao diện đang được tạo lại lúc xoay máy.
+Hãy dùng `StateFlow`, theo đúng hướng dẫn của đội ngũ Android. Bạn thêm trường thông báo vào `UiState`, khi màn hình hiện Toast xong thì gọi ngay `userMessageShown()` để đặt nó về `null`. Nếu dùng `SharedFlow` hay `Channel`, thông báo bắn ra lúc đang xoay máy có thể bị mất luôn.
 
 **Hỏi:** Gom hết trạng thái màn hình vào một data class UiState duy nhất có hại gì không?
-Có thể, nếu bạn truyền nguyên object UiState xuống mọi Composable con. Đổi một cờ nhỏ tạo ra object mới khiến mọi hàm con nhận object đó đều phải recompose. Truyền cho mỗi con đúng trường dữ liệu nó cần giúp Compose bỏ qua các thành phần không bị thay đổi.
+Có thể gây vẽ lại thừa nếu bạn truyền nguyên cục `UiState` đó xuống cho mọi hàm Composable con. Khi một trường nhỏ đổi, cả đối tượng `UiState` được tạo mới khiến mọi hàm con nhận nó đều phải chạy lại. Bạn chỉ nên tách và truyền cho mỗi hàm con đúng trường dữ liệu mà nó thực sự đọc.
 
 **Hỏi:** Tham số WhileSubscribed(5000) trong stateIn có tác dụng thực sự gì?
-Nó giữ luồng dữ liệu sống thêm đúng năm giây sau khi màn hình ngắt kết nối lắng nghe. Khoảng trễ này ngăn chặn việc hủy và nạp lại dữ liệu mạng tốn kém trong khoảnh khắc người dùng xoay máy.
+Nó giữ cho luồng dữ liệu phía trên sống thêm 5 giây sau khi người nghe cuối cùng ngừng thu thập. Lúc xoay máy, Activity mới nối lại chỉ mất vài trăm mili giây nên luồng mạng hay DB không bị ngắt. Còn nếu người dùng bấm Home thoát ra ngoài quá 5 giây, luồng phía trên mới thực sự dừng để tiết kiệm tài nguyên.
 
 **Hỏi:** Thu thập StateFlow trong Activity tại sao phải bọc bằng repeatOnLifecycle?
-Để bảo đảm luồng thu thập dữ liệu tự động dừng lại khi màn hình khuất khỏi tầm nhìn. Nếu chỉ gọi `lifecycleScope.launch`, coroutine vẫn tiếp tục nhận dữ liệu ngầm gây lãng phí tài nguyên CPU và hao pin. `repeatOnLifecycle` sẽ tự khởi động lại việc lắng nghe ngay khi màn hình đạt trạng thái `STARTED`.
+Vì `StateFlow` là thư viện Kotlin thuần nên tự nó không biết lúc nào màn hình Android bị che khuất. Chỉ gọi `collect` trong `lifecycleScope.launch` làm coroutine vẫn thức nhận dữ liệu khi app xuống nền, gây tốn CPU và pin. Bọc `repeatOnLifecycle(Lifecycle.State.STARTED)` sẽ tự hủy thu thập khi màn hình `STOPPED` và tự thu thập lại khi màn hình lên `STARTED`.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] StateFlow thực chất là SharedFlow có replay bằng 1, lọc trùng qua equals và có giá trị khởi tạo.
-- [ ] Quy sự kiện một lần về State và cơ chế giao diện báo lại để xoá sau khi xử lý.
-- [ ] Bẫy quên xoá sự kiện trong State làm Toast lặp khi xoay máy; SharedFlow và Channel không bảo đảm giao nhận.
+- [ ] Giải thích được StateFlow thực chất là SharedFlow có replay = 1, có giá trị khởi tạo và lọc trùng bằng equals.
+- [ ] Trình bày được cách biến sự kiện thông báo thành một trường trong UiState rồi gọi hàm xóa về null sau khi đã hiển thị.
+- [ ] Nêu được bẫy quên xóa sự kiện làm Toast hiện lặp khi xoay máy và bẫy thiếu repeatOnLifecycle làm coroutine chạy ngầm tốn pin.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

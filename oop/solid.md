@@ -5,62 +5,63 @@ domain: oop
 tags: [oop, solid, clean-architecture, software-design]
 collections: [interview-fundamental]
 related: [oop-four-pillars, architecture-dependency-injection]
+diagrams: [Cơ chế|solid.png|Năm nguyên tắc SOLID, mỗi nguyên tắc một câu ý chính và một ví dụ]
 created: 2026-09-07
 ---
 
 ## Bản 30 giây
-Khi phần mềm thêm tính năng, sửa code thường làm hỏng các chỗ cũ đang chạy. Bộ năm nguyên lý SOLID hướng dẫn chia code thành các khối độc lập có ranh giới rõ ràng. Nhờ đó, bạn có thể mở rộng tính năng mà không gây đổ vỡ dây chuyền cho toàn bộ hệ thống.
+Khi ứng dụng thêm tính năng mới, sửa một đoạn code cũ rất dễ làm hỏng những chỗ đang chạy tốt. Năm nguyên lý SOLID giúp bạn chia code thành các khối có ranh giới rõ ràng. Nhờ đó, bạn thêm được tính năng mới mà không làm hỏng dây chuyền cả hệ thống.
 
 ## Cần biết trước
 - oop-four-pillars
 
 ## Vấn đề buộc nó ra đời
-Cuối thập niên 1990, các hệ thống phần mềm C++ và Java phình to nhanh chóng. Chúng rơi vào tình trạng mà Robert C. Martin (Uncle Bob) gọi là "sự thối rữa thiết kế" (design rot). Chỉ sửa định dạng in ấn cũng làm vỡ module thanh toán do liên kết quá chặt.
+Cuối thập niên 1990, các dự án C++ và Java phình to rất nhanh. Chúng rơi vào cảnh mà Robert C. Martin (Uncle Bob) gọi là "sự thối rữa thiết kế" (design rot). Nhiều khi bạn chỉ sửa định dạng in hóa đơn mà làm hỏng luôn phần thanh toán vì code dính chặt vào nhau.
 
-Năm 2000, Uncle Bob công bố bài viết tổng hợp các nguyên tắc thiết kế hướng đối tượng. Đến năm 2004, Michael Feathers ghép các chữ cái đầu thành từ viết tắt SOLID. Bộ năm nguyên lý này ra đời từ kinh nghiệm dẹp bỏ mã nguồn dễ gãy trong dự án thực tế.
+Năm 2000, Uncle Bob viết bài tổng hợp các nguyên tắc thiết kế hướng đối tượng. Đến năm 2004, Michael Feathers ghép các chữ cái đầu thành tên gọi SOLID. Năm nguyên lý này đúc kết từ việc chữa những dự án thực tế cứ sửa một chỗ là hỏng một chùm.
 
-Mỗi chữ cái giải quyết một nỗi đau cấu trúc cụ thể: mã nguồn cứng nhắc, dễ gãy và không thể tái sử dụng. Chúng là ranh giới kỹ thuật giúp hệ thống chịu đựng được sự thay đổi liên tục của nghiệp vụ.
+Mỗi chữ cái giải quyết một nỗi khổ quen thuộc: code cứng nhắc, sửa đâu vỡ đó và không đem đi tái sử dụng được. Chúng đặt ra ranh giới để dự án vẫn đứng vững khi yêu cầu nghiệp vụ thay đổi liên tục.
 
 ## Nó thực sự là cái gì
-SOLID KHÔNG phải là công thức thần thánh để viết code cho đẹp mắt. Thực chất, nó là chiến lược quản trị phụ thuộc, giúp cô lập phạm vi hỏng hóc khi sửa đổi mã nguồn.
+SOLID không phải là bộ luật trang trí cho code trông sang hơn. Nó sắp xếp chiều phụ thuộc giữa các lớp. Nhờ đó, khi bạn sửa một chỗ thì phạm vi bị ảnh hưởng chỉ gói gọn rất nhỏ.
 
 ## Cơ chế
-S gom hàm đổi cùng lý do vào một lớp, còn O mở rộng qua trừu tượng thay vì sửa mã cũ. L ép lớp con bảo toàn hợp đồng hành vi của lớp cha. I xé nhỏ giao diện để bên gọi không dính hàm thừa. D đảo ngược phụ thuộc: các module đều dựa vào trừu tượng.
+Chữ S gom các hàm đổi vì cùng lý do về một lớp, còn chữ O thêm tính năng qua lớp mới. Chữ L bắt lớp con phải giữ đúng lời hứa hành vi của lớp cha. Chữ I tách `interface` lớn thành các mảnh nhỏ để nơi gọi không phải gánh hàm thừa. Chữ D đảo chiều phụ thuộc: cả tầng cao lẫn tầng thấp đều nhìn vào `interface` chứ không gọi thẳng lớp cụ thể.
 
 ## Đánh đổi
-Hệ thống có khả năng chịu đựng thay đổi cao, dễ viết unit test và tách nhánh phát triển. Đổi lại, số lượng file và interface tăng vọt, tạo thêm tầng gián tiếp (indirection). Nếu áp dụng mù quáng cho dự án nhỏ, code sẽ bị phân mảnh và khó đọc hơn rất nhiều.
+Code dễ viết unit test, dễ tách việc cho nhiều người làm chung và ít hỏng vặt khi đổi yêu cầu. Đổi lại, dự án sinh ra nhiều file và `interface` hơn, khiến bạn phải nhảy qua thêm một tầng trung gian (indirection) khi đọc code. Nếu áp máy móc cho tính năng nhỏ, người đọc phải nhảy qua hàng chục file chỉ để tìm vài dòng lệnh.
 
 ## Nguyên lý gốc
-Nguyên lý giảm thiểu liên kết: cô lập các phần biến động sau ranh giới ổn định để dập tắt hiệu ứng domino khi lỗi.
+Giữ cho các khối ít dính vào nhau: đặt những phần hay thay đổi sau một `interface` ổn định để lỗi không lan dây chuyền.
 
 ## Key insight
 > SOLID không sinh ra để làm đẹp code, mà để trả lời câu hỏi: sửa chỗ này thì vỡ chỗ nào?
 
 ## Ví von
-Hệ thống vách ngăn chống cháy trên tàu biển. Khi một khoang bị bốc cháy, cửa lập tức sập xuống cô lập khoang đó, ngăn tai nạn nhấn chìm toàn bộ con tàu.
+SOLID giống hệ thống vách ngăn chống cháy trên tàu thủy. Khi một khoang bốc cháy, cửa ngăn sập xuống ngay để lửa không lan sang nhấn chìm cả con tàu.
 
 ## Bẫy & ranh giới
-Tạo cặp đôi vô nghĩa `FooInterface` và `FooImpl` chỉ có một bản cài đặt duy nhất là bẫy thừa thãi phổ biến nhất. Bẫy thứ hai là vi phạm Liskov: lớp con ném lỗi `UnsupportedOperationException` ở hàm kế thừa, gây sập app bất thình lình lúc chạy. Hãy áp dụng [Dependency Injection](concept:architecture-dependency-injection) để hiện thực hóa chữ D, và dùng [Bốn tính chất OOP](concept:oop-four-pillars) làm nền tảng. Chống chỉ định tách interface cho module CRUD đơn giản hoặc script ngắn vì chỉ gây phân mảnh và tăng chi phí điều hướng code.
+Bẫy phổ biến là mỗi lớp lại đẻ kèm cặp `FooInterface` và `FooImpl` dù dự án chỉ có một bản cài đặt. Bẫy thứ hai là vi phạm chữ L (Liskov): lớp con ghi đè hàm rồi ném `UnsupportedOperationException`, làm ứng dụng sập lúc chạy. Bạn hãy kết hợp [Dependency Injection](concept:architecture-dependency-injection) để áp dụng chữ D, và nắm vững [Bốn tính chất OOP](concept:oop-four-pillars) làm gốc. Đừng tách `interface` cho những màn hình thêm-sửa-xóa (CRUD) đơn giản vì chỉ làm người đọc mỏi tay bấm tìm file.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Có phải class nào cũng bắt buộc phải tạo interface tương ứng thì mới chuẩn SOLID?
-Không phải. Tạo mù quáng từng interface cho mỗi class khi chỉ có duy nhất một nơi dùng chỉ gây rác mã nguồn. Interface chỉ có ích khi thực sự có nhiều bản cài đặt hoặc khi cần làm giả dữ liệu để viết unit test.
+Không phải. Nếu một lớp chỉ có một cách chạy duy nhất và không cần làm giả khi test, tạo thêm `interface` chỉ làm chật dự án. Bạn chỉ nên tách `interface` khi thực sự có từ hai cách cài đặt trở lên hoặc cần tráo bằng bản giả trong unit test.
 
 **Hỏi:** Khi nào không nên áp dụng đầy đủ năm nguyên lý SOLID?
-Khi viết các module CRUD đơn giản, tiện ích ngắn hoặc sản phẩm thử nghiệm cần kiểm chứng nhanh ý tưởng. SOLID luôn đánh đổi bằng việc tăng vọt số lượng file, interface và các tầng trung gian điều hướng. Áp dụng cứng nhắc cho các tác vụ đơn giản chỉ làm mã nguồn bị phân mảnh và khó đọc thêm.
+Khi bạn viết các màn hình CRUD đơn giản, hàm tiện ích ngắn hoặc bản thử nghiệm cần làm nhanh để kiểm chứng ý tưởng. Áp dụng đủ SOLID luôn đẻ thêm nhiều file, `interface` và tầng gọi bắc cầu. Với bài toán nhỏ, làm vậy chỉ khiến bạn phải mở năm bảy file mới đọc hết một luồng chạy.
 
 **Hỏi:** Làm sao nhận biết code đang vi phạm nguyên lý thay thế Liskov (LSP)?
-Dấu hiệu rõ nhất là lớp con ghi đè hàm kế thừa bằng cách ném ngoại lệ `UnsupportedOperationException` hoặc để trống. Một dấu hiệu phổ biến khác là bên gọi phải dùng lệnh `is` để kiểm tra kiểu cụ thể trước khi thực thi. Khi lớp con không thể thay thế vị trí của cha mà không làm hỏng ứng dụng, hợp đồng LSP đã bị phá vỡ.
+Dấu hiệu rõ nhất là lớp con ghi đè hàm của lớp cha nhưng bên trong lại ném lỗi `UnsupportedOperationException` hoặc để rỗng. Một dấu hiệu nữa là nơi gọi hàm cứ phải dùng `is` kiểm tra xem đối tượng thuộc lớp con nào rồi mới dám gọi. Khi bạn thay lớp con vào chỗ của lớp cha mà ứng dụng chạy sai, nghĩa là hợp đồng Liskov đã bị vỡ.
 
 **Hỏi:** Single Responsibility (SRP) có phải là một class chỉ được làm đúng một việc duy nhất?
-Không đúng. SRP quy định một class chỉ có một lý do duy nhất để thay đổi, tương ứng với một tác nhân nghiệp vụ. Class vẫn có thể chứa nhiều hàm, miễn là yêu cầu sửa đổi chúng luôn đến từ cùng một bộ phận chịu trách nhiệm.
+Không đúng. SRP nói rằng một lớp chỉ nên có một lý do để thay đổi, tức chỉ phục vụ một nghiệp vụ. Lớp đó vẫn có thể chứa nhiều hàm, miễn là khi nghiệp vụ kia đổi quy định thì các hàm này mới cùng sửa.
 
 **Hỏi:** Nguyên lý đảo ngược phụ thuộc (DIP) và [Dependency Injection](concept:architecture-dependency-injection) có phải là một không?
-Không phải. DIP là nguyên lý thiết kế yêu cầu các mô-đun nghiệp vụ phải phụ thuộc vào giao diện trừu tượng thay vì lớp cụ thể. Còn [Dependency Injection](concept:architecture-dependency-injection) là kỹ thuật chuyển giao đối tượng phụ thuộc từ bên ngoài vào, giúp bạn hiện thực hoá nguyên lý DIP.
+Không phải. DIP yêu cầu lớp xử lý nghiệp vụ chỉ gọi qua `interface` thay vì gọi thẳng lớp chi tiết bên dưới. Còn [Dependency Injection](concept:architecture-dependency-injection) là cách bạn truyền đối tượng từ bên ngoài vào `constructor`, giúp thực hiện nguyên lý DIP đó.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Bản chất SOLID là quản trị rủi ro phụ thuộc để giới hạn phạm vi đổ vỡ, không phải thẩm mỹ.
-- [ ] Phân biệt được trách nhiệm cốt lõi của từng chữ cái: S, O, L, I, D.
-- [ ] Bẫy sinh interface thừa (Interface Soup) và bẫy lớp con phá vỡ hợp đồng ném ngoại lệ vi phạm Liskov.
+- [ ] Giải thích được SOLID dùng để khoanh vùng chỗ hỏng khi sửa code chứ không phải để làm đẹp mã nguồn.
+- [ ] Nêu được ý nghĩa của từng chữ cái S, O, L, I, D bằng ví dụ cụ thể.
+- [ ] Chỉ ra được bẫy tạo cặp FooInterface/FooImpl thừa thãi và bẫy lớp con ném UnsupportedOperationException vi phạm Liskov.
 
 ## Tôi đã gặp nó ở đâu

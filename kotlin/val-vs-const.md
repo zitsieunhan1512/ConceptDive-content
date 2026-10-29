@@ -10,28 +10,28 @@ created: 2026-09-10
 ---
 
 ## Bản 30 giây
-`val` là biến chỉ đọc nhưng giá trị được tính toán khi chương trình đang chạy. `const val` là hằng số được trình biên dịch thay thế trực tiếp giá trị vào mã nguồn ngay lúc dịch. Sự khác biệt này quyết định tính an toàn khi nâng cấp thư viện và khả năng dùng trong các chú thích khai báo.
+Khi bạn khai báo biến chỉ đọc, `val` sẽ gọi hàm `getter` để lấy giá trị lúc ứng dụng đang chạy. Còn `const val` bảo compiler chép thẳng giá trị hằng số vào từng chỗ dùng ngay lúc biên dịch. Khác biệt này quyết định việc dùng nó trong `annotation` và rủi ro lệch dữ liệu khi nâng cấp thư viện.
 
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
-Khi thiết kế Kotlin, ngôn ngữ muốn mọi thuộc tính đều có tính bao đóng để đảm bảo an toàn truy cập. Khai báo `val` được dịch thành một biến riêng tư kèm hàm đọc công khai (getter). Cách tiếp cận này giúp mã nguồn dễ mở rộng và kiểm soát tính bất biến.
+Khi làm Kotlin, nhóm thiết kế muốn mọi thuộc tính trong class đều đi qua hàm đọc để giữ tính đóng gói. Vì vậy, mỗi biến `val` được dịch thành một trường `private` kèm theo hàm `getter` công khai.
 
-Tuy nhiên, cấu trúc này vấp phải giới hạn của máy ảo Java với chú thích khai báo (annotation). Annotation đòi hỏi giá trị phải nung sẵn vào bytecode lúc biên dịch. Chúng không thể đợi hàm getter chạy khi ứng dụng khởi động.
+Nhưng cách này lại vướng quy định của máy ảo Java khi bạn truyền giá trị vào `annotation`. `annotation` bắt buộc giá trị phải có sẵn ngay trong bytecode lúc biên dịch, chứ không đợi gọi hàm `getter` lúc chạy được.
 
-Từ khóa `const` ra đời để tháo gỡ bế tắc này. Tuy nhiên, nó tạo ra nguy cơ gãy tương thích nhị phân khi hằng số thay đổi.
+Từ khóa `const` ra đời để chép thẳng giá trị vào bytecode cho các chỗ như vậy. Đổi lại, nó gây lệch giá trị giữa các module khi thư viện đổi hằng số mà bên gọi chưa biên dịch lại.
 
 ## Nó thực sự là cái gì
-`val` và `const val` KHÔNG phải hai cách viết hằng số tương đương chỉ khác nhau ở độ ngắn gọn cú pháp. Thực chất, `val` là một thuộc tính (property), mặc định sinh ra phương thức getter để truy cập khi chương trình vận hành. Ngược lại, `const val` là hằng số biên dịch, được compiler thay thế thẳng giá trị thô vào mọi vị trí sử dụng mã nguồn. Lớp khai báo vẫn giữ trường tĩnh công khai cho tương tác Java, nhưng bên gọi Kotlin không hề phát sinh lệnh gọi hàm getter.
+`val` và `const val` không phải hai cách viết hằng số giống nhau. `val` là một thuộc tính có hàm `getter`, mỗi lần bạn đọc là máy gọi vào hàm đó lúc đang chạy. Ngược lại, `const val` là hằng số lúc biên dịch, được compiler chép thẳng giá trị vào mọi chỗ gọi. Class gốc vẫn giữ một trường `public static final` cho bên Java dùng, nhưng code Kotlin khi đọc sẽ lấy thẳng giá trị đã chép.
 
 ## Cơ chế
-Khi khai báo `val` thông thường, trình biên dịch tạo một trường `private final` và hàm getter công khai trong tệp bytecode. Khi khai báo `const val`, compiler sinh trường `public static final` nhưng tại mọi vị trí gọi sẽ nhúng thẳng giá trị hằng số. Do nhúng thẳng, `const val` chỉ nhận kiểu nguyên thủy hoặc String và cấm hàm getter. Bên gọi nạp trực tiếp giá trị bằng `ldc` hay `bipush` mà không tham chiếu lớp gốc.
+Khi bạn viết `val` thường, compiler tạo một trường `private final` và một hàm `getter` trong bytecode. Khi bạn viết `const val`, compiler tạo trường `public static final` nhưng tại mọi chỗ gọi nó chép thẳng giá trị vào luôn. Vì phải chép ngay lúc dịch, `const val` chỉ nhận kiểu nguyên thủy hoặc `String` và không cho viết hàm `getter` riêng. Lúc chạy, chỗ gọi nạp thẳng con số hoặc chuỗi bằng lệnh `ldc` hay `bipush` mà không cần hỏi class gốc.
 
 ## Đánh đổi
-Dùng `const val` giúp triệt tiêu chi phí gọi hàm getter và hỗ trợ annotation. Bạn phải đánh đổi tính linh hoạt: không thể gán biểu thức runtime hay override. Nguy hiểm nhất là đứt gãy tương thích nhị phân khi thư viện đổi giá trị hằng số. Ứng dụng cũ sẽ tiếp tục chạy sai lệch vì vẫn ôm giá trị nhúng cứng.
+Dùng `const val` giúp bạn truyền được giá trị vào `annotation` và bớt được một lần gọi hàm `getter`. Đổi lại, bạn không thể gán kết quả của một hàm cho nó hay ghi đè nó ở lớp con. Rủi ro lớn nhất là gãy tương thích nhị phân khi một thư viện đổi giá trị `const val`. Nếu module gọi không biên dịch lại, nó vẫn chạy với giá trị cũ đã chép sẵn trong bytecode.
 
 ## Nguyên lý gốc
-Đây là sự đánh đổi giữa liên kết tĩnh lúc biên dịch và liên kết động khi chạy. Liên kết tĩnh đem lại tốc độ tối đa nhưng làm chặt chẽ hóa phụ thuộc giữa các mô-đun. Liên kết động qua hàm bọc giúp che giấu chi tiết và bảo toàn ranh giới độc lập.
+Chép cứng giá trị lúc biên dịch để dùng ngay, hoặc đọc qua hàm lúc chạy để giữ đồng bộ khi đổi.
 
 ## Key insight
 > `const val` không phải để chạy nhanh hơn `val`, mà là cái bẫy gãy tương thích nhị phân mỗi khi bạn đổi giá trị.
@@ -52,28 +52,28 @@ class ApiClient {
 ```
 
 ## Bẫy & ranh giới
-Bẫy tai hại nhất là đổi `const val` trong thư viện mà không biên dịch lại các mô-đun phụ thuộc. Mô-đun cũ vẫn giữ giá trị nhúng cứng trong bytecode, gây sai lệch dữ liệu mà không báo lỗi. Chống chỉ định dùng `const val` cho các cấu hình có thể thay đổi giữa các phiên bản. Hãy dùng `val` cho biến công khai xuyên mô-đun để bảo vệ tính tương thích nhị phân.
+Bẫy nguy hiểm nhất là sửa `const val` trong một module thư viện mà không biên dịch lại các module đang gọi nó. Module gọi vẫn giữ nguyên con số cũ đã chép vào bytecode, làm hai bên chạy lệch nhau mà không báo lỗi. Vì vậy, đừng dùng `const val` cho các thông số có thể đổi qua các phiên bản thư viện. Với biến công khai cho module khác đọc, hãy dùng `val` để giữ tương thích nhị phân.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Dùng val thì giá trị của biến có luôn luôn bất biến không?
-Không. `val` chỉ cấm gán lại tham chiếu chứ không cấm sửa đổi trạng thái bên trong đối tượng được trỏ tới. Ngoài ra, một `val` có custom getter hoặc ủy quyền bằng [by lazy](concept:kotlin-lateinit-vs-lazy) hoàn toàn có thể trả về giá trị khác nhau.
+Không. Từ khóa `val` chỉ cấm bạn gán biến đó sang đối tượng khác, chứ không cấm sửa dữ liệu bên trong đối tượng. Ngoài ra, một biến `val` tự viết hàm `get()` hoặc dùng [by lazy](concept:kotlin-lateinit-vs-lazy) vẫn có thể trả về kết quả khác nhau.
 
 **Hỏi:** Cả hai đều không sửa được, khi nào bắt buộc phải dùng const val?
-Bắt buộc dùng `const val` khi giá trị cần truyền vào Annotation hoặc làm hằng số switch-case bên Java. Các trường hợp này đòi hỏi giá trị phải được nung cứng trực tiếp vào bytecode ngay lúc biên dịch. Với các trường hợp còn lại, bạn nên ưu tiên dùng `val` để đảm bảo an toàn khi cập nhật thư viện.
+Bạn bắt buộc dùng `const val` khi truyền giá trị vào `annotation` hoặc dùng trong `switch-case` phía Java. Những chỗ này đòi hỏi giá trị phải nằm sẵn trong bytecode ngay lúc biên dịch. Còn ở các chỗ bình thường khác, bạn cứ dùng `val` để sau này đổi giá trị không sợ lỗi.
 
 **Hỏi:** Vì sao đổi giá trị const val trong một library module lại làm app chạy sai dù không báo lỗi biên dịch?
-Vì compiler đã nhúng thẳng giá trị cũ của `const val` vào bytecode của module gọi lúc biên dịch. Nếu bạn nâng cấp file jar thư viện mà không biên dịch lại module gọi, nó vẫn giữ nguyên giá trị số cũ. Hậu quả là hai phần của ứng dụng chạy cùng lúc nhưng lại nhìn thấy hai giá trị cấu hình lệch nhau.
+Vì lúc biên dịch lần trước, compiler đã chép thẳng giá trị cũ của `const val` vào bytecode của module gọi. Khi bạn chỉ thay file `.jar` của thư viện mà không biên dịch lại module gọi, chỗ gọi vẫn đọc con số cũ của nó. Thế là thư viện chạy giá trị mới còn ứng dụng lại chạy giá trị cũ.
 
 **Hỏi:** Vì sao Kotlin cấm khai báo const val cho đối tượng class thông thường hoặc bên trong hàm?
-Vì `const val` đòi hỏi giá trị phải biết trước lúc biên dịch và chỉ nhận kiểu nguyên thuỷ hoặc String. Đối tượng class đòi hỏi cấp phát bộ nhớ trên Heap qua constructor, điều chỉ diễn ra khi ứng dụng đang vận hành. Còn vị trí thì `const` chỉ được khai báo ở cấp file, trong `object` hoặc `companion object`, nơi compiler sinh được trường `static final`.
+Vì `const val` phải chép được ngay vào bytecode lúc dịch nên chỉ nhận kiểu nguyên thủy hoặc `String`. Còn một đối tượng class thông thường phải đợi lúc chạy mới tạo trên Heap qua constructor. Ngoài ra, `const val` chỉ đặt được ở đầu file, trong `object` hoặc `companion object`, nơi sinh được trường `static final`.
 
 **Hỏi:** const val có giúp ứng dụng chạy nhanh hơn val đáng kể không?
-Không đáng kể. `const val` chỉ bớt được một lệnh gọi hàm getter và một lần đọc trường tĩnh trong bytecode. Máy ảo ART trên Android thường tự động inline các getter đơn giản, nên khác biệt tốc độ thực tế là không đáng kể.
+Không đáng kể. Dùng `const val` chỉ bớt được một lệnh gọi hàm `getter` và một lần đọc biến tĩnh. Trên Android, máy ảo ART vốn tự chép thẳng các hàm `getter` ngắn vào chỗ gọi nên tốc độ gần như nhau.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Bản chất: val thông thường biên dịch thành getter lúc chạy, const val nhúng thẳng giá trị vào bytecode lúc biên dịch.
-- [ ] Ràng buộc của const val: chỉ áp dụng cho kiểu nguyên thuỷ hoặc String, nằm ở top-level hoặc trong object.
-- [ ] Bẫy tương thích nhị phân: thay đổi const val ở thư viện khiến ứng dụng chạy giá trị cũ nếu không biên dịch lại.
+- [ ] Giải thích được val gọi hàm getter lúc chạy, còn const val chép thẳng giá trị vào bytecode lúc biên dịch.
+- [ ] Nêu được điều kiện dùng const val: chỉ nhận kiểu nguyên thủy hoặc String, đặt ở cấp file hoặc trong object.
+- [ ] Trình bày được vì sao đổi const val trong thư viện mà không biên dịch lại bên gọi sẽ làm lệch dữ liệu.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

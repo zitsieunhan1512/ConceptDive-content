@@ -10,36 +10,36 @@ diagrams: [Cơ chế|ble-command-queue-busy.png|Giao thức ATT bật cờ mDevi
 ---
 
 ## Bản 30 giây
-Tầng Bluetooth của Android chỉ có thể xử lý một thao tác tại một thời điểm cho mỗi kết nối. Bắn nhiều lệnh cùng lúc sẽ khiến hệ thống âm thầm hủy bỏ lệnh mà không báo lỗi. Bạn bắt buộc phải xây dựng hàng đợi để thực thi tuần tự từng tác vụ một cách an toàn.
+Khi giao tiếp Bluetooth với thiết bị ngoại vi, Android chỉ xử lý được đúng một lệnh tại một thời điểm trên mỗi kết nối. Nếu gọi hai lệnh đọc ghi liên tiếp ngay lập tức, hệ thống sẽ âm thầm bỏ qua lệnh thứ hai. Vì vậy, bạn bắt buộc phải xếp hàng các lệnh để chạy lần lượt từng lệnh một.
 
 ## Cần biết trước
 - android-ble-gatt-model
 - kotlin-coroutines
 
 ## Vấn đề buộc nó ra đời
-Năm 2013, Google đưa API Bluetooth Low Energy vào Android 4.3 Jelly Bean. Tầng giao tiếp Java bọc ngoài thư viện gốc C++ qua cầu nối Binder liên tiến trình.
+Năm 2013, Google đưa API Bluetooth Low Energy vào Android 4.3 Jelly Bean. Tầng Java bọc ngoài thư viện C++ bên dưới và nói chuyện qua cầu nối Binder liên tiến trình.
 
-Thời điểm đó, lập trình viên quen với mạng bất đồng bộ đã gọi đồng thời nhiều lệnh đọc ghi trên một kết nối. Giao thức ATT lại chỉ cho phép một yêu cầu chưa có phản hồi trên mỗi kênh truyền. Tầng Java Android không có hàng đợi tự động, khiến các thao tác gọi dồn dập bị nuốt chửng âm thầm.
+Quen với cách gọi mạng bất đồng bộ, lập trình viên thường bắn cùng lúc nhiều lệnh đọc ghi trên một kết nối. Nhưng giao thức ATT chỉ cho phép một yêu cầu chờ phản hồi trên mỗi kênh truyền. Tầng Java của Android lại không tự xếp hàng, nên các lệnh gọi dồn dập bị bỏ qua âm thầm.
 
-Các lệnh gọi tiếp theo bị loại bỏ, khiến quá trình trao đổi dữ liệu rơi vào bế tắc. Hàng loạt mã lỗi bí ẩn xuất hiện mà không hề có tài liệu giải thích rõ ràng.
+Hậu quả là các lệnh tiếp theo biến mất, khiến việc truyền dữ liệu bị treo giữa chừng. Hàng loạt mã lỗi khó hiểu như `status 133` xuất hiện mà tài liệu không giải thích rõ.
 
 ## Nó thực sự là cái gì
-KHÔNG PHẢI do phần cứng vô tuyến không thể truyền nhận nhiều luồng dữ liệu. Thực chất, giới hạn này bắt nguồn từ giao thức ATT: chỉ một yêu cầu được phép chờ phản hồi trên một kết nối. Android cài đặt quy tắc này bằng cờ `mDeviceBusy` trong `BluetoothGatt` của từng kết nối.
+Giới hạn này không phải do con chip sóng không truyền nhận được nhiều luồng dữ liệu. Nó bắt nguồn từ quy định của giao thức ATT: trên một kết nối chỉ được có một yêu cầu đang chờ phản hồi. Android kiểm soát việc này bằng biến cờ `mDeviceBusy` bên trong mỗi đối tượng `BluetoothGatt`.
 
 ## Cơ chế
-Khi một thao tác ATT đang chạy trên kết nối, cờ `mDeviceBusy` bật khiến lệnh tiếp theo trên [BluetoothGatt](concept:android-ble-gatt-model) bị từ chối ngay. Callback phản hồi mặc định chạy trên luồng Binder IPC, trừ khi truyền custom Handler vào `connectGatt` từ Android 8. Hàm `disconnect()` chỉ ngắt liên kết sóng, còn `close()` mới giải phóng slot client trong stack Bluetooth native. Mã `status 133` là lỗi `GATT_ERROR` chung do rớt sóng hoặc timeout, nhưng rò rỉ client native sẽ làm kết nối hỏng vĩnh viễn.
+Khi một lệnh ATT đang chạy, biến cờ `mDeviceBusy` bật lên làm lệnh tiếp theo gọi vào [BluetoothGatt](concept:android-ble-gatt-model) trả về `false` ngay. Hàm callback báo kết quả mặc định chạy trên luồng Binder IPC, trừ khi bạn truyền `Handler` riêng vào `connectGatt` từ Android 8. Hàm `disconnect()` chỉ ngắt sóng, còn bạn phải gọi `close()` mới trả lại được chỗ đăng ký (slot client) trong tầng Bluetooth native. Mã `status 133` là lỗi `GATT_ERROR` chung do rớt sóng hoặc hết giờ, nhưng quên gọi `close()` sẽ làm kẹt hẳn các lần kết nối sau.
 
 ## Đánh đổi
-Tuân thủ nghiêm ngặt giao thức ATT giúp ngăn ngừa mất mát và sai lệch trạng thái gói tin. Đổi lại, lập trình viên buộc phải tự dựng hàng đợi tuần tự bằng [Coroutines](concept:kotlin-coroutines) để xâu chuỗi mọi tác vụ. Nếu không xếp hàng, các lệnh ghi dữ liệu gửi dồn dập sẽ bị tầng Java từ chối âm thầm mà không ném lỗi.
+Chặn gọi chồng lệnh giúp các gói tin truyền qua lại không bị lẫn lộn hay sai thứ tự. Đổi lại, bạn phải tự làm hàng đợi bằng [Coroutines](concept:kotlin-coroutines) để chạy từng lệnh một và chờ callback báo xong. Nếu bạn gọi liền hai lệnh ghi mà không chờ nhau, tầng Java sẽ lặng lẽ bỏ lệnh sau mà không ném ngoại lệ nào.
 
 ## Nguyên lý gốc
-Nguyên lý tuần tự hóa giao thức ATT: mỗi kênh truyền chỉ được phép tồn tại một yêu cầu chưa hoàn tất.
+Trên mỗi kênh giao thức ATT, bạn phải chờ yêu cầu trước trả kết quả xong rồi mới được gửi yêu cầu tiếp theo.
 
 ## Key insight
 > Android BluetoothGatt chỉ nhận một lệnh tại một thời điểm: gọi lệnh mới trước khi callback cũ trả về sẽ bị từ chối âm thầm.
 
 ## Ví von
-Như một buồng điện thoại công cộng một ống nghe. Bạn phải chờ người trước cúp máy hoàn toàn thì hệ thống mới cho phép nhấc máy quay số cuộc gọi tiếp theo.
+Giống như buồng điện thoại công cộng chỉ có một ống nghe. Bạn phải chờ người trước nói chuyện và gác máy xong xuôi thì mới nhấc ống nghe bấm số gọi tiếp được.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -56,25 +56,25 @@ class BleQueue(private val gatt: BluetoothGatt) {
 ```
 
 ## Bẫy & ranh giới
-Quên gọi `close()` sau khi ngắt kết nối làm cạn kiệt slot client native, khiến mọi lần kết nối sau đều thất bại. Từ Android 7, quét quá 5 lần trong 30 giây sẽ bị hệ thống bóp nghẽn và trả về kết quả rỗng. Từ Android 12, quét và kết nối bắt buộc xin quyền runtime `BLUETOOTH_SCAN` và `BLUETOOTH_CONNECT`. Triệu chứng hỏng hóc là hàm ghi trả về false hoặc callback nhận mã `status 133` liên tục.
+Quên gọi `close()` sau khi ngắt kết nối sẽ làm hết sạch chỗ đăng ký client native, khiến mọi lần kết nối sau đều hỏng. Từ Android 7, nếu bạn bật tắt quét quá 5 lần trong 30 giây, hệ thống sẽ chặn và trả về danh sách rỗng. Từ Android 12, ứng dụng bắt buộc phải xin hai quyền `BLUETOOTH_SCAN` và `BLUETOOTH_CONNECT` lúc đang chạy. Triệu chứng khi dính bẫy là hàm ghi trả về `false`, hoặc callback trả về mã lỗi `status 133` liên tục.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Mã lỗi status 133 trong onConnectionStateChange là gì và xử lý thế nào?
-Đó là lỗi `GATT_ERROR` chung do mất sóng, rớt gói tin hoặc cạn kiệt slot client native. Bạn bắt buộc phải gọi `gatt.close()` ngay lập tức và chờ ít nhất 500ms trước khi thử kết nối lại.
+Đó là mã lỗi chung `GATT_ERROR`, thường nổ ra khi thiết bị mất sóng, quá thời gian chờ hoặc hết chỗ đăng ký client native. Khi gặp mã này, bạn phải gọi `gatt.close()` ngay để dọn sạch kết nối cũ rồi chờ ít nhất 500ms mới kết nối lại.
 
 **Hỏi:** Tại sao các hàm callback của BluetoothGatt lại không chạy trên Main thread?
-Vì Android nhận tín hiệu từ Bluetooth stack rồi bắn sang ứng dụng qua luồng Binder IPC. Muốn callback chạy trên luồng chỉ định, bạn có thể truyền Handler vào hàm `connectGatt` từ Android 8.0.
+Tiến trình Bluetooth hệ thống gửi kết quả qua cầu nối Binder IPC nên callback chạy ngay trên luồng Binder. Từ Android 8.0, nếu muốn callback chạy trên luồng mình chọn, bạn có thể truyền thêm một `Handler` vào hàm `connectGatt`.
 
 **Hỏi:** Tham số autoConnect trong hàm connectGatt nên đặt true hay false?
-Đặt false khi người dùng chủ động kết nối để Android quét tích cực và kết nối nhanh trong vài trăm mili-giây. Đặt true cho các tác vụ kết nối lại dưới nền không giới hạn thời gian.
+Khi người dùng bấm kết nối và đứng gần thiết bị, hãy đặt `false` để Android quét nhanh trong vài trăm mili-giây. Chỉ đặt `true` khi muốn ứng dụng chờ dưới nền và tự nối lại mỗi khi thiết bị vào vùng phủ sóng.
 
 **Hỏi:** Quên gọi close() sau khi disconnect() gây hậu quả nghiêm trọng gì?
-Nó gây rò rỉ slot client trong stack Bluetooth native. Vượt giới hạn slot sẽ khiến các lần gọi `connectGatt` sau trả về null hoặc báo lỗi.
+Hàm `disconnect()` chỉ ngắt sóng chứ không trả lại chỗ đăng ký client trong tầng Bluetooth native của máy. Sau vài lần quên gọi `close()`, bảng đăng ký bị đầy khiến các lần gọi `connectGatt` tiếp theo trả về `null` hoặc báo lỗi `status 133`.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Giới hạn một thao tác do quy tắc giao thức ATT, bảo vệ bởi cờ mDeviceBusy theo từng kết nối.
-- [ ] Sự khác biệt sống còn giữa disconnect() ngắt sóng và close() giải phóng slot client native.
-- [ ] Callback chạy trên Binder thread trừ khi truyền Handler vào connectGatt từ Android 8.
+- [ ] Giải thích được vì sao giao thức ATT chỉ nhận một lệnh mỗi lúc và cách biến cờ mDeviceBusy chặn lệnh thứ hai.
+- [ ] Phân biệt được disconnect() chỉ ngắt sóng với close() trả lại slot client trong tầng Bluetooth native.
+- [ ] Nêu được việc callback chạy trên luồng Binder IPC và cách truyền Handler riêng vào connectGatt từ Android 8.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

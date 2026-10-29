@@ -10,28 +10,28 @@ created: 2026-09-07
 ---
 
 ## Bản 30 giây
-Sealed class và data class giải quyết hai bài toán hoàn toàn khác nhau. Lớp sealed giới hạn danh sách con để compiler bắt bạn xử lý đủ mọi nhánh. Lớp data tự động sinh hàm so sánh giá trị và sao chép để bạn không phải viết tay.
+Khi biểu diễn trạng thái màn hình, bạn cần giới hạn các trạng thái và cất dữ liệu bên trong. `sealed` đóng kín danh sách lớp con để compiler bắt bạn xử lý đủ mọi nhánh trong `when`. Còn `data class` tự sinh các hàm so sánh nội dung và sao chép để bạn không phải viết tay.
 
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
-Trong Java cũ, mô hình hóa trạng thái màn hình gặp bế tắc lớn. Dùng Enum thì mọi nhánh bị ép chung một cấu trúc dữ liệu, không thể lưu tham số riêng. Mở lớp kế thừa tự do thì lệnh switch buộc phải có nhánh default, dễ bỏ sót lỗi khi thêm class mới.
+Trong Java cũ, biểu diễn các trạng thái của một màn hình rất vướng. Dùng `enum` thì mọi nhánh có chung một cấu trúc nên không cất dữ liệu riêng cho từng nhánh được. Còn dùng class kế thừa tự do thì khối `switch` phải có nhánh `default`, nên thêm trạng thái mới rất dễ quên xử lý.
 
-Bên cạnh đó, việc tạo class chứa dữ liệu đòi hỏi viết tay hàng trăm dòng mã cho `equals`, `hashCode` và `toString`. Khi thêm thuộc tính mới vào class, lập trình viên thường quên cập nhật các hàm này. Hậu quả là phép so sánh hai đối tượng bị sai lệch nghiêm trọng.
+Ngoài ra, mỗi lần tạo class chứa dữ liệu, bạn phải viết tay hàng chục dòng cho `equals`, `hashCode` và `toString`. Khi thêm một trường mới vào class mà quên sửa các hàm này, phép so sánh hai đối tượng sẽ chạy sai.
 
-Năm 2011, JetBrains thiết kế Kotlin và tách hai bài toán thành hai từ khóa độc lập. Từ khóa `sealed` khóa chặt phân cấp kế thừa, còn `data` tự động hóa toàn bộ hàm so sánh dữ liệu. Mãi đến năm 2021, Java 17 mới bắt kịp mô hình này qua `record` và `sealed` class.
+Năm 2011, JetBrains tách hai việc này thành hai từ khóa riêng trong Kotlin. Từ khóa `sealed` khóa danh sách lớp con lại, còn `data` tự sinh toàn bộ hàm so sánh theo giá trị. Mãi đến năm 2021, Java 17 mới có `record` và `sealed` class tương tự.
 
 ## Nó thực sự là cái gì
-Sealed class và data class KHÔNG phải hai phương án kiến trúc đối đầu nhau. Thực chất, sealed là công cụ kiểm soát cây kế thừa, còn data là công cụ tự sinh mã so sánh theo giá trị.
+`sealed class` và `data class` không phải hai cách đối lập để bạn chọn một bỏ một. `sealed` dùng để khóa danh sách các lớp con, còn `data` dùng để tự sinh hàm so sánh theo dữ liệu bên trong.
 
 ## Cơ chế
-Trước Kotlin 1.5, lớp con của `sealed` bắt buộc phải nằm cùng file. Từ bản 1.5, Kotlin bổ sung `sealed interface` và cho phép lớp con nằm khác file, miễn là cùng package và module. Nhờ biết trước mọi lớp con, compiler kiểm tra được tính vét cạn (exhaustive) trong `when` mà không cần `else`. Từ khóa `data` tự sinh bytecode cho [equals và hashCode](concept:kotlin-equals-hashcode), `toString`, `componentN` và `copy` từ constructor chính.
+Trước Kotlin 1.5, các lớp con của `sealed` phải nằm trong cùng một file. Từ Kotlin 1.5, bạn có thêm `sealed interface` và được đặt lớp con ở file khác trong cùng package và module. Nhờ biết hết mọi lớp con lúc biên dịch, compiler kiểm tra được khối `when` đã xét đủ nhánh chưa (exhaustive) mà không cần `else`. Còn từ khóa `data` dựa vào các biến ở constructor chính để tự sinh bytecode cho [equals và hashCode](concept:kotlin-equals-hashcode), `toString`, `componentN` và `copy`.
 
 ## Đánh đổi
-Lập trình viên loại bỏ được mã lặp và có compiler bảo vệ khỏi việc bỏ sót nhánh. Đổi lại, thêm một nhánh vào sealed class sẽ buộc sửa mọi khối `when` trong dự án. Với data class, khai báo thuộc tính biến đổi (`var`) sẽ phá hủy tính toàn vẹn của bảng băm.
+Bạn không phải viết code lặp lại và được compiler nhắc ngay khi quên xử lý một nhánh trạng thái. Đổi lại, mỗi khi thêm một lớp con vào `sealed`, bạn phải đi cập nhật mọi khối `when` liên quan trong dự án. Với `data class`, nếu bạn dùng biến `var` rồi sửa giá trị, đối tượng sẽ bị thất lạc khi đang nằm trong `HashMap`.
 
 ## Nguyên lý gốc
-Hệ thống kiểu đại số: kiểu tổng (Sum Type - chọn một nhánh) và kiểu tích (Product Type - gom các trường dữ liệu).
+Ghép kiểu chọn một trong nhiều nhánh (Sum Type) với kiểu gom nhiều trường dữ liệu lại (Product Type).
 
 ## Key insight
 > Đặt `sealed` đối lập `data` là sai tiền đề: chúng là hai trục độc lập thường kết hợp để biểu diễn trạng thái.
@@ -52,29 +52,28 @@ fun render(state: ScreenState): String = when (state) {
 ```
 
 ## Bẫy & ranh giới
-Bẫy chết người là dùng `var` trong data class, khiến `hashCode` bị đổi sau khi sửa và biến mất khỏi HashMap. Bẫy thứ hai là lạm dụng nhánh `else` trong biểu thức `when` của sealed class. Khi thêm trạng thái mới, `else` nuốt chửng nhánh đó và tái hiện đúng lỗi bỏ sót của Java. Chống chỉ định dùng data class cho thực thể có ID riêng thay vì đối tượng so sánh bằng giá trị.
+Nếu bạn khai báo `var` trong `data class`, việc đổi giá trị biến đó sẽ làm đổi `hashCode` và làm mất đối tượng trong `HashMap`. Bẫy thứ hai là viết thêm nhánh `else` vào khối `when` đang kiểm tra một `sealed class`. Khi có người thêm trạng thái mới, nó sẽ lọt vào nhánh `else` khiến compiler không báo lỗi cho bạn biết. Đừng dùng `data class` cho các đối tượng có vòng đời hoặc định danh riêng mà không so sánh bằng giá trị.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Data class có kế thừa được sealed class hay sealed interface không?
-Được. Hai từ khoá này nằm trên hai trục độc lập và rất thường xuyên kết hợp cùng nhau. Trong [State holders](concept:android-state-holders), các nhánh dữ liệu thường là data class cài đặt `sealed interface` để compiler kiểm tra tính vét cạn.
+Được. Hai từ khoá này làm hai việc khác nhau và thường đi cặp với nhau. Trong [State holders](concept:android-state-holders), từng nhánh trạng thái có mang dữ liệu thường là một `data class` cài đặt `sealed interface` chung.
 
 **Hỏi:** Khi nào không nên dùng data class mà phải dùng class thông thường?
-Khi đối tượng cần định danh riêng thay vì so sánh bằng dữ liệu bên trong. Ví dụ đối tượng có vòng đời hoặc trạng thái đổi liên tục như [ViewModel](concept:android-viewmodel) hay một kết nối mạng. So sánh bằng dữ liệu sẽ coi hai thực thể khác nhau là một khi dữ liệu tình cờ trùng.
+Khi đối tượng có định danh hoặc vòng đời riêng chứ không phải một gói dữ liệu thuần túy. Ví dụ như [ViewModel](concept:android-viewmodel) hay một kết nối mạng thì phải dùng class thường. Nếu dùng `data class`, hai đối tượng khác nhau có thể bị coi là một chỉ vì các biến bên trong tình cờ bằng nhau.
 
 **Hỏi:** Vì sao trong biểu thức when với sealed class, thêm nhánh else lại bị coi là chống chỉ định?
-Vì nhánh `else` làm vô hiệu hoá khả năng kiểm tra vét cạn của trình biên dịch. Khi bạn thêm một nhánh mới vào sealed class, compiler không thể báo lỗi ở các khối `when` có `else`. Ứng dụng sẽ âm thầm rơi vào nhánh mặc định, tái hiện lại đúng nguy cơ bỏ sót lỗi như trong Java.
+Vì nhánh `else` làm tắt mất bước kiểm tra đủ nhánh của compiler. Sau này bạn thêm một trạng thái mới vào `sealed class`, các khối `when` có `else` vẫn biên dịch êm ru mà không báo thiếu. Lúc chạy thật, trạng thái mới đó sẽ âm thầm rơi vào nhánh `else` và gây lỗi khó tìm.
 
 **Hỏi:** Nên dùng sealed class hay sealed interface khi mô hình hoá trạng thái UI?
-Ưu tiên `sealed interface` trừ khi bạn cần chia sẻ constructor hoặc thuộc tính có backing field. `sealed interface` giúp lớp con không bị mất suất đơn kế thừa và có thể cài đặt nhiều giao diện cùng lúc. Ngoài ra, giao diện không sở hữu constructor nên cấu trúc bytecode nhẹ nhàng và linh hoạt hơn.
+Nên ưu tiên `sealed interface`, trừ khi các nhánh con cần dùng chung constructor hoặc biến có backing field. Dùng `sealed interface` thì lớp con vẫn còn nguyên quyền kế thừa một class khác và cài đặt được nhiều interface cùng lúc. Ngoài ra, interface không tạo constructor nên bytecode sinh ra cũng gọn hơn.
 
 **Hỏi:** Data object khác data class chỗ nào khi dùng trong sealed hierarchy?
-`data object` dùng cho các nhánh trạng thái không mang dữ liệu riêng như `Loading`. Nó tạo một singleton duy nhất nên không tốn chi phí cấp phát bộ nhớ mỗi lần phát sinh trạng thái. Đồng thời, `data object` tự sinh hàm `toString()` hiển thị rõ tên lớp thay vì chuỗi địa chỉ khó đọc.
+`data object` dùng cho nhánh trạng thái không cầm theo dữ liệu nào, ví dụ như `Loading`. Nó chỉ tạo một đối tượng duy nhất trong bộ nhớ (singleton) thay vì cấp phát mới mỗi lần chuyển trạng thái. Hơn nữa, `data object` tự sinh sẵn hàm `toString()` in ra đúng tên lớp rất dễ đọc khi gỡ lỗi.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Khẳng định câu hỏi so sánh sealed class với data class là sai tiền đề vì hai khái niệm độc lập.
-- [ ] Sealed class giúp compiler kiểm tra tính vét cạn (exhaustive when) bằng cách giới hạn phạm vi kế thừa.
-- [ ] Data class tự sinh các hàm so sánh nội dung và sao chép theo giá trị từ constructor chính.
-- [ ] Bẫy dùng var trong data class phá vỡ bảng băm và bẫy dùng nhánh else làm mất tính vét cạn.
+- [ ] Giải thích được vì sao sealed và data không đối lập nhau mà thường kết hợp để biểu diễn trạng thái màn hình.
+- [ ] Nêu được cách sealed khóa danh sách lớp con để compiler kiểm tra đủ nhánh (exhaustive) trong khối when.
+- [ ] Trình bày được các hàm mà data class tự sinh từ constructor chính, cùng hai cái bẫy dùng biến var và nhánh else.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

@@ -10,7 +10,7 @@ diagrams: [Cơ chế|savedstate-process-death-binder.png|Activity ghi Bundle dư
 ---
 
 ## Bản 30 giây
-Khi người dùng chuyển sang ứng dụng khác, hệ điều hành Android có thể âm thầm giải phóng bộ nhớ bằng cách hủy tiến trình. Dữ liệu lưu trên ViewModel sẽ biến mất hoàn toàn, chỉ những giá trị được đóng gói trong `SavedStateHandle` mới được khôi phục. Cơ chế này giúp tái tạo nguyên vẹn trải nghiệm của người dùng mà không phụ thuộc vào vòng đời tiến trình.
+Khi bạn rời ứng dụng sang dùng app khác, Android có thể âm thầm tắt tiến trình chạy ngầm để lấy lại RAM. Lúc đó dữ liệu trong ViewModel mất sạch, chỉ những giá trị bạn cất vào `SavedStateHandle` mới được giữ lại. Nhờ vậy, khi mở lại ứng dụng, màn hình vẫn hiện đúng trạng thái cũ dù tiến trình đã khởi động lại.
 
 ## Cần biết trước
 - android-activity-lifecycle
@@ -18,32 +18,28 @@ Khi người dùng chuyển sang ứng dụng khác, hệ điều hành Android 
 - android-memory-leak
 
 ## Vấn đề buộc nó ra đời
-Năm 2008, Android được thiết kế để chạy đa nhiệm trên các thiết bị di động có dung lượng RAM vô cùng eo hẹp. Hệ thống bắt buộc phải chủ động tiêu diệt các tiến trình chạy ngầm để nhường tài nguyên cho ứng dụng phía trước.
+Năm 2008, Android ra đời trên những chiếc điện thoại có dung lượng RAM rất ít. Để chạy đa nhiệm, hệ thống phải tắt tiến trình nền nhằm nhường bộ nhớ cho ứng dụng trước mặt.
 
-Lập trình viên hay ngỡ ViewModel giữ dữ liệu vĩnh viễn, nhưng nó chỉ sống sót qua việc xoay màn hình. Khi tiến trình bị hủy, người dùng quay lại sẽ gặp màn hình trắng hoặc bị sập ứng dụng do biến rỗng.
+Nhiều bạn mới đi làm tưởng ViewModel giữ được dữ liệu mãi mãi, nhưng thật ra nó chỉ sống qua lúc xoay màn hình. Khi tiến trình bị tắt ngầm, người dùng mở lại app sẽ thấy màn hình trắng trơn hoặc ứng dụng bị sập vì biến rỗng.
 
-Google giới thiệu `SavedStateHandle` để kết nối trực tiếp kho lưu trữ trạng thái của hệ thống vào ViewModel. Lập trình viên không còn phải gọi thủ công các hàm tuần tự hóa phức tạp trong Activity.
+Google đưa ra `SavedStateHandle` để nối thẳng kho lưu trạng thái của hệ thống vào trong ViewModel. Bạn không còn phải tự viết code đóng gói dữ liệu rườm rà trong các hàm vòng đời của Activity.
 
 ## Nó thực sự là cái gì
-Tiêu diệt tiến trình (*Process Death*) KHÔNG phải là lỗi tràn bộ nhớ (*OutOfMemory*) do rò rỉ mã nguồn gây ra. Thực chất, đây là hành động chủ động của trình dọn dẹp bộ nhớ nhân Linux dựa trên điểm ưu tiên (*oom_score_adj*).
-
-Hệ thống lưu trữ dữ liệu trạng thái vào bộ nhớ của tiến trình máy chủ hệ thống (*system_server*) trước khi giải phóng.
+`Process Death` không phải là lỗi tràn bộ nhớ (`OutOfMemory`) do code của bạn bị rò rỉ. Thật ra, nhân Linux chủ động tắt tiến trình chạy ngầm dựa vào điểm ưu tiên `oom_score_adj` khi máy thiếu RAM. Trước khi tắt, hệ thống chép dữ liệu trạng thái của bạn sang giữ ở tiến trình hệ thống `system_server`.
 
 ## Cơ chế
-Trước khi thu hồi tiến trình, hệ điều hành yêu cầu Activity ghi các trạng thái quan trọng vào một gói dữ liệu (*Bundle*). Gói dữ liệu này được gửi qua kênh liên tiến trình (*Binder*) đến tiến trình quản lý hệ điều hành.
-
-`SavedStateHandle` là một lớp bao bọc dạng khóa giá trị giúp ViewModel đọc và ghi trực tiếp vào gói dữ liệu này. Khi người dùng mở lại app, tiến trình mới được tạo và hệ thống tự động truyền lại gói dữ liệu để khôi phục.
+Khi bạn vừa ẩn ứng dụng xuống nền, hệ điều hành bảo Activity gom các trạng thái cần giữ vào một gói `Bundle`. Gói dữ liệu này được gửi qua kênh liên tiến trình `Binder` sang nằm nhờ ở tiến trình `system_server`. `SavedStateHandle` chỉ là một bảng khóa - giá trị trong ViewModel giúp bạn đọc và ghi thẳng vào gói `Bundle` đó. Lúc bạn mở lại app, Android tạo tiến trình mới rồi trả gói `Bundle` này về để `SavedStateHandle` nạp lại dữ liệu cũ.
 
 ## Đánh đổi
-Khôi phục trạng thái qua `SavedStateHandle` đảm bảo trải nghiệm người dùng liền mạch sau nhiều giờ rời khỏi ứng dụng. Khi tiến trình bị thu hồi, toàn bộ tin nhắn đang chờ trên [MessageQueue](concept:android-handler-looper-message-queue) cũng tan biến hoàn toàn.
+Dùng `SavedStateHandle` giúp bạn giữ nguyên màn hình đang dùng dở dù người dùng đã rời app hàng giờ liền. Khi tiến trình bị tắt, mọi tin nhắn đang xếp hàng trên [MessageQueue](concept:android-handler-looper-message-queue) của luồng chính cũng mất sạch.
 
-Đổi lại, gói dữ liệu Binder bị giới hạn dung lượng nghiêm ngặt ở mức khoảng một megabyte cho mỗi tiến trình. Nếu bạn cố tình nhét danh sách lớn hoặc ảnh bitmap vào đây, ứng dụng sẽ bị sập ngay lập tức.
+Đổi lại, kênh truyền `Binder` giới hạn tổng dung lượng gói dữ liệu ở mức khoảng một megabyte cho cả tiến trình. Nếu bạn cố nhét danh sách dài hay ảnh bitmap vào đây, ứng dụng sẽ sập ngay lúc người dùng bấm nút Home.
 
 ## Nguyên lý gốc
-Nguyên lý tồn lưu trạng thái: tiến trình tính toán là tạm thời, nhưng trạng thái người dùng phải bền vững. Sự phân tách giữa tiến trình thực thi và kho lưu trữ trạng thái giúp hệ thống linh hoạt điều phối tài nguyên.
+Tiến trình có thể bị tắt bất cứ lúc nào. Vì vậy, trạng thái màn hình phải được cất ở nơi sống lâu hơn tiến trình đó.
 
 ## Key insight
-> ViewModel không bảo vệ dữ liệu trước việc hủy tiến trình, chỉ có SavedStateHandle mới vượt qua được ranh giới này.
+> ViewModel mất sạch khi tiến trình bị tắt ngầm, chỉ dữ liệu gửi qua `SavedStateHandle` sang `system_server` mới còn sống.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -60,22 +56,22 @@ class ProductDetailViewModel(
 ```
 
 ## Bẫy & ranh giới
-Lưu dữ liệu vượt quá giới hạn một megabyte của bộ đệm Binder sẽ kích hoạt ngoại lệ tràn giao dịch liên tiến trình. Chống chỉ định lưu toàn bộ đối tượng nghiệp vụ phức tạp vào `SavedStateHandle` thay vì chỉ lưu mã định danh. Triệu chứng gồm crash app với `TransactionTooLargeException`, mất trắng dữ liệu nhập dở hoặc tải lại trang sai lệch.
+Nếu bạn cất dữ liệu vượt ngưỡng một megabyte của bộ đệm `Binder`, giao dịch liên tiến trình sẽ bị tràn và ném lỗi ngay. Đừng bao giờ nhét cả đối tượng dữ liệu lớn vào `SavedStateHandle`, mà chỉ nên lưu mã định danh hoặc từ khóa đang tìm kiếm. Triệu chứng khi mắc bẫy là app sập với lỗi `TransactionTooLargeException`, mất sạch chữ vừa gõ dở, hoặc mở lại ra sai trang.
 
 ## Câu hỏi thực chiến
 **Hỏi:** ViewModel có sống sót qua việc hệ điều hành tiêu diệt tiến trình (Process Death) không?
-Không. Khi tiến trình bị hệ thống tiêu diệt, toàn bộ bộ nhớ RAM bao gồm ViewModel và singleton đều bị xóa sạch hoàn toàn.
+Không. Khi hệ thống tắt tiến trình, toàn bộ vùng nhớ RAM của app gồm cả ViewModel lẫn các biến singleton đều bị xóa sạch.
 
 **Hỏi:** Làm thế nào để phân biệt xoay màn hình với việc bị tiêu diệt tiến trình?
-Dựa vào cờ trạng thái khôi phục. Khi xoay màn hình, instance của ViewModel được giữ nguyên, còn khi tiến trình tái sinh, ViewModel được tạo mới cùng `SavedStateHandle`.
+Khi bạn xoay màn hình, đối tượng ViewModel cũ vẫn nằm nguyên trên RAM và chỉ nối lại vào Activity mới. Còn sau `Process Death`, hệ thống phải tạo một đối tượng ViewModel mới tinh rồi nạp lại dữ liệu từ `SavedStateHandle`.
 
 **Hỏi:** Có nên lưu danh sách phân trang vào SavedStateHandle không?
-Không nên. Bạn chỉ nên lưu ID hoặc số trang hiện tại để tải lại, tránh gây quá tải bộ đệm Binder 1MB.
+Không nên. Bạn chỉ cần lưu mã ID hoặc số trang đang xem vào `SavedStateHandle` để lúc mở lại thì gọi lấy lại dữ liệu. Cách này giúp bạn không làm tràn bộ đệm 1MB của `Binder`.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Phân biệt xoay màn hình (ViewModel sống) và Process Death (ViewModel chết).
-- [ ] SavedStateHandle lưu dữ liệu qua Binder sang system_server để sống sót.
-- [ ] Giới hạn bộ đệm Binder 1MB và bẫy TransactionTooLargeException.
+- [ ] Phân biệt được xoay màn hình (ViewModel còn sống) và Process Death (ViewModel bị xóa cùng tiến trình).
+- [ ] Giải thích được cách SavedStateHandle gửi Bundle qua Binder sang tiến trình system_server để giữ dữ liệu.
+- [ ] Nêu được giới hạn 1MB của bộ đệm Binder và lỗi TransactionTooLargeException khi lưu dữ liệu quá lớn.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

@@ -10,36 +10,36 @@ diagrams: [Cơ chế|handler-looper-message-queue-loop.png|Handler gửi tin và
 ---
 
 ## Bản 30 giây
-Một luồng hệ điều hành thông thường sẽ lập tức kết thúc và giải phóng tài nguyên sau khi chạy hết lệnh. Android giữ cho luồng giao diện sống sót liên tục nhờ vòng lặp `Looper` và hàng đợi `MessageQueue` xử lý tin nhắn. `Handler` đóng vai trò sứ giả để các luồng phụ gửi công việc về luồng chính một cách an toàn.
+Một luồng bình thường sẽ tự kết thúc và biến mất ngay sau khi chạy xong dòng lệnh cuối cùng trong hàm `run()`. Android giữ cho luồng chính sống suốt lúc mở ứng dụng nhờ vòng lặp `Looper` liên tục rút việc từ hàng đợi `MessageQueue`. Còn `Handler` là đầu mối để các luồng phụ gửi công việc về hàng đợi của luồng chính một cách an toàn.
 
 ## Cần biết trước
 - thread
 - android-activity-lifecycle
 
 ## Vấn đề buộc nó ra đời
-Hệ thống hiển thị của Android không an toàn đa luồng (*Not Thread-Safe*). Nhiều luồng cùng lúc thao tác lên cây giao diện sẽ gây xé hình và xung đột trạng thái nghiêm trọng.
+Hệ thống View của Android không an toàn khi truy cập đa luồng (*Not Thread-Safe*). Nếu hai luồng cùng lúc sửa một nút bấm, giao diện sẽ hiển thị sai lệch hoặc sập ứng dụng ngay.
 
-Để ngăn ngừa thảm họa này, Google áp dụng nguyên tắc truy cập đơn luồng cho toàn bộ hệ thống View. Mọi lệnh cập nhật màn hình bắt buộc phải chuyển giao về luồng chính duy nhất xử lý tuần tự.
+Để tránh việc phải đặt khóa đồng bộ ở mọi View, Google quy định chỉ một luồng duy nhất được phép sửa giao diện. Mọi lệnh vẽ màn hình và xử lý chạm tay đều phải đưa về luồng chính để chạy lần lượt.
 
-Bộ ba `Handler`, `Looper` và `MessageQueue` ra đời từ phiên bản Android đầu tiên để giải quyết bài toán giao tiếp giữa các luồng. Chúng thiết lập một đường ray truyền tin nhắn bền bỉ giữa các tiến trình.
+Bộ ba `Handler`, `Looper` và `MessageQueue` có mặt từ bản Android đầu tiên để chuyển việc giữa các luồng. Nhờ đó, luồng phụ tải dữ liệu xong có thể gửi kết quả về luồng chính để hiển thị.
 
 ## Nó thực sự là cái gì
-`Looper` KHÔNG phải là một vòng lặp `while(true)` chạy rỗng liên tục gây đốt cháy năng lượng CPU. Thực chất, đây là một cơ chế ngủ đông dựa trên lời gọi hệ thống `epoll_wait` của nhân Linux.
+`Looper` không phải là một vòng lặp `while(true)` chạy rỗng liên tục làm tốn pin và nóng máy. Thực ra, bên dưới nó dùng lệnh `epoll_wait` của nhân Linux để cho luồng tạm ngủ khi rảnh.
 
-Khi hàng đợi hết việc, luồng chính tự động nhường CPU và chỉ thức dậy khi có tệp mô tả sự kiện phát tín hiệu.
+Khi hàng đợi `MessageQueue` không có việc nào cần chạy, luồng chính sẽ ngủ yên và nhường CPU cho việc khác. Ngay khi bạn chạm vào màn hình hoặc có tin nhắn mới gửi tới, nhân Linux mới đánh thức luồng dậy làm việc.
 
 ## Cơ chế
-Mỗi `Thread` chỉ có thể gắn với duy nhất một đối tượng `Looper` thông qua biến cục bộ luồng (*ThreadLocal*). `MessageQueue` lưu trữ các thông điệp và gói lệnh theo thứ tự mốc thời gian thực thi.
+Mỗi `Thread` chỉ gắn được với tối đa một `Looper`, được cất riêng trong vùng nhớ `ThreadLocal` của luồng đó. Hàng đợi `MessageQueue` xếp các gói tin nhắn theo thứ tự thời điểm cần chạy từ sớm tới muộn.
 
-Vòng lặp `Looper.loop()` liên tục lấy thông điệp từ hàng đợi và gọi hàm xử lý của `Handler` đích. Rào cản đồng bộ (*Sync Barrier*) được dùng để ưu tiên các thông điệp vẽ giao diện trước các tác vụ thông thường.
+Vòng lặp `Looper.loop()` lần lượt lấy từng tin nhắn ra và giao cho đúng `Handler` đã gửi tin đó xử lý. Khi vẽ khung hình mới, hệ thống cắm chốt chặn (*Sync Barrier*) vào hàng đợi để ưu tiên chạy lệnh vẽ trước.
 
 ## Đánh đổi
-Cơ chế hàng đợi tuần tự loại bỏ hoàn toàn các lỗi xung đột khóa (*Race Condition*) trên cây giao diện. Đổi lại, nếu một tác vụ trong hàng đợi xử lý quá lâu, toàn bộ các tác vụ phía sau sẽ bị phong tỏa.
+Chạy từng việc một trên một hàng đợi giúp cây giao diện không bao giờ bị hai luồng tranh chấp dữ liệu (*Race Condition*). Đổi lại, nếu một công việc ở đầu hàng chạy quá lâu, mọi việc xếp phía sau đều phải đứng chờ.
 
-Nếu luồng chính bị phong tỏa khiến sự kiện tương tác chờ quá năm giây, hệ thống sẽ báo lỗi không phản hồi.
+Nếu giữ luồng chính quá 5 giây làm kẹt sự kiện chạm, hệ thống sẽ báo lỗi ứng dụng không phản hồi.
 
 ## Nguyên lý gốc
-Nguyên lý vòng lặp sự kiện: giữ tiến trình sống sót bằng cách tuần tự hóa mọi kích thích từ môi trường. Sự phân chia giữa luồng tính toán nặng và luồng điều phối giao diện đảm bảo độ mượt mà của hệ thống tương tác.
+Giữ luồng sống lâu bằng một vòng lặp rút việc từ hàng đợi, và tách riêng luồng tính toán nặng khỏi luồng vẽ giao diện.
 
 ## Key insight
 > Looper không làm nóng máy nhờ lệnh chờ epoll, và Handler chỉ là cổng gửi nhận chứ không sở hữu luồng.
@@ -60,22 +60,22 @@ class WorkerThread : Thread() {
 ```
 
 ## Bẫy & ranh giới
-Tạo `Handler` nặc danh không tĩnh trong Activity sẽ ngầm giữ tham chiếu đến Context, gây [rò rỉ bộ nhớ](concept:android-memory-leak) nghiêm trọng. Khi hệ thống gặp biến cố [tiêu diệt tiến trình](concept:android-process-death-and-saved-state), các tin nhắn trong hàng đợi cũng bị hủy bỏ. Chống chỉ định đẩy các tác vụ giải mã file hoặc gọi cơ sở dữ liệu vào hàng đợi luồng chính. Triệu chứng lỗi gồm rò rỉ bộ nhớ qua chuỗi tin nhắn chờ, giật khung hình và [lỗi ứng dụng không phản hồi (*ANR*)](concept:android-main-thread-and-anr).
+Tạo `Handler` ẩn danh trong `Activity` rồi gửi tin hẹn giờ sẽ giữ chặt `Activity` và gây [rò rỉ bộ nhớ](concept:android-memory-leak). Khi ứng dụng dưới nền gặp cảnh [tiêu diệt tiến trình](concept:android-process-death-and-saved-state), mọi tin nhắn đang chờ trong `MessageQueue` cũng mất sạch. Tuyệt đối không đẩy việc đọc file lớn hay truy vấn cơ sở dữ liệu vào `Handler` của luồng chính. Triệu chứng dính bẫy là rò rỉ bộ nhớ, giật khung hình và [lỗi ứng dụng không phản hồi (*ANR*)](concept:android-main-thread-and-anr).
 
 ## Câu hỏi thực chiến
 **Hỏi:** Tại sao vòng lặp vô tận Looper.loop() trên Main Thread không làm treo hay nóng máy điện thoại?
-Không nóng máy vì nó sử dụng cơ chế `epoll_wait` của Linux. Khi không có tin nhắn trong hàng đợi, luồng chính đi vào trạng thái ngủ đông và nhường CPU cho tiến trình khác.
+Vì bên dưới nó gọi hàm `epoll_wait` của nhân Linux chứ không chạy vòng lặp rỗng. Khi `MessageQueue` hết tin nhắn cần chạy ngay, luồng chính tự ngủ và nhường hoàn toàn CPU cho các luồng khác.
 
 **Hỏi:** Handler tạo trên luồng phụ có thể cập nhật giao diện trực tiếp được không?
-Không được. Handler gửi công việc vào hàng đợi của Looper gắn liền với nó; muốn sửa giao diện, bạn phải truyền `Looper.getMainLooper()` vào hàm khởi tạo.
+Không được, vì `Handler` gửi việc vào hàng đợi của `Looper` nào mà nó được gắn lúc khởi tạo. Muốn gửi việc từ luồng phụ về sửa giao diện, bạn phải truyền `Looper.getMainLooper()` vào lúc tạo `Handler`.
 
 **Hỏi:** Rào cản đồng bộ (Sync Barrier) trong MessageQueue có tác dụng gì?
-Nó tạm chặn các tin nhắn thông thường để ưu tiên tín hiệu vẽ màn hình. Nhờ đó, khung hình 60 hay 120 FPS luôn được xử lý đúng hạn.
+Khi đến nhịp vẽ màn hình, hệ thống thả chốt `Sync Barrier` vào hàng đợi để tạm gác các tin nhắn thường sang một bên. Nhờ đó, tin nhắn vẽ khung hình được chạy vượt lên trước, giúp màn hình giữ được tốc độ 60 hoặc 120 hình mỗi giây.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Looper.loop() chạy dựa trên lệnh ngủ epoll_wait của nhân Linux.
-- [ ] Handler gắn liền với Looper thông qua ThreadLocal để định tuyến tin nhắn.
-- [ ] Bẫy Handler nặc danh giữ tham chiếu Activity gây rò rỉ bộ nhớ.
+- [ ] Giải thích được vì sao Looper.loop() không làm tốn CPU nhờ cơ chế ngủ epoll_wait của nhân Linux.
+- [ ] Trình bày được cách Handler gắn với Looper qua ThreadLocal để gửi việc về đúng hàng đợi.
+- [ ] Chỉ ra được bẫy Handler ẩn danh giữ tham chiếu Activity qua tin nhắn hẹn giờ gây rò rỉ bộ nhớ.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

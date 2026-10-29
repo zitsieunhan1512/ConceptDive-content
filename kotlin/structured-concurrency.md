@@ -10,7 +10,7 @@ created: 2026-10-01
 ---
 
 ## Bản 30 giây
-Lập trình bất đồng bộ truyền thống dễ làm thất lạc tác vụ ngầm khi một phần việc bị lỗi. Đồng quy có cấu trúc (*structured concurrency*) trói buộc vòng đời các tác vụ con vào tác vụ cha thành một cây gia phả. Khi cha bị hủy hoặc con gặp sự cố, toàn bộ nhánh việc liên quan sẽ tự động dừng lại.
+Khi gọi 3 API cùng lúc mà một cái bị lỗi, các coroutine còn lại dễ chạy thừa nếu thiếu quản lý. Đồng quy có cấu trúc (*structured concurrency*) gắn vòng đời của mọi coroutine con vào một `Job` cha theo hình cây. Khi `Job` cha bị hủy hoặc một nhánh con ném lỗi, toàn bộ các nhánh liên quan đều tự dừng lại.
 
 ## Cần biết trước
 - kotlin-coroutines
@@ -18,36 +18,36 @@ Lập trình bất đồng bộ truyền thống dễ làm thất lạc tác v�
 - thread
 
 ## Vấn đề buộc nó ra đời
-Năm 2018, Nathaniel J. Smith công bố bài luận so sánh câu lệnh khởi chạy luồng tự do với lệnh nhảy goto tai hại của thập niên 1960. Các tiến trình chạy ngầm không có điểm neo vòng đời thường bị bỏ quên khi gặp lỗi.
+Năm 2018, Nathaniel J. Smith viết bài luận ví lệnh bắn luồng tự do giống như lệnh nhảy `goto` dễ gây rối của thập niên 1960. Một việc chạy ngầm không gắn vào đâu thường bị bỏ quên khi hàm gọi nó gặp lỗi.
 
-Trong ứng dụng di động, người dùng rời màn hình nhưng các luồng tải mạng vẫn âm thầm thực thi. Hậu quả là ứng dụng rò rỉ bộ nhớ, hao pin và thậm chí gây sập khi cập nhật vào giao diện đã chết.
+Trên điện thoại, người dùng đã đóng màn hình nhưng các luồng tải mạng bên dưới vẫn cứ chạy tiếp. Ứng dụng vừa tốn pin, rò rỉ bộ nhớ, lại vừa dễ sập khi cố vẽ kết quả lên màn hình đã đóng.
 
-Tháng 9 năm 2018, Roman Elizarov đưa mô hình này vào thư viện `kotlinx.coroutines 0.26.0`. Bản phát hành này đánh dấu lỗi thời (*deprecated*) các builder toàn cục, đồng thời bổ sung `CoroutineScope` và `GlobalScope`.
+Tháng 9 năm 2018, Roman Elizarov đưa mô hình này vào `kotlinx.coroutines 0.26.0`. Phiên bản này đánh dấu lỗi thời (*deprecated*) các hàm khởi chạy tự do và đưa vào `CoroutineScope` cùng `GlobalScope`.
 
 ## Nó thực sự là cái gì
-Đồng quy có cấu trúc KHÔNG PHẢI là một luồng chạy đặc biệt hay tính năng tối ưu tốc độ CPU. Thực chất, đây là kỷ luật quản lý vòng đời dựa trên cấu trúc cây quan hệ giữa các đối tượng `Job`.
+Đồng quy có cấu trúc không phải một loại luồng mới hay mẹo làm CPU chạy nhanh hơn. Nó là quy tắc quản lý vòng đời bằng cách xếp các đối tượng `Job` thành một cây cha con.
 
-Khối lệnh cha chỉ hoàn thành khi toàn bộ các coroutine con bên trong đã kết thúc mỹ mãn.
+Khối lệnh cha chỉ xong việc khi mọi coroutine con bên trong nó đã chạy xong.
 
-Ngoại lệ chưa bắt ở một nhánh con sẽ lập tức hủy cha và các nhánh anh em, trừ khi dùng [SupervisorJob](concept:kotlin-coroutine-context-and-dispatchers) hoặc `supervisorScope`.
+Nếu nhánh con ném lỗi chưa bắt, nó sẽ hủy cả cha lẫn các nhánh anh em, trừ khi dùng [SupervisorJob](concept:kotlin-coroutine-context-and-dispatchers) hoặc `supervisorScope`.
 
 ## Cơ chế
-Mỗi khi coroutine con khởi chạy từ một `CoroutineScope`, builder tự động tạo một đối tượng `Job` mới. `Job` mới này gắn vào danh sách con của `Job` cha để tạo nên một cây phân cấp.
+Mỗi khi bạn gọi `launch` hay `async` từ một `CoroutineScope`, hàm đó tạo ra một đối tượng `Job` mới. `Job` mới này tự gắn vào danh sách con của `Job` cha để tạo thành một cây phân cấp.
 
-Khi cha bị hủy, tín hiệu hủy lan truyền từ trên xuống dưới tới mọi nút lá.
+Khi bạn hủy `Job` cha, tín hiệu hủy đi từ trên xuống dưới tới mọi `Job` con.
 
-Khi một con ném ngoại lệ, nó gửi tín hiệu hủy ngược lên nút cha để hủy toàn bộ nhánh còn lại.
+Ngược lại, khi một `Job` con gặp lỗi không bắt được, nó báo ngược lên `Job` cha để hủy hết các nhánh còn lại.
 
 ## Đánh đổi
-Mô hình cây đảm bảo tuyệt đối không có tác vụ nào bị rò rỉ chạy ngầm vô thừa nhận. Đổi lại, một lỗi nhỏ ở tác vụ phụ nếu không xử lý kỹ sẽ kéo sập toàn bộ luồng công việc chính.
+Cách tổ chức hình cây giúp bạn không bao giờ bỏ sót một coroutine nào chạy ngầm ngoài ý muốn. Đổi lại, chỉ cần một việc phụ bị lỗi mà quên bắt lại thì cả công việc chính cũng bị hủy theo.
 
-Hệ thống phải duy trì danh sách liên kết các nút `Job` trên bộ nhớ Heap trong suốt thời gian thực thi.
+Ứng dụng cũng phải giữ danh sách liên kết các đối tượng `Job` trên bộ nhớ Heap trong lúc chúng đang chạy.
 
 ## Nguyên lý gốc
-Nguyên lý đóng gói phạm vi: một thao tác xử lý chỉ kết thúc khi mọi phần việc ủy thác bên dưới đã dừng hẳn. Trách nhiệm dọn dẹp lỗi luôn thuộc về cấp chỉ huy trực tiếp.
+Một hàm chỉ được phép kết thúc khi mọi việc con mà nó đẻ ra bên trong đã dừng hẳn.
 
 ## Key insight
-> Đồng quy có cấu trúc biến việc quản lý luồng từ lệnh nhảy tự do thành khối đóng gói có cây gia phả vòng đời.
+> Đồng quy có cấu trúc gom các coroutine rời rạc vào một cây `Job` cha con để tự chờ nhau và tự hủy cùng nhau.
 
 ## Ví von
 Một người quản lý dự án giao việc cho ba nhân viên cấp dưới. Người quản lý chỉ được về khi nhân viên làm xong, và khi dự án bị hủy thì cả nhóm ngừng làm việc.
@@ -62,22 +62,22 @@ suspend fun fetchDashboard(): Dashboard = coroutineScope {
 ```
 
 ## Bẫy & ranh giới
-Bẫy dùng `GlobalScope.launch` phá vỡ hoàn toàn cây `Job`, biến tác vụ thành tiến trình mồ côi gây rò rỉ bộ nhớ. Chống chỉ định truyền trực tiếp `Job()` vào builder vì thao tác này cắt đứt liên kết cha con với phạm vi hiện tại. Nếu muốn một nhánh con thất bại không làm hủy nhánh khác, hãy dùng `supervisorScope` hoặc `SupervisorJob`. Triệu chứng vi phạm là rò rỉ [Memory leak](concept:android-memory-leak), hoặc một cuộc gọi mạng phụ bị lỗi kéo theo sập toàn bộ màn hình.
+Nếu bạn gọi `GlobalScope.launch`, coroutine đó nằm ngoài cây `Job` của màn hình nên dễ chạy mãi và gây rò rỉ bộ nhớ. Cũng đừng truyền thẳng `Job()` mới vào trong `launch(Job())`, vì làm vậy là tự cắt đứt dây nối với `Job` cha hiện tại. Nếu bạn muốn một nhánh con lỗi mà các nhánh anh em vẫn chạy tiếp, hãy bọc bằng `supervisorScope` hoặc dùng `SupervisorJob`. Triệu chứng khi làm sai là bị [Memory leak](concept:android-memory-leak), hoặc một API phụ bị lỗi làm hủy luôn cả màn hình chính.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Vì sao `launch(Job())` bên trong `viewModelScope` vẫn chạy tiếp sau khi màn hình đã đóng?
-`Job()` truyền vào làm tham số trở thành cha mới và cắt đứt liên kết với `Job` của scope. Do đó, lệnh hủy từ `viewModelScope` khi màn hình đóng không thể lan truyền tới tác vụ này. Bạn nên tránh truyền `Job()` mới vào builder trừ khi cố ý tạo tiến trình độc lập.
+Vì đối tượng `Job()` bạn mới tạo nhảy vào thay thế vị trí cha và cắt đứt liên kết với `Job` của `viewModelScope`. Khi màn hình đóng, lệnh hủy từ `viewModelScope` không còn đường nào để truyền xuống coroutine đó nữa. Vì vậy, bạn đừng tự truyền `Job()` mới vào hàm `launch`.
 
 **Hỏi:** Khối `runBlocking` hoặc `coroutineScope` có chờ các coroutine con không gắn `await` kết thúc không?
-Có. Theo quy tắc này, phạm vi cha luôn đình chỉ và đợi toàn bộ các con kết thúc trước khi hoàn tất chính nó. Bạn không cần gọi `join` thủ công cho từng nhánh con trừ khi cần đồng bộ thứ tự chạy.
+Có. Khối cha luôn tự tạm dừng và đợi mọi coroutine con bên trong chạy xong rồi mới đi tiếp. Bạn không cần gọi `join` cho từng nhánh con, trừ khi muốn nhánh này phải xong trước nhánh kia.
 
 **Hỏi:** Việc truyền `CoroutineScope(Job())` vào ViewModel có gây rò rỉ bộ nhớ không?
-Có nguy cơ rất cao. Nếu bạn không gọi `cancel()` khi ViewModel bị hủy trong [ViewModel](concept:android-viewmodel), các coroutine chạy bên trong sẽ tiếp tục sống. Do đó, bạn nên luôn dùng `viewModelScope` tích hợp sẵn để tự động hủy công việc theo vòng đời màn hình.
+Rất dễ rò rỉ. Nếu bạn quên tự gọi `cancel()` khi [ViewModel](concept:android-viewmodel) bị đóng, các coroutine bên trong sẽ cứ thế chạy tiếp. Tốt nhất bạn hãy dùng sẵn `viewModelScope` để nó tự hủy công việc khi người dùng thoát hẳn màn hình.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Phân tích cấu trúc cây phân cấp Job cha con và cơ chế tự động chờ mọi con kết thúc.
-- [ ] Giải thích nguyên lý lan truyền tín hiệu hủy hai chiều giữa cha và con.
-- [ ] Nêu rõ bẫy truyền Job() vào builder làm mất liên kết hủy của viewModelScope.
+- [ ] Giải thích được cách các đối tượng Job xếp thành cây cha con và quy tắc cha luôn chờ mọi con chạy xong.
+- [ ] Trình bày được hai chiều truyền tín hiệu hủy: từ cha xuống con khi bị cancel, và từ con lên cha khi ném lỗi.
+- [ ] Chỉ ra được bẫy truyền Job() mới vào launch làm đứt dây nối với viewModelScope và cách dùng supervisorScope.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

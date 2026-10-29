@@ -10,28 +10,28 @@ created: 2026-09-07
 ---
 
 ## Bản 30 giây
-Bảng tra cứu nhanh (`HashMap`, `HashSet`) dùng mã băm chia ngăn, còn phép so bằng tìm đúng món đồ trong ngăn đó. Cặp hàm này giữ hợp đồng: hai đối tượng bằng nhau bắt buộc phải có cùng mã băm. Nếu vi phạm, máy tính tìm sai ngăn và coi như đối tượng không tồn tại.
+Khi tìm người dùng trong `HashMap` hay `HashSet`, máy dùng `hashCode` chọn ngăn chứa rồi gọi `equals` so từng món. Vì vậy hai đối tượng bằng nhau qua `equals` bắt buộc phải trả về cùng một số `hashCode`. Nếu làm sai luật này, bạn vừa thêm đối tượng vào xong tìm lại ngay cũng không thấy.
 
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
-Năm 1953, Hans Peter Luhn tại IBM phát minh ra bảng băm (hash table). Mục tiêu là tra cứu dữ liệu tức thì trong thời gian O(1) thay vì quét mảng O(N). Thuật toán băm chuyển đổi khóa thành chỉ số ngăn chứa (bucket index) trong mảng.
+Năm 1953, Hans Peter Luhn tại IBM tạo ra bảng băm (hash table) để tìm dữ liệu với tốc độ O(1). Nhờ vậy, máy không phải dò từng ô từ đầu mảng với tốc độ O(N). Hàm băm biến mỗi khóa thành một số thứ tự ngăn chứa (`bucket index`) trong mảng.
 
-Năm 1995, Java đưa `equals` và `hashCode` vào lớp gốc `Object`. Quyết định này đặt ra hợp đồng bất di bất dịch: nếu `a.equals(b)` đúng thì mã băm của chúng phải giống hệt nhau.
+Năm 1995, Java đưa hai hàm `equals` và `hashCode` vào lớp gốc `Object` cho mọi đối tượng. Từ đó có một luật bắt buộc: nếu `a.equals(b)` trả về `true` thì `a.hashCode()` và `b.hashCode()` phải ra cùng một con số.
 
-Lập trình viên thường chỉ override `equals` mà quên `hashCode`. Hậu quả là `HashMap` và `HashSet` tính sai ngăn chứa, làm mất dấu phần tử một cách bí ẩn trong bộ nhớ.
+Rất nhiều người mới học chỉ viết lại hàm `equals` để so nội dung mà quên viết lại hàm `hashCode`. Khi đó, `HashMap` và `HashSet` cất vào một ngăn nhưng tìm ở ngăn khác, làm đối tượng như bốc hơi.
 
 ## Nó thực sự là cái gì
-Hợp đồng này KHÔNG phải lý thuyết giáo điều. Thực chất, đó là bất biến (invariant) của bảng băm: `hashCode` định vị ngăn chứa, còn `equals` tìm đúng đối tượng trong ngăn. Trong Kotlin, khai báo [data class](concept:kotlin-sealed-vs-data-class) giúp trình biên dịch tự động sinh cặp hàm chuẩn xác này.
+Luật đi đôi giữa `equals` và `hashCode` không phải để học vẹt, mà là điều kiện để bảng băm chạy đúng. Bạn cứ hình dung `hashCode` giúp nhảy tới đúng ngăn tủ, còn `equals` giúp nhìn mặt từng món đồ trong ngăn đó. Trong Kotlin, khi khai báo [data class](concept:kotlin-sealed-vs-data-class), trình biên dịch tự sinh hai hàm này theo các thuộc tính trong ngoặc tròn.
 
 ## Cơ chế
-`HashSet` gọi `hashCode()` để tính chỉ số ngăn chứa qua phép lấy dư hoặc mặt nạ bit. Sau khi đến đúng ngăn chứa, nó mới dùng `equals()` để so sánh từng phần tử. Khi gọi `contains()`, quy trình lặp lại y hệt để tìm đối tượng. Nếu mã băm bị lệch, máy tính sẽ lục soát nhầm ngăn chứa và báo không tìm thấy.
+Khi bạn cất đối tượng vào `HashSet`, nó gọi `hashCode()` rồi chia lấy dư (hoặc lọc bit) để tính ra số thứ tự ngăn chứa. Tới đúng ngăn đó, nó mới gọi `equals()` so với các phần tử đang nằm sẵn xem có bị trùng không. Lúc bạn gọi `contains()` để kiểm tra, `HashSet` cũng tính lại số ngăn từ `hashCode()` y hệt như vậy. Nếu hai đối tượng bằng nhau lại có mã băm khác nhau, máy mở nhầm ngăn và báo không có.
 
 ## Đánh đổi
-Tuân thủ hợp đồng giúp tìm kiếm và kiểm tra tồn tại đạt tốc độ O(1). Đổi lại, các trường tham gia tính mã băm bắt buộc phải bất biến. Nếu dùng trường thay đổi (`var`), đối tượng sẽ kẹt vĩnh viễn trong tập hợp thành "hồn ma" không thể xóa.
+Nhờ chia ngăn bằng mã băm, việc tìm kiếm hay kiểm tra trùng lặp đạt tốc độ O(1) dù có hàng vạn phần tử. Đổi lại, mọi thuộc tính dùng để tính `hashCode` bắt buộc phải giữ nguyên (`val`) suốt thời gian đối tượng nằm trong bảng. Nếu dùng thuộc tính `var` rồi sửa giá trị, đối tượng kẹt ở ngăn cũ và không thể tìm hay xóa.
 
 ## Nguyên lý gốc
-Nguyên lý phân vùng không gian (spatial partitioning): chia không gian tìm kiếm thành các ô nhỏ để thu hẹp phạm vi quét dữ liệu.
+Thay vì lục tung kho hàng lớn, ta chia thành nhiều ngăn đánh số. Khi tìm chỉ cần lục một ngăn (spatial partitioning).
 
 ## Key insight
 > Hai đối tượng bằng nhau bắt buộc phải cùng hashCode; sửa biến tạo hashCode sau khi lưu vào HashSet sẽ làm mất tích đối tượng.
@@ -50,28 +50,28 @@ val exists = set.contains(UserId("A"))
 ```
 
 ## Bẫy & ranh giới
-Bẫy kinh điển là dùng `var` trong class làm key của `HashMap`. Khi sửa giá trị, mã băm đổi khác khiến `map.get(key)` trả về `null` dù key vẫn nằm trong map. Bẫy thứ hai là viết `equals(other: UserId)` thay vì `equals(other: Any?)`, biến thành hàm overload chứ không ghi đè. Chống chỉ định dùng đối tượng chứa `var` làm key của collection băm vì gây rò rỉ bộ nhớ dưới dạng các đối tượng ma.
+Bẫy hay gặp nhất là dùng đối tượng có thuộc tính `var` làm khóa (`key`) của `HashMap` rồi sửa biến đó. Khi đổi giá trị, mã băm trỏ sang ngăn mới nên `map[key]` trả về `null`, dù đối tượng cũ vẫn chiếm RAM. Bẫy thứ hai là viết `fun equals(other: UserId)` thiếu `override` và kiểu `Any?`, thành nạp chồng thay vì ghi đè. Đừng bao giờ lấy đối tượng có thuộc tính `var` tham gia tính mã băm đi làm khóa cho `HashMap` hay phần tử của `HashSet`.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Hai đối tượng có cùng `hashCode` thì chắc chắn sẽ bằng nhau qua `equals` đúng không?
-Không phải. Mã băm chỉ có kích thước 32-bit nên hai đối tượng khác nhau hoàn toàn có thể trùng mã do xung đột băm. `HashMap` khi đó xếp chúng chung một ngăn và bắt buộc phải gọi `equals()` để tìm đúng món đồ.
+Không, vì `hashCode` chỉ là số nguyên 32-bit nên hai đối tượng khác nhau vẫn có thể trùng mã (đụng độ băm). Khi đó `HashMap` xếp cả hai vào chung một ngăn, rồi gọi tiếp `equals()` từng cái để lấy ra đúng đối tượng bạn cần.
 
 **Hỏi:** Mọi thuộc tính khai báo trong `data class` đều tự động tham gia vào `equals` và `hashCode` à?
-Không. Compiler chỉ dùng các thuộc tính khai báo trong hàm khởi tạo chính của `data class`. Mọi biến khai báo bên trong thân class đều bị bỏ qua, khiến hai đối tượng có thân khác nhau vẫn bằng nhau.
+Không, trình biên dịch chỉ lấy các thuộc tính khai báo trong ngoặc tròn của hàm khởi tạo chính (`primary constructor`). Thuộc tính viết trong ngoặc nhọn thân lớp sẽ bị bỏ qua. Hai đối tượng khác nhau ở phần thân vẫn được coi là bằng nhau.
 
 **Hỏi:** `data class` chứa thuộc tính kiểu mảng `Array` hoặc `ByteArray` có gì nguy hiểm?
-Phép so sánh sẽ so nhầm địa chỉ bộ nhớ thay vì kiểm tra nội dung mảng. Mảng trên JVM không ghi đè `equals`, khiến hai đối tượng có mảng cùng nội dung vẫn bị coi là khác nhau. Muốn so đúng nội dung, bạn bắt buộc phải tự override lại và dùng `contentEquals()` cùng `contentHashCode()`.
+Hàm `equals` tự sinh sẽ so sánh địa chỉ bộ nhớ của mảng chứ không so từng phần tử bên trong. Do mảng trên JVM không so nội dung, hai đối tượng chứa hai mảng giống hệt nhau vẫn bị báo khác nhau. Khi có mảng trong `data class`, bạn phải tự viết lại `equals` và `hashCode` bằng `contentEquals()` và `contentHashCode()`.
 
 **Hỏi:** Khi nào tuyệt đối không được dùng một object làm key trong `HashMap`?
-Khi đối tượng chứa bất kỳ biến có thể thay đổi nào. Nếu bạn đổi giá trị biến sau khi đưa vào bảng băm, mã băm sẽ tính ra chỉ số ngăn khác. Khi đó hàm `get()` sẽ trả về `null` dù đối tượng vẫn nằm kẹt lại và gây rò rỉ bộ nhớ.
+Khi đối tượng đó dùng biến `var` có thể thay đổi để tính `hashCode`. Nếu bạn nhét nó vào `HashMap` rồi mới sửa biến `var` đó, lần sau tìm lại hàm `hashCode()` sẽ chỉ sang một ngăn khác. Lúc đó gọi `get()` sẽ trả về `null`, còn đối tượng cũ thì nằm kẹt mãi trong ngăn cũ gây rò rỉ bộ nhớ.
 
 **Hỏi:** Điều gì xảy ra nếu ta luôn cho hàm `hashCode()` trả về một hằng số cố định như 0?
-Chương trình vẫn đúng nhưng mọi phần tử dồn vào một ngăn duy nhất. Từ Java 8, `HashMap` biến ngăn quá đông thành cây đỏ đen nên tra cứu còn O(log N) nếu key là `Comparable`. Key không `Comparable` thì có thể tụt về duyệt tuần tự O(N).
+Code vẫn chạy ra kết quả đúng, nhưng mọi phần tử bạn thêm vào đều bị dồn hết vào chung một ngăn số 0. Từ Java 8, nếu ngăn quá 8 phần tử và khóa cài đặt `Comparable`, `HashMap` chuyển ngăn thành cây đỏ đen O(log N). Còn nếu khóa không so sánh lớn nhỏ được, tốc độ tìm kiếm sẽ tụt về dò từng cái O(N) như một danh sách thường.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Hợp đồng cốt lõi: hai đối tượng equals bằng nhau thì hashCode bắt buộc phải bằng nhau.
-- [ ] Bẫy sửa biến var làm đối tượng biến mất khỏi HashSet dù vẫn nằm trong bộ nhớ.
-- [ ] Bẫy viết sai tham số hàm equals biến thành overload thay vì override.
+- [ ] Giải thích được luật bắt buộc: hai đối tượng bằng nhau qua equals thì phải trả về cùng một số hashCode.
+- [ ] Trình bày được vì sao sửa thuộc tính var sau khi đưa vào HashSet lại làm đối tượng bị kẹt ở ngăn cũ và tìm không thấy.
+- [ ] Chỉ ra được lỗi viết fun equals(other: UserId) thay vì override fun equals(other: Any?) và bẫy dùng mảng trong data class.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

@@ -5,6 +5,7 @@ domain: oop
 tags: [oop, paradigm, software-design]
 collections: [interview-fundamental]
 related: [oop-solid, jvm-virtual-method-dispatch, oop-abstract-class-vs-interface]
+diagrams: [Cơ chế|four-pillars.png|Bốn trụ cột OOP: đóng gói giấu dữ liệu, trừu tượng chỉ lộ vài hàm, kế thừa nhận sẵn trường và hàm, đa hình chọn hàm lúc chạy]
 created: 2026-09-07
 ---
 
@@ -14,29 +15,29 @@ Khi phần mềm lớn dần, việc phụ thuộc trực tiếp vào chi tiết
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
-Năm 1967, Ole-Johan Dahl và Kristen Nygaard phát triển Simula 67 cho các bài toán mô phỏng sự kiện rời rạc. Lập trình thủ tục dùng biến rời rạc làm việc theo dõi trạng thái các thực thể độc lập trở thành thảm họa logic. Họ gom biến và lệnh vào một thực thể gọi là đối tượng (object).
+Năm 1967, Ole-Johan Dahl và Kristen Nygaard phát triển ngôn ngữ Simula 67 để mô phỏng các sự kiện rời rạc. Khi viết kiểu thủ tục với biến rời rạc, theo dõi trạng thái nhiều thực thể cùng lúc rất dễ rối. Hai ông gom luôn biến và hàm xử lý vào chung một khối gọi là đối tượng (object).
 
-Khoảng năm 1966 đến 1967, Alan Kay đặt ra thuật ngữ lập trình hướng đối tượng tại Đại học Utah trước khi phát triển Smalltalk. Ông nhấn mạnh bản chất là message passing (truyền thông điệp), đóng gói trạng thái và late binding.
+Khoảng năm 1966 đến 1967, Alan Kay đặt ra thuật ngữ lập trình hướng đối tượng tại Đại học Utah trước khi làm Smalltalk. Ông xem cốt lõi là đối tượng gửi thông điệp (message passing), giữ kín trạng thái và nối hàm muộn (late binding).
 
-Thập niên 1990, C++ và Java bùng nổ trong giảng dạy. Các giáo trình đúc kết thành bốn tính chất: đóng gói, trừu tượng, kế thừa và đa hình. Cách dạy này biến chúng thành lý thuyết cú pháp, xa rời mô hình sinh học truyền thông điệp ban đầu của Kay.
+Đến thập niên 1990, C++ và Java bùng nổ trong các trường đại học. Sách giáo trình đúc kết lại thành bốn tính chất: đóng gói, trừu tượng, kế thừa và đa hình. Cách dạy này biến chúng thành bài học cú pháp, làm người học quên mất ý tưởng gửi thông điệp ban đầu của Kay.
 
 ## Nó thực sự là cái gì
-Bốn tính chất OOP KHÔNG phải là định nghĩa nguyên bản của Alan Kay. Thực chất, chúng là phân loại do giáo trình thập niên 1990 đúc kết lại để dạy học cho các ngôn ngữ class-based. Thay vì nhấn mạnh message passing, bốn cột trụ này lập quy tắc kiểm soát phụ thuộc mã nguồn.
+Bốn tính chất OOP không phải là định nghĩa gốc của Alan Kay. Chúng là cách sách giáo trình thập niên 1990 gom nhóm lại để dạy các ngôn ngữ xoay quanh `class`. Thay vì xoay quanh việc gửi thông điệp, bốn tính chất này đặt ranh giới để code không phụ thuộc bừa vào nhau.
 
 ## Cơ chế
-Đóng gói dùng từ khóa truy cập để phong tỏa dữ liệu, còn trừu tượng để lộ giao diện tương tác tối thiểu. Kế thừa sao chép memory layout lớp cha vào con, khác với hợp đồng không trạng thái trong [Abstract class đối lập Interface](concept:oop-abstract-class-vs-interface). Đa hình dùng [bảng phương thức ảo (vtable)](concept:jvm-virtual-method-dispatch) để phân giải con trỏ hàm lúc chạy. Nhờ đó bên gọi hoàn toàn không bị trói chặt vào bất kỳ lớp cụ thể nào.
+Đóng gói dùng từ khóa `private` khóa biến lại bên trong, còn trừu tượng chỉ mở ra vài hàm cần thiết cho bên ngoài gọi. Kế thừa chép cấu trúc ô nhớ (memory layout) từ lớp cha, khác với hợp đồng trong [Abstract class đối lập Interface](concept:oop-abstract-class-vs-interface). Đa hình dựa vào [bảng phương thức ảo (vtable)](concept:jvm-virtual-method-dispatch) để chọn đúng hàm cần chạy lúc ứng dụng đang mở. Nhờ vậy, nơi gọi hàm không bị khóa cứng vào một lớp cụ thể nào.
 
 ## Đánh đổi
-Hệ thống đạt tính mô-đun cao và an toàn dữ liệu. Đổi lại, việc tạo nhiều lớp trung gian làm tăng chi phí đọc code. Tra cứu bảng hàm ảo vtable và cấp phát đối tượng trên Heap tốn tài nguyên hơn hàm tuần tự. Nguy hiểm nhất, lạm dụng kế thừa thay vì lắp ghép (composition) sẽ tạo liên kết cứng, phá vỡ chính tính đóng gói.
+Code được chia thành từng khối rõ ràng và biến bên trong không bị sửa bậy. Đổi lại, bạn phải đọc qua nhiều lớp trung gian hơn để lần ra nơi chạy thật. Máy ảo cũng tốn thêm bộ nhớ Heap cho đối tượng và tốn một bước tra bảng `vtable` khi gọi hàm. Nếu lạm dụng kế thừa thay vì lắp ghép (composition), lớp con sẽ dính chặt lớp cha và hỏng tính đóng gói.
 
 ## Nguyên lý gốc
-Nguyên lý che giấu thông tin do David Parnas đề xuất năm 1972. Mỗi khối phần mềm giấu kín cấu trúc bên trong và chỉ để lộ giao diện tối thiểu.
+Nguyên lý giấu thông tin của David Parnas năm 1972: mỗi khối tự giấu cách làm và chỉ mở cửa giao tiếp nhỏ nhất.
 
 ## Key insight
 > OOP không nhằm tái sử dụng mã qua kế thừa, mà để cô lập biến động bằng ranh giới đóng gói và đa hình.
 
 ## Ví von
-Hệ thống lái ô tô: Đóng gói giấu động cơ dưới nắp capo. Trừu tượng là vô lăng và chân phanh. Kế thừa là xe điện và xe xăng cùng là ô tô. Đa hình là đạp phanh thì xe nào cũng dừng, dù bên dưới dùng má phanh cơ hay phanh điện tái sinh.
+Với chiếc ô tô, đóng gói là giấu động cơ dưới nắp capo, còn trừu tượng là chỉ lộ vô lăng và phanh. Kế thừa là xe điện và xe xăng cùng thuộc dòng ô tô. Đa hình là bạn cứ đạp phanh thì xe nào cũng dừng, dù bên dưới dùng má phanh cơ hay phanh điện tái sinh.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -52,28 +53,28 @@ fun alert(v: Vehicle): String = v.horn()
 ```
 
 ## Bẫy & ranh giới
-Coi kế thừa là cốt lõi thay vì message passing dẫn tới bẫy lạm dụng kế thừa (Fragile Base Class). Ghi đè hàm thêm danh sách nhưng lớp cha tự gọi lại hàm thêm đơn lẻ làm kết quả đếm bị nhân đôi. Để dẹp bỏ bẫy này, Kotlin mặc định khóa mọi class bằng `final` và hỗ trợ ủy quyền qua từ khóa `by`. Chống chỉ định kế thừa để tái sử dụng mã; hãy ưu tiên composition để bảo toàn tính đóng gói.
+Nếu coi kế thừa là trung tâm thay vì gửi thông điệp, bạn dễ dính bẫy lớp cha dễ vỡ (Fragile Base Class). Khi ghi đè hàm thêm danh sách, lớp cha lại tự gọi hàm thêm từng phần tử làm kết quả đếm nhân đôi. Để chặn bẫy này, Kotlin khóa mọi `class` mặc định là `final` và cho phép ủy quyền qua từ khóa `by`. Đừng kế thừa chỉ để lấy lại vài dòng code; hãy dùng lắp ghép (composition) để giữ an toàn cho lớp.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Mục đích chính của OOP có phải là để tái sử dụng code thông qua kế thừa không?
-Không phải. Mục đích cốt lõi của OOP là cô lập các biến động để khi thay đổi một chỗ không làm đổ vỡ nơi khác. Lạm dụng kế thừa để tái sử dụng mã thường phá huỷ tính đóng gói và làm hệ thống trở nên cứng nhắc.
+Không phải. Mục đích chính của OOP là giữ cho khi bạn sửa một chỗ thì không làm hỏng dây chuyền sang chỗ khác. Nếu lạm dụng kế thừa chỉ để dùng lại code, lớp con sẽ dính chặt vào ruột lớp cha và làm hỏng tính đóng gói.
 
 **Hỏi:** Khi nào nên dùng kế thừa, khi nào nên dùng lắp ghép (composition)?
-Hầu như luôn ưu tiên lắp ghép, chỉ kế thừa khi mối quan hệ là IS-A thực sự bất biến. Nếu bạn chỉ muốn tận dụng vài tính năng của lớp khác, hãy biến nó thành một biến phụ thuộc bên trong. Trong Kotlin, bạn có thể dùng từ khoá `by` để uỷ quyền triển khai giao diện mà không tạo liên kết cứng.
+Bạn nên ưu tiên lắp ghép, và chỉ kế thừa khi lớp con thật sự là một loại của lớp cha (IS-A). Nếu chỉ cần dùng vài hàm của lớp khác, bạn hãy đặt nó làm một biến bên trong lớp mình. Trong Kotlin, bạn dùng thêm từ khóa `by` để chuyển tiếp hàm của `interface` mà không bị trói vào lớp cha.
 
 **Hỏi:** Trừu tượng (Abstraction) khác Đóng gói (Encapsulation) chỗ nào khi cả hai đều giấu thông tin?
-Đóng gói là bảo vệ dữ liệu nội tại, còn Trừu tượng là che giấu độ phức tạp của cách cài đặt. Đóng gói dùng từ khoá private để ngăn truy cập và biến đổi biến trạng thái trái phép từ bên ngoài. Trừu tượng cung cấp giao diện tương tác tối giản để bên gọi sử dụng mà không cần biết thuật toán bên dưới.
+Đóng gói là khóa biến dữ liệu lại, còn trừu tượng là giấu đi các bước xử lý rắc rối bên dưới. Bạn đóng gói bằng từ khóa `private` để bên ngoài không tự ý gán sai giá trị biến. Còn trừu tượng là bạn chỉ đưa ra một hàm gọn gàng để nơi khác gọi mà không cần biết thuật toán bên trong.
 
 **Hỏi:** Đa hình (Polymorphism) vận hành ở tầng máy ảo như thế nào để biết phải gọi hàm nào?
-Máy ảo tra cứu địa chỉ hàm trong [bảng phương thức ảo (vtable)](concept:jvm-virtual-method-dispatch) gắn với đối tượng thực tế lúc chạy. Mỗi đối tượng trên Heap đều chứa một con trỏ tham chiếu đến cấu trúc lớp và bảng hàm tương ứng. Khi có lệnh gọi, CPU đọc con trỏ từ bảng này rồi nhảy đến đoạn mã thực thi của lớp con.
+Lúc chạy, máy ảo tra địa chỉ hàm trong [bảng phương thức ảo (vtable)](concept:jvm-virtual-method-dispatch) gắn với đối tượng thực tế. Mỗi đối tượng trên Heap đều giữ một con trỏ chỉ tới thông tin lớp và bảng `vtable` của lớp đó. Khi gặp lệnh gọi hàm, CPU nhìn vào bảng này để nhảy tới đúng hàm mà lớp con đã ghi đè.
 
 **Hỏi:** Vì sao Kotlin lại mặc định khoá mọi class bằng final thay vì mở như Java?
-Để ngăn ngừa bẫy Fragile Base Class bắt nguồn từ thói quen lạm dụng kế thừa tự do trong Java. Khi kế thừa không kiểm soát, sửa đổi ngầm ở lớp cha rất dễ làm biến đổi hành vi ngoài ý muốn ở lớp con. Kotlin buộc bạn phải gõ từ khoá `open` như một cam kết rằng lớp này đã được thiết kế an toàn để kế thừa.
+Để tránh lỗi lớp cha dễ vỡ (Fragile Base Class) do thói quen kế thừa tùy tiện trong Java. Khi lớp cha chưa chuẩn bị cho kế thừa, sửa một hàm nhỏ ở cha cũng dễ làm lớp con chạy sai. Vì vậy Kotlin bắt gõ rõ từ khóa `open` để xác nhận lớp đã được thiết kế an toàn cho kế thừa.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Bản chất: 4 tính chất là phân loại sách giáo trình đúc kết lại để dạy học, kế thừa sao chép memory layout.
-- [ ] Bản chất Trừu tượng là che giấu chi tiết cài đặt; Đa hình là phân phối động tại runtime qua vtable.
-- [ ] Phân tích bẫy Fragile Base Class và lý do Kotlin để class mặc định là final, hỗ trợ uỷ quyền bằng từ khoá by.
+- [ ] Giải thích được 4 tính chất là cách sách giáo trình đúc kết để dạy học, và kế thừa chép memory layout của lớp cha sang lớp con.
+- [ ] Phân biệt được đóng gói là khóa biến bằng private, trừu tượng là giấu cách cài đặt, còn đa hình tra bảng vtable lúc chạy.
+- [ ] Nêu được bẫy Fragile Base Class và lý do Kotlin để class mặc định là final kèm từ khóa ủy quyền by.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

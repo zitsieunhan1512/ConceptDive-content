@@ -10,7 +10,7 @@ created: 2026-09-15
 ---
 
 ## Bản 30 giây
-Sinh dữ liệu bất đồng bộ liên tục dễ lãng phí tài nguyên nếu không có ai đón nhận. `Flow` dùng mô hình dữ liệu nguội, chỉ bắt đầu tính toán khi có người gọi lệnh thu thập. Khả năng tạm ngưng của coroutine giúp tự động điều tiết áp lực ngược mà không cần bộ đệm phức tạp.
+Khi đọc cảm biến hay cơ sở dữ liệu liên tục, chạy sẵn lúc chưa ai xem sẽ rất tốn pin. `Flow` là luồng dữ liệu nguội (`Cold Stream`), nghĩa là khối code bên trong chỉ bắt đầu chạy khi có nơi gọi `collect`. Do `emit` và `collect` đều là hàm `suspend`, bên phát tự chờ khi bên nhận chậm mà khỏi cấu hình bộ đệm.
 
 ## Cần biết trước
 - kotlin-coroutines
@@ -18,32 +18,32 @@ Sinh dữ liệu bất đồng bộ liên tục dễ lãng phí tài nguyên n�
 - kotlin-coroutine-context-and-dispatchers
 
 ## Vấn đề buộc nó ra đời
-Trước năm 2019, lập trình viên Android phụ thuộc vào RxJava để xử lý các luồng dữ liệu phản ứng (*Reactive Streams*). RxJava rất mạnh nhưng bộ API đồ sộ khiến dự án phình to dung lượng và khó gỡ lỗi.
+Trước năm 2019, lập trình viên Android thường dùng RxJava để xử lý các luồng dữ liệu phát liên tục (`Reactive Streams`). RxJava rất mạnh nhưng thư viện lớn, nhiều kiểu dữ liệu và toán tử nên khó học và khó lần dấu lỗi.
 
-Nơi phát nhanh hơn nơi nhận tạo ra áp lực ngược (*Backpressure*) đè nặng lên bộ nhớ. Lập trình viên phải chọn chiến lược đệm hay thả rơi rất phức tạp, dễ gây lỗi tràn bộ nhớ.
+Khi bên phát bắn dữ liệu nhanh hơn tốc độ bên nhận xử lý, dữ liệu bị ứ đọng gọi là áp lực ngược (`Backpressure`). Bạn phải tự chọn giữ trong bộ đệm hay bỏ bớt. Nếu quên, ứng dụng rất dễ sập vì tràn bộ nhớ.
 
-Đội ngũ Kotlin phát triển `Flow` như một giải pháp thay thế tinh gọn dựa trên Coroutine. Cơ chế tạm ngưng nguyên bản giúp dữ liệu truyền nhịp nhàng mà không cần hệ thống điều tiết cồng kềnh.
+Đội ngũ Kotlin tạo ra `Flow` gọn nhẹ ngay trên nền Coroutine. Nhờ cơ chế tạm dừng của hàm `suspend`, bên phát tự chờ bên nhận xử lý xong mới phát tiếp. Do đó, bạn không cần bộ điều tiết cồng kềnh.
 
 ## Nó thực sự là cái gì
-`Flow` KHÔNG phải là một tiến trình luồng chạy ngầm hay một danh sách lưu sẵn phần tử trên bộ nhớ. Thực chất, đây là một khối lệnh tạm ngưng đóng gói bên trong một giao diện hàm thu thập duy nhất.
+`Flow` không phải là một luồng đang chạy ngầm sẵn hay một danh sách chứa sẵn dữ liệu trong bộ nhớ. Thật ra, nó chỉ là một khối lệnh `suspend` được gói bên trong một giao diện có đúng một hàm `collect`.
 
-Mỗi khi gọi lệnh thu thập, toàn bộ khối mã phát dữ liệu mới thực sự chạy lại từ đầu.
+Mỗi lần một màn hình gọi `collect`, toàn bộ khối lệnh bên trong `flow { ... }` mới bắt đầu chạy lại từ dòng đầu tiên.
 
 ## Cơ chế
-Khi gọi `emit`, hàm phát dữ liệu sẽ tạm ngưng cho tới khi hàm xử lý của bên nhận hoàn tất công việc. Để bảo toàn ngữ cảnh (*Context Preservation*), `Flow` cấm tuyệt đối việc tự ý chuyển đổi luồng bằng `withContext` bên trong khối phát.
+Khi khối `flow` gọi `emit(value)`, nó gọi thẳng vào hàm của `collect` và tạm dừng chờ bên nhận chạy xong. Để giữ đúng ngữ cảnh (`Context Preservation`), `Flow` cấm bạn tự ý bọc `withContext` đổi luồng ngay bên trong khối `flow { ... }`.
 
-Toán tử `flowOn` thay đổi luồng phía trên bằng cách tự động tạo một kênh đệm (*Channel*) kết nối giữa hai coroutine độc lập. Nhờ đó, luồng phát và luồng nhận có thể vận hành trên hai [điều phối viên](concept:kotlin-coroutine-context-and-dispatchers) khác nhau một cách an toàn.
+Để đọc dữ liệu trên luồng khác, bạn gắn `flowOn` nhằm tạo kênh `Channel` nối giữa hai coroutine riêng. Nhờ vậy, coroutine phát và coroutine nhận chạy trên hai [`Dispatcher`](concept:kotlin-coroutine-context-and-dispatchers) khác nhau mà vẫn an toàn.
 
 ## Đánh đổi
-Mô hình dữ liệu nguội tiết kiệm pin và RAM vì không tính toán khi vắng bóng người quan sát. Đổi lại, nếu có nhiều người cùng thu thập, khối lệnh phát dữ liệu sẽ bị thực thi lại nhiều lần.
+Là luồng nguội, `Flow` không tốn pin hay RAM khi chưa gọi `collect`, và tự dừng khi coroutine bị hủy. Đổi lại, nếu 3 nơi cùng gọi `collect` trên một `Flow` gọi API, khối lệnh sẽ gọi mạng 3 lần riêng.
 
-Chi phí chuyển đổi ngữ cảnh qua kênh đệm của `flowOn` cũng tạo ra áp lực cấp phát rác nhỏ trên Heap.
+Ngoài ra, mỗi lần bạn dùng `flowOn` để đổi luồng, hệ thống phải tạo thêm `Channel` và đối tượng trung gian trên Heap.
 
 ## Nguyên lý gốc
-Nguyên lý dòng dữ liệu phản ứng: dữ liệu chỉ nên được tạo ra theo nhu cầu thực tế của nơi tiêu thụ. Sự đồng bộ nhịp độ giữa bên sản xuất và bên tiêu thụ là chìa khóa để ngăn ngừa cạn kiệt bộ đệm.
+Chỉ tạo dữ liệu khi có nơi yêu cầu lấy. Bên phát phải đi theo đúng tốc độ của bên nhận.
 
 ## Key insight
-> Flow không phải công cụ chạy ngầm liên tục, mà là một khối mã đóng băng chỉ thức giấc khi có lệnh thu thập.
+> `Flow` không tự chạy ngầm, mà chỉ là một công thức đóng gói sẵn, mỗi lần gọi `collect` mới bắt đầu chạy từ đầu.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -61,22 +61,22 @@ viewModelScope.launch {
 ```
 
 ## Bẫy & ranh giới
-Gọi hàm `withContext` trực tiếp bên trong khối `flow { ... }` sẽ bị chặn đứng ngay lập tức bằng ngoại lệ bất hợp pháp. Chống chỉ định dùng Cold Flow thay cho [StateFlow](concept:kotlin-stateflow-vs-sharedflow) khi phát sự kiện cho nhiều nơi vì gây gọi mạng lặp lại. Triệu chứng lỗi gồm crash app với `IllegalStateException`, tiêu tốn băng thông do gọi API thừa thãi hoặc tụt khung hình.
+Nếu bạn bọc `withContext(Dispatchers.IO)` quanh lệnh `emit` bên trong khối `flow { ... }`, ứng dụng sẽ sập ngay với lỗi `IllegalStateException`. Đừng dùng `Flow` thường thay [`StateFlow`](concept:kotlin-stateflow-vs-sharedflow) khi nhiều nơi cùng nghe kết quả mạng, vì mỗi nơi sẽ gọi lại API. Triệu chứng là crash lúc phát dữ liệu, gọi mạng lặp lại nhiều lần, hoặc giật giao diện do quên gắn `flowOn(Dispatchers.IO)` khi đọc đĩa.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Tại sao không được dùng withContext để đổi luồng bên trong khối flow builder?
-Không được phép vì vi phạm quy tắc bảo toàn ngữ cảnh. Trình chạy Flow bắt buộc luồng phát phải giữ nguyên ngữ cảnh của bên thu thập, và bạn phải dùng `flowOn`.
+Vì `Flow` tuân thủ bảo toàn ngữ cảnh (`Context Preservation`), nên lệnh `emit` phải chạy đúng luồng nơi gọi `collect`. Nếu `withContext` tự đổi luồng bên trong, khối `collect { ... }` ở tầng giao diện sẽ chạy nhầm trên luồng phụ và gây lỗi. Muốn đổi luồng cho phần việc phía trên, bạn bắt buộc phải viết `.flowOn(...)` ở bên ngoài khối `flow`.
 
 **Hỏi:** Điều gì sẽ xảy ra nếu nhiều nơi cùng gọi collect trên một Cold Flow?
-Khối lệnh bên trong flow sẽ bị thực thi lại từ đầu cho mỗi người thu thập. Mỗi người nhận sẽ có một phiên làm việc riêng biệt và không dùng chung luồng dữ liệu.
+Khối code bên trong `flow { ... }` sẽ chạy lại từ đầu và hoàn toàn độc lập cho từng nơi gọi `collect`. Ví dụ `Flow` mở kết nối đọc file hay gọi API. Khi 2 nơi gọi `collect`, máy sẽ chạy 2 lần riêng.
 
 **Hỏi:** Flow giải quyết bài toán Backpressure như thế nào so với RxJava?
-Nó dựa vào cơ chế suspend tự nhiên thay vì bộ đệm phức tạp. Khi bên nhận chưa xử lý xong, lệnh `emit` của bên phát sẽ tạm ngưng và đợi bên nhận sẵn sàng.
+`Flow` tận dụng ngay việc hàm `emit` là một hàm `suspend` thay vì phải dựng bộ điều tiết riêng như RxJava. Khi khối `collect` còn bận xử lý phần tử trước, lệnh `emit` ở bên phát sẽ tự tạm dừng và nhả luồng. Chỉ khi bên nhận xử lý xong phần tử đó thì dòng lệnh sau `emit` mới được đánh thức để tạo phần tử kế tiếp.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Cold Flow chỉ chạy khi có người gọi collect và chạy lại từ đầu cho mỗi người nhận.
-- [ ] Nguyên tắc Context Preservation cấm withContext trong flow và bắt buộc dùng flowOn.
-- [ ] Cơ chế giải quyết Backpressure tự nhiên bằng hàm tạm ngưng suspend.
+- [ ] Giải thích được Cold Flow chỉ là khối lệnh đóng gói sẵn, chỉ chạy khi có nơi gọi collect và chạy lại từ đầu cho mỗi người nhận.
+- [ ] Trình bày được quy tắc Context Preservation cấm bọc withContext quanh emit và cách flowOn dùng Channel để đổi luồng an toàn.
+- [ ] Nêu được cách Flow tự động hãm tốc độ bên phát theo bên nhận (Backpressure) nhờ hàm emit là hàm suspend.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

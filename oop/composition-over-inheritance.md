@@ -10,46 +10,36 @@ diagrams: [Cơ chế|composition-fragile-base-class.png|Kế thừa HashSet làm
 ---
 
 ## Bản 30 giây
-Kế thừa lớp trói buộc chặt chẽ mã nguồn và dễ làm hỏng hành vi lớp con khi lớp cha thay đổi. Thay vì bắt đối tượng phải là một biến thể của lớp khác, ta lắp ghép các khối chức năng độc lập vào bên trong. Cách làm này giúp hoán đổi tính năng linh hoạt khi chạy và khoanh vùng lỗi trong từng khối.
+Khi bạn kế thừa một lớp chỉ để dùng lại vài hàm, sửa một chút ở lớp cha rất dễ làm hỏng lớp con. Thay vì bắt lớp mới làm con của lớp cũ, bạn hãy đặt các khối chức năng vào bên trong như những biến thành phần. Nhờ vậy, bạn đổi được hành vi ngay lúc chạy và lỗi ở khối nào chỉ nằm yên trong khối đó.
 
 ## Cần biết trước
 - oop-four-pillars
 - oop-abstract-class-vs-interface
 
 ## Vấn đề buộc nó ra đời
-Năm 1994, nhóm Gang of Four đúc kết nguyên lý ưu tiên thành phần hơn kế thừa trong cuốn sách mẫu thiết kế kinh điển. Kế thừa phá vỡ tính đóng gói vì lớp con phụ thuộc trực tiếp vào chi tiết cài đặt của lớp cha.
+Năm 1994, nhóm Gang of Four đúc kết nguyên lý ưu tiên lắp ghép hơn kế thừa trong cuốn sách mẫu thiết kế kinh điển. Kế thừa làm vỡ tính đóng gói vì lớp con bị lệ thuộc thẳng vào cách lớp cha tự gọi hàm bên trong.
 
-Năm 2001, Joshua Bloch xuất bản cuốn sách Effective Java với lời khuyên ưu tiên thành phần hơn kế thừa. Năm 2003, Allen Holub phân tích thảm họa lớp cơ sở mong manh (*Fragile Base Class*) trong bài viết 'Why extends is evil'.
+Năm 2001, Joshua Bloch khuyên ưu tiên lắp ghép hơn kế thừa trong sách Effective Java. Đến năm 2003, Allen Holub mổ xẻ lỗi lớp cơ sở mong manh (*Fragile Base Class*) trong bài viết 'Why extends is evil'.
 
-Kotlin để mọi lớp mặc định là `final`, theo lời khuyên của Effective Java về việc thiết kế cho kế thừa hoặc cấm nó. Đồng thời, ngôn ngữ bổ sung từ khóa `by` để ủy quyền phương thức gọn gàng.
+Vì vậy, Kotlin để mọi lớp mặc định là `final`, đúng theo lời khuyên thiết kế rõ cho kế thừa hoặc khóa lại. Đồng thời, ngôn ngữ thêm từ khóa `by` để bạn chuyển tiếp lệnh gọi hàm thật gọn.
 
 ## Nó thực sự là cái gì
-Lắp ghép KHÔNG PHẢI là kỹ thuật lập trình đối lập hay phủ nhận hoàn toàn tính đa hình. Thực chất, đây là sự chuyển dịch từ liên kết tĩnh ở thời điểm biên dịch sang liên kết động ở thời gian chạy.
-
-Kế thừa thể hiện quan hệ bản thể (IS-A), trong khi lắp ghép thể hiện quan hệ sở hữu thành phần (HAS-A).
-
-Đối tượng chứa tham chiếu tới các bộ phận và ủy quyền xử lý, giúp che giấu hoàn toàn cấu trúc bên trong.
+Lắp ghép không hề phủ nhận hay đối chọi với tính đa hình. Thay vì khóa cứng quan hệ cha con từ lúc biên dịch, bạn nối các đối tượng với nhau linh hoạt lúc chạy. Kế thừa thể hiện quan hệ "là một" (IS-A), còn lắp ghép thể hiện quan hệ "có chứa" (HAS-A). Đối tượng bọc ngoài giữ biến trỏ tới đối tượng bên trong rồi nhờ nó làm hộ, nên giấu kín được cách cài đặt.
 
 ## Cơ chế
-Đối tượng bao bọc lưu các thể hiện hành vi thành các trường dữ liệu riêng biệt trên bộ nhớ Heap. Khi có yêu cầu, nó gọi chuyển tiếp phương thức tới đối tượng thành phần thích hợp.
-
-Với từ khóa `by` trong Kotlin, trình biên dịch tự động sinh mã chuyển tiếp cho mọi hàm của giao diện.
-
-Cơ chế này loại bỏ hoàn toàn mã thừa mà vẫn bảo toàn kiểm tra kiểu an toàn.
+Đối tượng bọc ngoài giữ các đối tượng thành phần làm biến riêng trên bộ nhớ Heap. Khi bạn gọi hàm, nó chỉ chuyển lời gọi đó sang cho đối tượng thành phần bên trong xử lý. Với từ khóa `by` trong Kotlin, trình biên dịch tự sinh sẵn các hàm chuyển tiếp cho toàn bộ `interface`. Nhờ đó, bạn không phải gõ tay từng hàm lặp lại mà vẫn được kiểm tra kiểu an toàn.
 
 ## Đánh đổi
-Lắp ghép giúp mã nguồn mềm dẻo, dễ kiểm thử đơn vị và dễ thay thế hành vi khi chạy. Đổi lại, hệ thống phải cấp phát thêm đối tượng chuyển tiếp và tốn thêm chi phí gọi gián tiếp.
-
-Chữ ký hàm có thể bị phân mảnh nếu phải tự viết tay nhiều phương thức ủy quyền trung gian.
+Lắp ghép giúp code dễ viết unit test và dễ tráo đổi hành vi ngay lúc ứng dụng đang chạy. Đổi lại, chương trình tốn thêm một đối tượng bọc ngoài trên Heap và thêm một bước gọi hàm bắc cầu. Nếu ngôn ngữ không có từ khóa `by`, bạn sẽ phải tự gõ tay rất nhiều hàm chuyển tiếp trung gian.
 
 ## Nguyên lý gốc
-Nguyên lý ghép nối lỏng: hệ thống luôn bền vững hơn khi cấu tạo từ các khối độc lập có thể tháo rời. Tính mở rộng nên dựa trên sự kết hợp thay vì biến đổi cấu trúc sẵn có.
+Hệ thống luôn bền hơn khi ghép từ các khối rời có thể tháo lắp độc lập (loose coupling). Khi cần thêm tính năng, bạn nên ghép thêm khối mới thay vì sửa vào cây kế thừa cũ.
 
 ## Key insight
-> Kế thừa trói buộc vào phả hệ tĩnh, còn lắp ghép tổ hợp năng lực độc lập linh hoạt khi chạy.
+> Kế thừa trói lớp con vào dòng họ lúc biên dịch, còn lắp ghép cho phép đổi khối chức năng lúc chạy.
 
 ## Ví von
-Kế thừa giống như sinh vật lai ghép bị trói buộc gen từ đời cha mẹ. Lắp ghép giống túi đồ nghề, cần kìm thì lấy kìm, hỏng tua vít thì thay cái mới mà không ảnh hưởng người thợ.
+Kế thừa giống cơ thể sinh học bị gắn chặt gen di truyền từ đời bố mẹ. Lắp ghép giống túi đồ nghề của người thợ: cần kìm thì rút kìm, hỏng tua vít thì đổi cái mới ngay.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -68,22 +58,22 @@ class CountingSet<T>(private val inner: MutableSet<T> = HashSet()) :
 ```
 
 ## Bẫy & ranh giới
-Bẫy kế thừa để dùng lại một hàm tiện ích khiến lớp con gánh trọn vẹn mọi phương thức thừa của cha. Chống chỉ định dùng kế thừa khi giữa hai lớp không thỏa mãn mối quan hệ bản thể IS-A một cách tự nhiên. Tránh tạo lớp con ghi đè hàm trong chuỗi gọi nội bộ của cha vì rất dễ gây đếm trùng hoặc sai trạng thái. Triệu chứng dùng sai là lỗi vỡ hành vi lớp con khi thư viện cha cập nhật, hoặc mã nguồn bị trói chặt khó gỡ.
+Nếu kế thừa chỉ để lấy một hàm tiện ích, lớp con phải gánh theo mọi hàm thừa của lớp cha. Đừng dùng kế thừa khi hai lớp không có quan hệ bản chất "là một" (IS-A) rõ ràng. Đặc biệt, ghi đè hàm mà lớp cha tự gọi lại chính nó sẽ làm biến đếm bị cộng trùng. Triệu chứng là nâng cấp thư viện cha cũng làm lớp con chạy sai, hoặc muốn tách lớp đi nơi khác đều vướng.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Vì sao lớp `CountingSet` kế thừa `HashSet` đếm sai khi gọi `addAll`?
-`addAll` của lớp cha gọi lại phương thức `add` vốn đã bị ghi đè, khiến mỗi phần tử bị đếm hai lần. Lắp ghép bằng `by` giúp lớp bao bọc chuyển tiếp độc lập mà không phụ thuộc chi tiết cài đặt của cha.
+Bên trong `HashSet`, hàm `addAll` tự gọi hàm `add` cho từng phần tử. Vì `add` đã bị lớp con ghi đè nên mỗi phần tử bị cộng hai lần. Khi lắp ghép bằng `by`, lớp bọc chỉ gọi chuyển tiếp vào `inner` nên tránh được vòng gọi ngầm của lớp cha.
 
 **Hỏi:** Cơ chế ủy quyền `by` trong Kotlin có giải quyết được nhược điểm gõ nhiều mã chuyển tiếp của mẫu Wrapper không?
-Có. Trình biên dịch Kotlin sẽ tự động sinh mã chuyển tiếp cho toàn bộ các hàm được khai báo trong giao diện. Bạn không cần phải viết tay từng phương thức ủy quyền, giúp mã nguồn vừa sạch gọn vừa giữ trọn lợi thế lắp ghép.
+Có. Lúc biên dịch, Kotlin tự sinh toàn bộ các hàm chuyển tiếp cho những hàm có trong `interface`. Bạn chỉ cần viết lại đúng hàm nào muốn thêm logic, vừa gọn code vừa giữ nguyên lợi thế của lắp ghép.
 
 **Hỏi:** Tại sao lớp cơ sở mong manh (*Fragile Base Class*) lại là thảm họa lớn nhất của kế thừa?
-Bởi vì lớp cha có thể thay đổi cách các hàm nội bộ gọi lẫn nhau trong các bản cập nhật tiếp theo. Một lớp con ghi đè phương thức vô tình làm thay đổi luồng thực thi mà tác giả lớp cha không hề lường trước. Kết quả là lớp con bị lỗi logic âm thầm hoặc làm hỏng dữ liệu mà không hề báo lỗi khi biên dịch.
+Vì ở bản cập nhật sau, tác giả lớp cha có thể đổi cách các hàm bên trong gọi lẫn nhau. Lớp con ghi đè một hàm sẽ vô tình làm chệch luồng chạy mới mà tác giả lớp cha không hề biết. Hậu quả là ứng dụng tính sai dữ liệu âm thầm lúc chạy dù biên dịch không báo một lỗi nào.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Phân biệt bản chất quan hệ IS-A (kế thừa) và HAS-A (lắp ghép).
-- [ ] Nêu ví dụ CountingSet đếm sai do addAll gọi nội bộ hàm add của lớp cha.
-- [ ] Trình bày cơ chế ủy quyền class delegation qua từ khóa by của Kotlin ở tầng compiler.
+- [ ] Phân biệt được quan hệ IS-A (kế thừa) và HAS-A (lắp ghép đối tượng thành phần).
+- [ ] Giải thích được ví dụ CountingSet kế thừa HashSet bị đếm gấp đôi vì addAll gọi ngầm hàm add.
+- [ ] Trình bày được cách từ khóa by trong Kotlin tự sinh các hàm chuyển tiếp ở lúc biên dịch.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

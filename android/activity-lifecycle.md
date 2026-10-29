@@ -10,34 +10,34 @@ diagrams: [Cơ chế|activity-lifecycle-process-death.png|Activity che khuất l
 ---
 
 ## Bản 30 giây
-Thiết bị di động có RAM hạn chế và hệ điều hành sẵn sàng khai tử ứng dụng chạy ngầm để nhường tài nguyên. Vòng đời là giao thức thương lượng tài nguyên giữa ứng dụng và hệ điều hành. Nó báo cho ứng dụng kịp nhả tài nguyên và lưu trạng thái trước khi kernel can thiệp.
+Khi mở ứng dụng khác đè lên mà thiếu RAM, hệ điều hành sẽ tắt ứng dụng cũ để lấy bộ nhớ. Vòng đời là bộ hàm báo trước giữa ứng dụng và hệ điều hành. Nhờ đó, bạn kịp ngắt định vị và lưu dữ liệu màn hình trước khi nhân hệ điều hành thu hồi tiến trình.
 
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
 Tháng 10/2008, HTC Dream ra mắt với vỏn vẹn 192MB RAM. Chip sóng và hệ điều hành chiếm phần lớn, chỉ để lại chưa đầy 100MB cho ứng dụng.
 
-Thiết bị di động không thể dùng bộ nhớ swap trên ổ đĩa vì chip nhớ flash quá chậm và nhanh hỏng. Đồng thời, cuộc gọi đến có thể ập tới bất ngờ và đòi hỏi RAM trống tức thì.
+Thiết bị di động không thể dùng bộ nhớ swap trên ổ đĩa vì chip nhớ flash quá chậm và nhanh hỏng. Trong khi đó, cuộc gọi đến có thể ập tới bất ngờ và cần RAM trống ngay lập tức.
 
-Kỹ sư Android đưa Low Memory Killer vào kernel để gửi tín hiệu `SIGKILL` tiêu diệt tiến trình ngầm. Họ tạo ra lifecycle để lưu trạng thái, tạo ảo ảnh ứng dụng vẫn chạy liên tục.
+Kỹ sư Android đưa Low Memory Killer vào kernel để gửi tín hiệu `SIGKILL` tắt thẳng tiến trình ngầm. Họ tạo ra lifecycle để ứng dụng kịp lưu trạng thái, giúp người dùng mở lại thấy màn hình vẫn như chưa từng bị tắt.
 
 ## Nó thực sự là cái gì
-Activity Lifecycle KHÔNG phải chuỗi hàm tiện ích sắp xếp nạp giao diện. Thực chất, nó là giao thức thương lượng tài nguyên giữa ứng dụng và hệ điều hành. Cơ chế này cho phép kernel thu hồi RAM bất cứ lúc nào mà không làm đứt đoạn trải nghiệm.
+Activity Lifecycle không phải chuỗi hàm tiện ích để bạn sắp xếp việc nạp giao diện. Thực ra, nó là quy ước báo hiệu giữa ứng dụng và hệ điều hành để nhường trả tài nguyên. Cơ chế này giúp nhân hệ điều hành thu hồi RAM bất cứ lúc nào mà người dùng mở lại vẫn thấy màn hình cũ.
 
 ## Cơ chế
-Khi Activity bị che khuất, hệ thống gọi `onPause` rồi `onStop` và lưu trạng thái qua `onSaveInstanceState`. Hệ điều hành tăng điểm `oom_score_adj` (chỉ số ưu tiên bị diệt trong LMKD) của tiến trình lên mức cao. Khi cạn RAM, daemon LMKD gửi `SIGKILL` xóa sổ tiến trình có điểm cao nhất mà không hề gọi `onDestroy`. Khi mở lại, Android tạo tiến trình mới và nạp lại Bundle vào `onCreate` để phục hồi giao diện.
+Khi màn hình của bạn bị che khuất, hệ thống gọi `onPause` rồi `onStop` và lưu dữ liệu tạm qua `onSaveInstanceState`. Lúc này, hệ điều hành tăng điểm `oom_score_adj` (mức ưu tiên bị tắt trong bộ dọn LMKD) của tiến trình lên cao. Khi máy thiếu RAM, LMKD gửi lệnh `SIGKILL` tắt ngay tiến trình có điểm cao nhất mà không gọi `onDestroy`. Khi người dùng mở lại ứng dụng, Android tạo tiến trình mới và truyền lại `Bundle` vào `onCreate` để dựng lại màn hình.
 
 ## Đánh đổi
-Hệ thống giữ được độ ổn định cao trên phần cứng hạn chế. Đổi lại, lập trình viên phải tự xử lý việc lưu trữ trạng thái và đối mặt với nguy cơ [rò rỉ bộ nhớ](concept:android-memory-leak). Màn hình bị hủy rồi tạo lại sau mỗi lần xoay máy khiến luồng xử lý bất đồng bộ rất dễ đứt gãy.
+Hệ thống chạy ổn định ngay cả trên những máy ít RAM. Đổi lại, bạn phải tự viết code lưu trạng thái màn hình và cẩn thận tránh [rò rỉ bộ nhớ](concept:android-memory-leak). Mỗi lần người dùng xoay ngang điện thoại, Activity bị hủy rồi tạo lại nên các việc đang chạy dở rất dễ bị ngắt.
 
 ## Nguyên lý gốc
-Ảo ảnh tính liên tục: duy trì trải nghiệm liền mạch bằng cách hủy và dựng lại thành phần từ bản chụp trạng thái.
+Giữ cảm giác ứng dụng chạy liên tục bằng cách cất dữ liệu vào bản chụp tạm trước khi hủy. Khi người dùng quay về, hệ thống dựng lại màn hình từ bản chụp đó.
 
 ## Key insight
-> Lifecycle là giao thức nhượng quyền để hệ điều hành giải phóng RAM bất cứ lúc nào mà người dùng không hề hay biết.
+> Lifecycle báo trước để hệ điều hành thu hồi RAM ứng dụng ngầm bất cứ lúc nào mà người dùng không biết.
 
 ## Ví von
-Khi khách rời phòng, khách sạn cất đồ đạc vào vali nhỏ rồi nhường phòng cho người khác. Khi khách quay lại, họ dọn đồ vào phòng mới y như cũ.
+Khi bạn trả phòng tạm để đi chơi xa, khách sạn cất đồ của bạn vào chiếc vali nhỏ rồi cho khách khác thuê phòng. Khi bạn quay lại, nhân viên xếp đồ từ vali ra một căn phòng mới giống hệt phòng cũ.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -52,25 +52,25 @@ lifecycle.addObserver(LocationListener(gpsManager))
 ```
 
 ## Bẫy & ranh giới
-Bẫy tai hại nhất là tin rằng `onDestroy()` luôn luôn được gọi. Khi ở chế độ nền, Low Memory Killer bắn lệnh `SIGKILL` xóa sổ app ngay lập tức mà bỏ qua hoàn toàn `onDestroy()`. Lưu dữ liệu quan trọng trong `onDestroy` chắc chắn sẽ làm mất dữ liệu của người dùng. Chống chỉ định chạy tác vụ I/O dài hạn trong callback vì nếu bị SIGKILL thì công việc sẽ dở dang và hỏng dữ liệu.
+Bẫy hay gặp nhất là tin rằng `onDestroy()` lúc nào cũng chạy khi ứng dụng đóng. Khi ứng dụng nằm dưới nền mà máy hết RAM, Low Memory Killer bắn lệnh `SIGKILL` tắt tiến trình ngay mà bỏ qua `onDestroy()`. Nếu bạn đợi tới `onDestroy` mới lưu bài viết đang soạn dở, người dùng sẽ mất sạch chữ vừa gõ. Cũng đừng gọi lệnh ghi file hay mạng lâu trong các hàm vòng đời, vì bị `SIGKILL` giữa chừng sẽ làm hỏng dữ liệu.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Gọi finish() thì Activity có bị hủy ngay lập tức không?
-Không. Lệnh `finish()` chỉ đánh dấu kết thúc và xếp lịch chuyển màn hình, các dòng mã phía sau lệnh gọi đó vẫn chạy tiếp. Hệ thống chỉ thực sự gọi `onDestroy` ở các chu kỳ thông điệp sau trên Main Thread.
+Không. Lệnh `finish()` chỉ báo cho hệ thống xếp lịch đóng màn hình, nên các dòng code viết ngay bên dưới nó vẫn chạy tiếp. Hệ thống chỉ thực sự gọi `onDestroy` ở các lượt xử lý tin nhắn sau trên Main Thread.
 
 **Hỏi:** onPause với onStop khác nhau chỗ nào trong thực tế?
-`onPause` xảy ra khi màn hình mất tiêu điểm nhưng vẫn nhìn thấy, còn `onStop` chạy khi giao diện bị che khuất hoàn toàn. Hiện hộp thoại cấp quyền hệ thống dạng trong suốt là tình huống kinh điển chỉ kích hoạt `onPause`. Bạn nên tạm dừng hoạt ảnh nhẹ ở `onPause`, nhưng chỉ ngắt kết nối định vị nặng ở `onStop`.
+`onPause` chạy khi màn hình mất tương tác nhưng vẫn nhìn thấy, còn `onStop` chạy khi màn hình bị che kín. Ví dụ khi một hộp thoại xin quyền trong suốt bật đè lên, Activity phía dưới chỉ vào `onPause` chứ chưa vào `onStop`. Bạn nên dừng hoạt ảnh nhẹ ở `onPause`, và ngắt GPS hay camera nặng ở `onStop`.
 
 **Hỏi:** Lưu trạng thái màn hình nên chọn onSaveInstanceState hay ViewModel, làm sao biết?
-Tuỳ vào việc bạn muốn sống sót qua xoay màn hình hay qua biến cố bị hệ thống diệt tiến trình ngầm. [ViewModel](concept:android-viewmodel) giữ đối tượng bộ nhớ lớn qua việc xoay máy nhưng sẽ mất trắng khi tiến trình bị thu hồi. `onSaveInstanceState` bắt buộc dùng để lưu lại ID và cờ nhỏ vào Bundle nhằm phục hồi đúng màn hình cũ.
+Tuỳ vào việc bạn muốn giữ dữ liệu qua lúc xoay màn hình hay qua lúc hệ thống tắt ngầm tiến trình. [ViewModel](concept:android-viewmodel) giữ được danh sách lớn trong RAM khi xoay máy, nhưng sẽ mất hết nếu tiến trình bị hệ thống tắt. Vì vậy, bạn phải dùng thêm `onSaveInstanceState` để cất các ID hoặc chữ đang gõ vào `Bundle` nhằm tải lại màn hình.
 
 **Hỏi:** Vì sao Google khuyên giải phóng tài nguyên ở onStop thay vì onDestroy?
-Vì `onDestroy` không có gì bảo đảm sẽ luôn được gọi. Khi ứng dụng về chế độ nền, hệ thống sẵn sàng gửi `SIGKILL` tiêu diệt tiến trình mà bỏ qua `onDestroy`. Giải phóng định vị hay máy ảnh ở `onStop` bảo đảm phần cứng được trả về ngay khi khuất tầm nhìn.
+Vì hệ thống không hứa sẽ luôn gọi `onDestroy`. Khi ứng dụng của bạn lùi về nền, hệ thống có thể gửi `SIGKILL` tắt thẳng tiến trình mà không chạy qua `onDestroy`. Ngắt định vị hay máy ảnh ngay ở `onStop` giúp trả lại phần cứng ngay khi người dùng không còn nhìn thấy màn hình.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] LMKD tăng điểm oom_score_adj và gửi SIGKILL xóa tiến trình nền mà không gọi onDestroy.
-- [ ] Bản chất: giao thức thương lượng tài nguyên với OS, tạo ảo ảnh liên tục qua cơ chế lưu Bundle.
-- [ ] Bẫy lưu dữ liệu trong onDestroy bị mất và bẫy rò rỉ bộ nhớ khi xoay máy.
+- [ ] Giải thích được cách LMKD tăng điểm oom_score_adj và gửi SIGKILL tắt tiến trình nền mà không gọi onDestroy.
+- [ ] Nêu được vai trò của lifecycle như cơ chế báo trước để ứng dụng lưu Bundle và nhường RAM cho hệ điều hành.
+- [ ] Chỉ ra được bẫy mất dữ liệu khi lưu trong onDestroy và nguy cơ rò rỉ bộ nhớ khi xoay màn hình.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

@@ -10,40 +10,33 @@ diagrams: [Cơ chế|samsung-mdc-packet-frame.png|Cấu trúc gói gửi và ph�
 ---
 
 ## Bản 30 giây
-Giao thức điều khiển màn hình thương mại qua cáp nối tiếp hoặc mạng.
-Mỗi lệnh là chuỗi byte bắt đầu bằng `0xAA` và kết thúc bằng tổng kiểm tra.
-Ứng dụng phải gửi từng lệnh tuần tự và chờ phản hồi trước khi gửi tiếp.
+Khi viết app điều khiển màn hình thương mại Samsung qua cáp nối tiếp hoặc mạng, bạn dùng giao thức `MDC`. Mỗi lệnh gửi đi là một mảng byte mở đầu bằng `0xAA` và chốt cuối bằng một byte `checksum`. Ứng dụng phải gửi từng lệnh một, đợi màn hình trả lời xong rồi mới được gửi lệnh kế tiếp.
 
 ## Cần biết trước
 - android-tcp-stream-framing
 - kotlin-coroutine-context-and-dispatchers
 
 ## Vấn đề buộc nó ra đời
-Khi lắp hàng loạt màn hình thương mại, kỹ thuật viên không thể dùng điều khiển hồng ngoại thao tác từng chiếc. Kéo riêng từng sợi cáp nối tiếp từ máy chủ đến hàng chục màn hình cũng làm cạn kiệt cổng vật lý.
+Khi lắp hàng chục màn hình quảng cáo ở sân bay, kỹ thuật viên không thể cầm điều khiển hồng ngoại đi bấm từng chiếc. Kéo riêng từng sợi cáp từ máy chủ tới mỗi màn hình cũng làm hết sạch cổng cắm vật lý.
 
-Samsung cho phép nối chuỗi cáp nối tiếp, từ cổng ra của máy trước vào cổng vào máy sau. Giao thức Multiple Display Control (MDC) ra đời để gửi lệnh nhị phân có định danh tới từng màn hình trên cùng một đường truyền.
+Samsung cho phép cắm cáp nối tiếp từ cổng ra của màn hình trước sang cổng vào của màn hình sau. Giao thức Multiple Display Control (`MDC`) gửi lệnh nhị phân gắn mã ID tới đúng màn hình trên một dây.
 
-Người vận hành có thể phát sóng lệnh đồng loạt mà không sợ nghẽn mạch do các máy phản hồi cùng lúc.
+Nhờ quy ước không trả lời lệnh phát chung, bạn bật tắt cả dàn máy mà không nghẽn đường truyền.
 
 ## Nó thực sự là cái gì
-MDC KHÔNG PHẢI là giao thức dựa trên văn bản như HTTP. Thực chất, nó là định dạng khung nhị phân điều khiển phần cứng trên cổng RS-232C hoặc cổng TCP 1515 của [dòng byte TCP](concept:android-tcp-stream-framing).
+`MDC` không gửi chữ đọc được bằng mắt như HTTP. Nó đóng gói lệnh thành khung byte ngắn, truyền qua cáp `RS-232C` hoặc cổng `TCP 1515` trên [TCP Stream Framing](concept:android-tcp-stream-framing).
 
 ## Cơ chế
-Gói gửi gồm byte đầu `0xAA`, mã lệnh, mã màn hình, độ dài dữ liệu, dữ liệu và một byte tổng kiểm tra (checksum).
-Lệnh đọc và lệnh đặt dùng chung mã lệnh, phân biệt bằng độ dài dữ liệu bằng không hay mang giá trị cài đặt.
-Màn hình phản hồi bằng `0xAA`, `0xFF`, mã màn hình, độ dài, ký tự `A` hoặc `N`, mã lệnh gốc và byte tổng kiểm tra.
-Mã phát sóng `0xFE` gửi tới toàn màn hình mà không nhận phản hồi, còn dòng mới hỗ trợ bảo mật TLS.
+Gói gửi đi gồm byte đầu `0xAA`, mã lệnh, ID màn hình, độ dài, dữ liệu và byte `checksum`. Lệnh hỏi trạng thái và đổi cài đặt dùng chung mã lệnh, chỉ khác độ dài dữ liệu bằng 0 hay có giá trị. Khung trả lời gồm `0xAA`, `0xFF`, ID, độ dài, chữ `A` (thành công) hoặc `N` (lỗi), mã lệnh và `checksum`. Với mã phát sóng `0xFE`, mọi màn hình làm theo nhưng không trả lời; đời máy mới có thêm `TLS`.
 
 ## Đánh đổi
-Tổng kiểm tra 8 bit tiết kiệm phần cứng nhưng bỏ sót lỗi hoán vị hai byte dữ liệu so với CRC.
-Kênh truyền chỉ xử lý một lệnh tại một thời điểm, khiến ứng dụng phải tự xây [hàng đợi tuần tự](concept:android-ble-android-pitfalls).
-Lập trình viên phải giới hạn bằng [bộ điều phối](concept:kotlin-coroutine-context-and-dispatchers) hoặc khóa đồng bộ, làm tăng độ phức tạp quản lý luồng.
+Cộng dồn 8 bit làm `checksum` rất nhẹ, nhưng đổi chỗ hai byte thì tổng không đổi nên thua `CRC`. Đường truyền cũng chỉ xử lý được một lệnh tại một lúc, nên app của bạn phải tự làm [hàng đợi tuần tự](concept:android-ble-android-pitfalls). Bạn buộc phải khóa luồng gửi bằng `Mutex` hoặc [Coroutine Dispatcher](concept:kotlin-coroutine-context-and-dispatchers) đơn luồng để các lệnh không giẫm lên nhau.
 
 ## Nguyên lý gốc
-Giao thức giao dịch bán song công (half-duplex transaction): một bên hỏi và một bên đáp theo chu kỳ đóng gói tuần tự. Mỗi yêu cầu phải hoàn tất hoặc hết thời gian chờ trước khi phiên giao tiếp tiếp nhận thông điệp mới.
+Trên kênh bán song công (half-duplex), bên điều khiển phải hỏi từng câu và đợi trả lời xong (hoặc hết giờ chờ) mới gửi tiếp.
 
 ## Key insight
-> Byte Java có dấu khiến `0xAA` âm, nhưng cộng dồn rồi `and 0xFF` vẫn đúng vì phần dấu chỉ thêm bội số 256.
+> Dù `Byte` có dấu biến `0xAA` thành số âm, cộng dồn rồi `and 0xFF` vẫn ra đúng `checksum` do phần dấu là bội của 256.
 
 ## Ví von
 MDC giống như máy bộ đàm một chiều giữa đài chỉ huy và các tàu biển. Chỉ huy đọc lệnh cho một tàu rồi đợi tàu đó xác nhận xong mới đọc tiếp lệnh cho tàu khác.
@@ -59,25 +52,22 @@ fun buildMdcPacket(cmd: Byte, id: Byte, data: ByteArray = byteArrayOf()): ByteAr
 ```
 
 ## Bẫy & ranh giới
-Trong Java, so sánh `byte == 0xAA` luôn sai do mở rộng dấu âm; còn Kotlin chặn lỗi này ngay khi biên dịch.
-Để so sánh đúng trong Kotlin, lập trình viên bắt buộc phải chuyển đổi bằng `(byte.toInt() and 0xFF) == 0xAA`.
-Bắn dồn dập nhiều lệnh sẽ xáo trộn gói phản hồi, khiến ứng dụng nhận nhầm kết quả giữa các tác vụ.
-Giao thức trả giá bằng độ trễ hàng đợi; trường Length một byte buộc dữ liệu lớn phải chia nhiều gói 255 byte.
+Trong Java, `byte == 0xAA` luôn ra `false` vì `byte` có dấu đổi thành số âm khi sang `Int` (sign-extension); Kotlin chặn lỗi này lúc biên dịch. Muốn so sánh đúng trong Kotlin, bạn phải khử phần dấu âm bằng cách viết `(byte.toInt() and 0xFF) == 0xAA`. Nếu gửi nhiều lệnh không chờ nhau, các byte trả về sẽ trộn lẫn làm lệnh trước đọc nhầm kết quả. Giao thức này chịu trễ do xếp hàng lệnh, và dữ liệu trên 255 byte phải cắt nhỏ vì ô độ dài chỉ 1 byte.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Vì sao cộng các byte âm trong mảng rồi `and 0xFF` vẫn ra đúng tổng kiểm tra?
-Do bit dấu mở rộng chỉ cộng thêm các bội số của 256 vào số nguyên 32 bit. Khi lấy 8 bit thấp qua phép `and 0xFF`, toàn bộ các bội số 256 này đều bị triệt tiêu hoàn toàn. Kết quả cuối cùng luôn đồng dư với tổng các số nguyên không dấu tương ứng.
+Khi `Byte` âm sang `Int` 32 bit, các byte cao lấp đầy bit 1, tức cộng thêm bội số của 256. Lúc bạn lấy 8 bit cuối bằng phép `and 0xFF`, toàn bộ phần bội số của 256 đó bị cắt bỏ sạch. Nhờ vậy, 8 bit còn lại giống hệt như khi bạn cộng các số không dấu từ đầu.
 
 **Hỏi:** Có thể bắn đồng thời nhiều lệnh MDC trên cùng một kết nối TCP không?
-Không, vì giao thức này vận hành theo cơ chế yêu cầu và phản hồi tuần tự trên một dòng truyền dữ liệu. Bắn lệnh dồn dập sẽ làm byte phản hồi bị lẫn lộn giữa các lệnh khác nhau. Bạn bắt buộc phải tuần tự hóa qua hàng đợi hoặc khóa đồng bộ.
+Không. Màn hình trả lời lần lượt trên cùng một dòng byte, mà gói trả về không có mã riêng cho từng lần gọi. Nếu bắn hai lệnh cùng lúc, byte phản hồi nối đuôi nhau làm không rõ gói nào của lệnh nào, nên phải xếp hàng.
 
 **Hỏi:** Khi dùng mã phát sóng `0xFE`, ứng dụng có nhận được phản hồi ACK từ màn hình không?
-Không, các màn hình trong chuỗi nối tiếp được quy định không phản hồi lệnh phát sóng. Quy ước này nhằm ngăn chặn thảm họa xung đột tín hiệu khi hàng chục màn hình cùng phát dữ liệu ngược về máy chủ. Ứng dụng phải chấp nhận cơ chế bắn lệnh mà không có xác nhận trạng thái tức thì.
+Không. Khi nhận lệnh có ID là `0xFE`, mọi màn hình đều làm theo lệnh nhưng được quy định là không gửi gói trả lời về. Quy ước này giúp hàng chục màn hình nối chung cáp không phát tín hiệu ngược cùng lúc gây loạn đường truyền.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Trình bày được cấu trúc gói tin MDC gồm byte đầu 0xAA, mã lệnh, ID, độ dài và checksum.
-- [ ] Giải thích được nguyên nhân sign-extension trong Java và cách dùng `and 0xFF` để khử phần dấu.
-- [ ] Phân tích được lý do phải tuần tự hóa lệnh và vì sao mã phát sóng 0xFE không có ACK.
+- [ ] Trình bày được cấu trúc gói tin MDC gồm byte đầu 0xAA, mã lệnh, ID, độ dài, dữ liệu và checksum.
+- [ ] Giải thích được vì sao byte 0xAA bị đổi thành số âm khi sang Int và cách dùng `and 0xFF` để lấy lại đúng 8 bit cuối.
+- [ ] Nêu được lý do phải xếp hàng gửi từng lệnh một và vì sao mã phát sóng 0xFE không trả lời ACK.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

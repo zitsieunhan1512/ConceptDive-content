@@ -10,58 +10,58 @@ diagrams: [Cơ chế|state-vs-event-lifecycle.png|State có tính lũy đẳng �
 ---
 
 ## Bản 30 giây
-Trộn lẫn giữa sự kiện tạm thời và trạng thái bền vững là nguồn gốc của lỗi lặp thông báo và sai lệch dữ liệu. Trạng thái phản ánh thực tại hiện thời, có thể đọc lại vô số lần mà không đổi kết quả. Sự kiện đại diện cho biến cố vừa xảy ra, chỉ được xử lý đúng một lần duy nhất.
+Khi nhầm giữa sự kiện một lần và trạng thái đứng yên, ứng dụng dễ hiện lặp thông báo hoặc trừ tiền hai lần. `State` là tình trạng hiện tại, màn hình đọc lại bao nhiêu lần kết quả vẫn giữ nguyên. Còn `Event` là việc vừa xảy ra, chỉ được chạy đúng một lần rồi phải khép lại.
 
 ## Cần biết trước
 
 ## Vấn đề buộc nó ra đời
-Năm 1975, Akkoyunlu, Ekanadham và Huber chứng minh bài toán Hai vị tướng không có lời giải. Năm 1978, Jim Gray đặt tên cho nó trong tài liệu "Notes on Data Base Operating Systems". Qua kênh truyền có thể mất tin, bên gửi không bao giờ chắc tin đã tới. Vì vậy chỉ còn hai lựa chọn: gửi lại và chấp nhận trùng lặp, hoặc không gửi lại và chấp nhận mất.
+Năm 1975, Akkoyunlu, Ekanadham và Huber chứng minh bài toán Hai vị tướng không có lời giải tuyệt đối. Năm 1978, Jim Gray đặt tên cho bài toán này trong tài liệu "Notes on Data Base Operating Systems". Khi gửi tin qua đường truyền có thể rớt mạng, bên gửi không bao giờ chắc chắn tin đã tới nơi. Vì vậy bạn chỉ có hai cách: gửi lại và chấp nhận tin bị trùng, hoặc không gửi lại và chấp nhận mất tin.
 
-Thập niên 2000, kiến trúc hướng sự kiện (EDA) và message queue bùng nổ. Khi mạng chập chờn, cơ chế gửi lại (at-least-once) khiến các consumer nhận trùng sự kiện thanh toán hoặc gửi thư nhiều lần.
+Đến thập niên 2000, các hệ thống truyền tin qua hàng đợi (message queue) và kiến trúc hướng sự kiện (EDA) bùng nổ. Khi mạng chập chờn, cơ chế gửi lại (at-least-once) làm máy chủ nhận trùng lệnh thanh toán hoặc gửi lặp email.
 
-Trên giao diện người dùng, lập trình viên thường lưu các hành động tạm thời vào luồng dữ liệu hiển thị. Khi xoay màn hình mà quên xoá, hệ thống đọc lại dữ liệu cũ và vô tình kích hoạt lại hành động đó.
+Trên ứng dụng di động, lập trình viên cũng hay cất các thông báo một lần vào chung biến trạng thái màn hình. Khi xoay ngang máy mà quên xóa thông báo, màn hình vẽ lại sẽ đọc biến cũ và bật thông báo lần nữa.
 
 ## Nó thực sự là cái gì
-State và Event KHÔNG phải hai cách gọi tên tùy ý cho cùng một biến dữ liệu. Thực chất, State là trạng thái tĩnh có tính lũy đẳng (idempotent), còn Event là thông điệp kích hoạt chuyển đổi trạng thái. Trong kiến trúc [MVVM vs MVI](concept:architecture-mvvm-vs-mvi), MVI chuẩn hóa sự phân định này thành luồng dữ liệu một chiều khép kín.
+`State` và `Event` không phải là hai cái tên tùy thích đặt cho cùng một biến dữ liệu. `State` là dữ liệu tĩnh có tính lũy đẳng (idempotent - đọc lại vẫn như cũ), còn `Event` là tín hiệu đổi trạng thái. Trong [MVVM vs MVI](concept:architecture-mvvm-vs-mvi), MVI nối chúng thành vòng một chiều: `Event` đi lên để sinh `State` mới đi xuống.
 
 ## Cơ chế
-Hệ thống xử lý Event bằng cách kiểm tra điều kiện rồi áp dụng thay đổi vào State hiện tại. Trong mô hình Event Sourcing và Redux, toàn bộ lịch sử Event được ghi thành log bất biến để tái tạo State khi cần. Tuy nhiên, các tác vụ phụ (side-effect) như gọi API hay bắn thông báo chỉ được kích hoạt khi Event phát sinh lần đầu. Khi khôi phục State từ log, hệ thống chỉ chạy logic biến đổi dữ liệu thuần túy và cấm chạy lại side-effect.
+Khi nhận một `Event`, hệ thống kiểm tra điều kiện rồi tính ra bản `State` mới. Trong hệ thống lưu nhật ký sự kiện (Event Sourcing) hay Redux, mọi `Event` đều ghi nối vào sổ log để dựng lại `State`. Tuy nhiên, các `side effect` như gọi API hay bật thông báo chỉ được chạy lúc `Event` mới xuất hiện lần đầu. Khi đọc lại log để khôi phục `State`, hệ thống chỉ tính lại dữ liệu chứ tuyệt đối không chạy lại `side effect`.
 
 ## Đánh đổi
-Tách bạch hai khái niệm giúp hệ thống miễn nhiễm với lỗi lệch pha dữ liệu và tái hiện bug dễ dàng. Đổi lại, bạn phải duy trì hai đường ống truyền dữ liệu riêng biệt và xử lý logic phức tạp hơn. Nếu áp dụng cực đoan cho các màn hình đơn giản, việc tạo thêm lớp Event sẽ làm tăng mã bản mẫu không cần thiết.
+Phân biệt rõ hai thứ giúp dẹp hẳn lỗi hiện lặp thông báo khi xoay máy và dễ dựng lại kịch bản lỗi. Đổi lại, bạn phải viết thêm bước xóa sự kiện sau khi đã hiển thị hoặc tách luồng xử lý riêng. Nếu màn hình chỉ hiện dữ liệu tĩnh đơn giản mà bày vẽ hệ thống `Event` đồ sộ thì code sẽ dài dòng thừa thãi.
 
 ## Nguyên lý gốc
-Tính lũy đẳng (Idempotence): thực hiện một thao tác nhiều lần vẫn cho ra kết quả giống hệt làm một lần. HTTP GET và PUT là State vì có tính lũy đẳng, còn POST là Event vì mỗi lần gọi tạo ra biến cố mới.
+Tính lũy đẳng (Idempotence): làm một thao tác năm lần vẫn ra kết quả y hệt như làm một lần. Trong HTTP, `GET` và `PUT` mang tính `State` vì gọi lại vẫn ra kết quả đó. Còn `POST` là `Event` vì mỗi lần gọi lại tạo thêm một bản ghi mới.
 
 ## Key insight
-> Event không phải là State dùng một lần: State luôn lũy đẳng khi đọc lại, còn Event chỉ kích hoạt tác vụ phụ.
+> `Event` không phải là `State` dùng một lần: `State` đọc lại bao nhiêu lần vẫn an toàn, còn `Event` làm phát sinh `side effect`.
 
 ## Ví von
-State là mực nước hiển thị trên đồng hồ đo, ai nhìn vào thời điểm nào cũng thấy mực nước đó. Event là giọt nước nhỏ vào bồn, chỉ kích hoạt gợn sóng ngay lúc giọt nước chạm mặt nước.
+`State` giống mực nước hiện trên thước đo của bồn chứa: ai đi ngang nhìn vào lúc nào cũng thấy đúng mực nước đó. Còn `Event` giống giọt nước vừa rơi xuống mặt bồn: nó chỉ làm mặt nước gợn sóng đúng một khoảnh khắc lúc chạm vào.
 
 ## Bẫy & ranh giới
-Bẫy kinh điển là đưa sự kiện một lần vào `StateFlow` mà không xoá sau khi giao diện đã xử lý. Khi xoay màn hình, giao diện mới dựng nhận lại trạng thái cũ và kích hoạt lại thông báo ngoài ý muốn. Ở backend, consumer nhận thông điệp thiếu tính lũy đẳng sẽ gây lỗi trừ tiền hai lần khi mạng chập chờn. Chống chỉ định đẩy sự kiện qua Channel hay [SharedFlow](concept:kotlin-stateflow-vs-sharedflow) khi ViewModel sống lâu hơn giao diện vì không bảo đảm giao nhận.
+Bẫy quen thuộc nhất trên Android là nhét câu thông báo lỗi vào `StateFlow` nhưng hiện xong lại quên gán nó về `null`. Khi xoay máy, giao diện dựng lại sẽ đọc trúng giá trị cũ và bật lại thông báo đó. Ở phía máy chủ, nếu hàm nhận tin không kiểm tra mã trùng (thiếu tính lũy đẳng), khách sẽ bị trừ tiền hai lần. Cũng đừng bắn sự kiện qua `Channel` hay [SharedFlow](concept:kotlin-stateflow-vs-sharedflow) mà không gắn vào `State`, vì màn hình tạm ẩn sẽ làm rơi sự kiện.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Nhét Event vào State rồi gán lại giá trị null sau khi dùng có ổn không?
-Ổn, đây chính là cách hướng dẫn chính thức của Android khuyên dùng. ViewModel đặt `userMessage` vào UiState, giao diện hiện xong sẽ gọi hàm để xoá trường đó về `null`. Xoay máy trước khi kịp xoá thì thông báo có thể hiện lại, nhưng không bao giờ bị rơi rớt sự kiện.
+Rất ổn, đây chính là cách tài liệu kiến trúc chính thức của Android khuyên bạn dùng. `ViewModel` đặt biến `userMessage` vào trong `UiState`, màn hình hiện thông báo xong thì gọi ngay một hàm để xóa trường đó về `null`. Nếu xoay máy ngay trước lúc hàm xóa chạy thì thông báo có thể hiện lại, nhưng bạn không bao giờ mất thông báo.
 
 **Hỏi:** Lệnh điều hướng sang màn hình mới nên xử lý dưới dạng State hay Event, làm sao biết?
-Tuỳ vào việc bạn có cần ViewModel xác thực logic nghiệp vụ trước khi chuyển trang hay không. Chuyển trang thuần tuý thì UI tự gọi điều hướng mà không cần thông qua ViewModel. Khi cần kiểm tra điều kiện, ViewModel phơi cờ trạng thái trong UiState để giao diện quan sát và tự điều hướng.
+Bạn xem việc chuyển màn hình đó có cần `ViewModel` kiểm tra điều kiện hay lưu dữ liệu trước không. Nếu bấm nút là sang màn hình mới ngay thì giao diện tự gọi lệnh chuyển trang luôn, không cần đi vòng qua `ViewModel`. Còn nếu phải đợi lưu dữ liệu xong, `ViewModel` hãy bật một cờ trong `UiState` để màn hình nhìn vào đó chuyển trang.
 
 **Hỏi:** Phân biệt State và Event có tác dụng thực sự gì trong ứng dụng thực tế?
-Nó dập tắt triệt để lỗi nhảy lặp hộp thoại hoặc gửi thông báo hai lần khi người dùng xoay điện thoại. Ở hệ thống lớn, phát lại lịch sử sự kiện để dựng dữ liệu sẽ không kích hoạt gửi thư hay trừ tiền.
+Nó giúp bạn trị dứt điểm lỗi bật lặp hộp thoại hoặc hiện `Toast` hai lần mỗi khi xoay màn hình điện thoại. Ở máy chủ, khi chạy lại lịch sử sự kiện để khôi phục dữ liệu, hệ thống không gửi nhầm email cũ cho khách.
 
 **Hỏi:** Tính lũy đẳng (idempotent) cứu nguy thế nào khi backend nhận trùng Event?
-Nó bảo đảm xử lý một thông điệp nhiều lần vẫn cho ra cùng một kết quả như xử lý lần đầu. Khi mạng chập chờn, yêu cầu gửi lại sẽ không trừ tiền hai lần nhờ kiểm tra mã giao dịch duy nhất.
+Nó đảm bảo dù máy chủ nhận cùng một tin nhắn nhiều lần thì kết quả vẫn như nhận một lần. Khi mạng yếu làm máy tự gửi lại lệnh thanh toán, máy chủ nhìn mã giao dịch duy nhất sẽ bỏ qua lần trùng. Nhờ đó, khách hàng không bị trừ tiền hai lần.
 
 **Hỏi:** Thao tác nhấn một nút trên màn hình là State hay Event?
-Nhát bấm của ngón tay là Event, còn việc nút bấm đang bị vô hiệu hóa hay sáng đèn là State. Event nhấn nút gửi đi tín hiệu xử lý, sau đó hệ thống mới tính toán và cập nhật State mới lên giao diện.
+Cú chạm ngón tay vào nút là `Event`, còn việc nút đang sáng hay bị khóa mờ là `State`. Cú chạm gửi `Event` cho hệ thống xử lý, rồi hệ thống trả về `State` mới để vẽ lại nút.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Bản chất: State có tính lũy đẳng (đọc lại vô hại), Event chỉ kích hoạt tác vụ phụ đúng một lần.
-- [ ] Ứng dụng ngoài giao diện: tính lũy đẳng của HTTP GET/PUT và cơ chế replay log không side-effect trong Event Sourcing.
-- [ ] Bẫy quên xoá sự kiện trong StateFlow làm lặp thông báo và bẫy trừ tiền trùng ở consumer message queue.
+- [ ] Phân biệt được: State có tính lũy đẳng (đọc lại nhiều lần không hại), còn Event kích hoạt side effect đúng một lần.
+- [ ] Nêu được ví dụ ngoài giao diện: tính lũy đẳng của HTTP GET/PUT so với POST, và việc phát lại log không chạy lại side effect trong Event Sourcing.
+- [ ] Chỉ ra được bẫy quên xóa sự kiện về null trong StateFlow làm lặp thông báo khi xoay màn hình, và bẫy trừ tiền hai lần khi thiếu kiểm tra trùng.
 
 ## Tôi đã gặp nó ở đâu
 

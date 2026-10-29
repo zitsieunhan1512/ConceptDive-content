@@ -10,44 +10,42 @@ created: 2026-10-01
 ---
 
 ## Bản 30 giây
-Hàm mở rộng giúp bổ sung tính năng cho một lớp có sẵn mà không cần sửa mã nguồn hoặc kế thừa. Bản chất bên dưới chỉ là hàm tĩnh thông thường nhận đối tượng đó làm tham số đầu vào. Cùng với đó, từ khoá `object` giúp tạo ra đối tượng duy nhất một cách an toàn mà không cần viết mẫu đơn bản.
+Khi muốn gắn thêm hàm `toSlug()` cho lớp `String` có sẵn mà không sửa được mã nguồn của nó, bạn viết một `extension function`. Khi biên dịch, Kotlin chỉ biến nó thành một hàm tĩnh bình thường nhận chuỗi đó làm tham số đầu tiên. Từ khóa `object` giúp tạo ngay một đối tượng duy nhất (`Singleton`) mà khỏi tự viết khóa đa luồng.
 
 ## Cần biết trước
 - jvm-virtual-method-dispatch
 - oop-four-pillars
 
 ## Vấn đề buộc nó ra đời
-Trong các dự án Java, lập trình viên thường tạo hàng loạt lớp tiện ích tĩnh như `StringUtils`. Cách viết này làm mất tính liền mạch của phong cách lập trình hướng đối tượng. Lập trình viên luôn phải gọi hàm lồng nhau thay vì chấm trực tiếp từ đối tượng.
+Trong dự án Java, mỗi khi cần thêm hàm xử lý chuỗi hay ngày tháng, bạn phải tạo lớp tiện ích như `StringUtils`. Khi ghép nhiều bước xử lý, bạn phải viết các lời gọi hàm lồng ngược vào nhau thay vì chấm nối tiếp trên đối tượng.
 
-Bên cạnh đó, việc tạo đối tượng đơn bản trong Java rất rườm rà và dễ mắc lỗi. Lập trình viên phải tự viết cơ chế khoá hai lần để bảo đảm an toàn đa luồng. Một sơ suất nhỏ trong xử lý luồng cũng làm hỏng tính duy nhất của đối tượng.
+Bên cạnh đó, muốn tạo một đối tượng dùng chung duy nhất (`Singleton`) trong Java vừa dài dòng vừa dễ sai. Bạn phải tự viết bước kiểm tra khóa hai lần để hai luồng chạy cùng lúc không tạo ra hai đối tượng khác nhau.
 
-Kotlin được JetBrains công bố năm 2011 và phát hành bản 1.0 năm 2016, hỗ trợ sẵn hàm mở rộng và `object`. Thiết kế này biến các mẫu mã rườm rà thành cú pháp trực quan và an toàn.
+JetBrains giới thiệu Kotlin năm 2011 và ra mắt bản 1.0 năm 2016 với sẵn `extension function` và từ khóa `object`. Hai tính năng này giúp bạn chấm gọi hàm tự nhiên và tạo đối tượng duy nhất chỉ bằng một dòng khai báo.
 
 ## Nó thực sự là cái gì
-Hàm mở rộng KHÔNG hề chèn thêm mã lệnh vào bên trong lớp được mở rộng.
+`Extension function` không hề mở khóa hay nhét thêm hàm mới vào bên trong lớp gốc.
 
-Thực chất, compiler biến nó thành phương thức tĩnh trong lớp `<TênFile>Kt`, nhận receiver làm tham số đầu tiên.
+Thật ra, trình biên dịch tạo một hàm `static` trong lớp `<TênFile>Kt`, nhận đối tượng trước dấu chấm làm tham số đầu tiên.
 
-Từ khoá `object` cũng KHÔNG phải là các phần tử tĩnh đơn thuần của Java.
-
-Thực chất, `object` là lớp riêng có đúng một thể hiện, khởi tạo khi truy cập lần đầu và an toàn luồng nhờ JLS §12.4.2.
+Từ khóa `object` cũng không phải biến `static` rời rạc: trình biên dịch tạo lớp giữ biến `INSTANCE`, khởi tạo ở lần gọi đầu. Nó an toàn đa luồng nhờ chuẩn nạp lớp JVM (JLS §12.4.2).
 
 ## Cơ chế
-Hàm mở rộng được phân giải tĩnh khi biên dịch dựa theo kiểu khai báo của biến.
+Khi bạn gọi `extension function`, trình biên dịch chọn luôn hàm sẽ chạy dựa theo kiểu khai báo của biến ngay lúc dịch code.
 
-Vì không sử dụng [bảng hàm ảo](concept:jvm-virtual-method-dispatch), bạn không thể ghi đè hàm mở rộng.
+Vì lệnh gọi không đi qua [bảng hàm ảo](concept:jvm-virtual-method-dispatch) `vtable`, lớp con không thể ghi đè (`override`) hàm mở rộng của lớp cha.
 
-Nếu hàm mở rộng trùng tên với hàm nội tại, compiler ưu tiên hàm nội tại và cảnh báo bị che khuất.
+Nếu hàm mở rộng trùng tên và tham số với hàm có sẵn trong lớp, trình biên dịch luôn gọi hàm của lớp.
 
-Khi dùng `companion object`, cần gắn nhãn `@JvmStatic` để Java gọi trực tiếp như hàm tĩnh.
+Còn khi viết hàm trong `companion object`, bạn gắn thêm `@JvmStatic` nếu muốn phía Java gọi thẳng được như hàm `static` thường.
 
 ## Đánh đổi
-Hàm mở rộng không thể truy cập vào các thuộc tính riêng tư của lớp ban đầu.
+Vì bản chất chỉ là hàm tĩnh đứng bên ngoài, `extension function` không đọc được các biến `private` hay `protected` của lớp gốc.
 
-Bù lại, lập trình viên được lợi cú pháp gọi gọn và tự gợi ý; bytecode bên dưới vẫn là lớp tiện ích tĩnh.
+Đổi lại, khi gõ dấu chấm, IDE tự gợi ý hàm ngay giúp code gọn và dễ đọc hơn lớp `Util`.
 
 ## Nguyên lý gốc
-Nguyên lý cú pháp thuận tiện: đóng gói mẫu mã quen thuộc thành cú pháp tự nhiên mà không đổi bản chất thực thi.
+Giữ nguyên cách máy ảo chạy hàm tĩnh bên dưới, chỉ bọc lại bằng cách viết dấu chấm cho người đọc dễ hiểu (syntactic sugar).
 
 ## Key insight
 > Hàm mở rộng được phân giải theo kiểu khai báo lúc biên dịch, không phải kiểu đối tượng lúc chạy.
@@ -67,22 +65,22 @@ object AppDatabase {
 ```
 
 ## Bẫy & ranh giới
-Nếu định nghĩa hàm mở rộng trùng chữ ký với thành viên lớp, compiler cảnh báo bị che khuất và ưu tiên thành viên. Việc dùng `object` bừa bãi sẽ tạo ra trạng thái toàn cục khó kiểm thử và cản trở việc dọn dẹp bộ nhớ. Khi gọi từ Java, thiếu nhãn `@JvmStatic` sẽ gây lỗi biên dịch nếu bạn không chấm qua thuộc tính Companion.
+Nếu thư viện thêm hàm thật trùng tên với `extension function` của bạn, code sẽ âm thầm gọi hàm của thư viện. Lạm dụng `object` giữ dữ liệu tạo ra biến toàn cục sống suốt đời ứng dụng, gây khó test và giữ bộ nhớ. Khi gọi hàm trong `companion object` từ code Java mà quên gắn `@JvmStatic`, bạn buộc phải viết dài dòng qua `.Companion` mới biên dịch được.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Nếu khai báo một extension function trùng tên và kiểu tham số với member function có sẵn của class thì chuyện gì xảy ra?
-Hàm thành viên nội tại sẽ được gọi. Trình biên dịch Kotlin sẽ hiển thị cảnh báo hàm mở rộng bị che khuất bởi thành viên. Hàm mở rộng của bạn sẽ không bao giờ được thực thi khi chữ ký trùng khớp.
+Hàm có sẵn bên trong lớp (`member function`) sẽ luôn thắng và được gọi. Trình biên dịch Kotlin chỉ hiện cảnh báo vàng báo rằng hàm mở rộng của bạn đã bị hàm thật che mất. Hàm mở rộng đó sẽ không bao giờ chạy chừng nào hai bên còn trùng hệt tên và danh sách tham số.
 
 **Hỏi:** Từ khoá object trong Kotlin có phải tương đương hoàn toàn với từ khoá static trong Java không?
-Không tương đương về mặt kiến trúc bộ nhớ. Bản chất `object` là một lớp riêng biệt nắm giữ cá thể đơn bản duy nhất được khởi tạo lười. Nó là một đối tượng thực tế trên bộ nhớ chứ không phải chỉ là trường tĩnh độc lập.
+Không giống nhau về cách tổ chức trong bộ nhớ. Từ khóa `object` tạo một lớp thật và giữ đối tượng duy nhất trên Heap, khởi tạo khi chạm tới lần đầu. Là đối tượng thật, `object` kế thừa được lớp khác hoặc cài đặt `interface`, điều mà hàm `static` trong Java không làm được.
 
 **Hỏi:** Tại sao gọi extension function trên một biến có kiểu giao diện lại không áp dụng đa hình lúc chạy?
-Vì hàm mở rộng được phân giải tĩnh tại thời điểm biên dịch. Máy ảo không tra cứu [bảng hàm ảo](concept:jvm-virtual-method-dispatch) để tìm đối tượng thực tế. Hàm được gọi hoàn toàn phụ thuộc vào kiểu dữ liệu bạn khai báo trên mã nguồn.
+Vì `extension function` được dịch thành lệnh gọi hàm tĩnh `invokestatic` ngay từ lúc biên dịch. Máy ảo không hề tra [bảng hàm ảo](concept:jvm-virtual-method-dispatch) để xem đối tượng thật lúc chạy thuộc lớp con nào. Bạn khai báo biến thuộc kiểu gì trên dòng code thì trình biên dịch khóa cứng vào hàm mở rộng của đúng kiểu đó.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Bản chất bytecode của hàm mở rộng là hàm tĩnh nhận receiver làm tham số đầu tiên.
-- [ ] Cơ chế phân giải tĩnh và thứ tự ưu tiên của hàm thành viên trước hàm mở rộng.
-- [ ] Cách thức khởi tạo an toàn luồng của từ khoá object và vai trò của @JvmStatic.
+- [ ] Giải thích được extension function khi dịch ra bytecode chỉ là hàm static nhận đối tượng gốc làm tham số đầu tiên.
+- [ ] Trình bày được vì sao hàm mở rộng chọn theo kiểu khai báo lúc biên dịch và luôn thua hàm có sẵn trong lớp khi trùng tên.
+- [ ] Nêu được cách object tạo đối tượng duy nhất an toàn đa luồng khi nạp lớp và tác dụng của nhãn @JvmStatic.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

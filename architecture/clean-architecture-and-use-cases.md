@@ -10,39 +10,33 @@ diagrams: [Cơ chế|clean-architecture-dependency-rule.png|Tầng UI và Data p
 ---
 
 ## Bản 30 giây
-Nhồi nhét logic nghiệp vụ vào ViewModel hoặc Repository khiến mã nguồn dính chặt vào Android SDK và khó kiểm thử. Kiến trúc sạch giải quyết bằng cách cô lập tầng Domain độc lập hoàn toàn, đại diện bởi các ca sử dụng (*Use Cases*). Mỗi Use Case chỉ đảm nhiệm một hành vi nghiệp vụ duy nhất, giúp kiểm thử nhanh chóng mà không cần thiết bị giả lập.
+Nếu bạn dồn hết logic tính toán vào `ViewModel` hoặc `Repository`, code sẽ dính chặt vào thư viện Android và rất khó viết test. Clean Architecture tách riêng một tầng `Domain` thuần Kotlin ở giữa, gồm các lớp nhỏ gọi là `Use Case`. Mỗi `Use Case` chỉ lo đúng một việc nghiệp vụ nên bạn chạy unit test trên máy tính cực nhanh mà không cần máy ảo.
 
 ## Cần biết trước
 - architecture-dependency-injection
 - architecture-mvvm-vs-mvi
 
 ## Vấn đề buộc nó ra đời
-Năm 2012, Robert C. Martin công bố mô hình Clean Architecture để giải quyết vấn đề mã nguồn bị phụ thuộc quá mức vào các framework ngoại vi. Các ứng dụng phần mềm thường bị sụp đổ cấu trúc khi thư viện bên thứ ba thay đổi.
+Năm 2012, Robert C. Martin giới thiệu Clean Architecture để trị căn bệnh code nghiệp vụ dính chặt vào thư viện bên ngoài. Nhiều dự án cứ đổi thư viện cơ sở dữ liệu hay giao diện là phải viết lại cả phần tính toán.
 
-Trong Android, ViewModel ban đầu đóng vai trò tiếp nhận dữ liệu từ Repository. Nhưng khi logic phình to, ViewModel biến thành các lớp khổng lồ chứa hàng ngàn dòng mã trộn lẫn tính toán và điều hướng.
+Trên Android, ban đầu `ViewModel` chỉ nhận dữ liệu từ `Repository` rồi đưa lên màn hình. Nhưng khi tính năng phức tạp dần, `ViewModel` phình thành lớp khổng lồ hàng ngàn dòng vừa tính tiền giỏ hàng vừa lo chuyển trang.
 
-Sự xuất hiện của tầng Domain với các Use Case chuyên biệt giúp bóc tách từng luồng nghiệp vụ riêng lẻ. Mã nguồn trở nên trong sáng, dễ đọc và cho phép nhiều kỹ sư làm việc song song mà không xung đột.
+Tách tầng `Domain` với các `Use Case` riêng giúp bạn cắt nhỏ từng luồng nghiệp vụ ra khỏi `ViewModel`. Code gọn hẳn lại, dễ đọc và nhiều người có thể chia nhau viết các `Use Case` cùng lúc mà không đụng hàng.
 
 ## Nó thực sự là cái gì
-`Use Case` KHÔNG phải là một lớp chuyển tiếp dữ liệu trung gian vô bổ chỉ làm động tác gọi lại hàm của Repository. Thực chất, đây là ranh giới đóng gói quy tắc nghiệp vụ cốt lõi và điều phối dữ liệu từ nhiều nguồn.
-
-Tầng Domain chứa Use Case tuyệt đối không chứa bất kỳ câu lệnh nhập xuất (*import*) nào từ thư viện Android.
+`Use Case` không phải là một lớp trung gian vô bổ chỉ đứng giữa gọi lại đúng một hàm của `Repository`. Nó là nơi giữ quy tắc nghiệp vụ cốt lõi và gom dữ liệu từ hai hay nhiều `Repository` lại với nhau. Tầng `Domain` chứa `Use Case` tuyệt đối không được `import` bất kỳ lớp nào của thư viện Android.
 
 ## Cơ chế
-Quy tắc phụ thuộc (*Dependency Rule*) quy định các tầng bên ngoài chỉ được phép phụ thuộc hướng vào tầng bên trong. Tầng Domain định nghĩa các giao diện (*Interfaces*) của Repository mà không cần quan tâm dữ liệu lưu ở đâu.
-
-Tầng Data bên ngoài sẽ triển khai các giao diện này dựa trên nguyên lý [đảo ngược phụ thuộc](concept:architecture-dependency-injection). Mỗi Use Case thường nạp chồng toán tử gọi hàm (*operator invoke*) để tạo cú pháp gọi trực tiếp tự nhiên.
+Quy tắc phụ thuộc (*Dependency Rule*) bắt buộc tầng ngoài chỉ được gọi vào tầng trong, không bao giờ đi chiều ngược lại. Tầng `Domain` ở trong chỉ khai báo `interface` của `Repository` chứ không cần biết dữ liệu lấy từ mạng hay từ máy. Tầng `Data` ở ngoài sẽ viết code thực thi các `interface` đó theo nguyên lý [đảo ngược phụ thuộc](concept:architecture-dependency-injection). Mỗi `Use Case` thường đặt tên hàm là `operator fun invoke` để bạn gọi thẳng đối tượng gọn như gọi một hàm.
 
 ## Đánh đổi
-Phân tách tầng giúp việc viết Unit Test đạt tốc độ tính bằng phần nghìn giây và tái sử dụng logic tối đa. Khi phối hợp với mô hình [Offline-First](concept:architecture-offline-first-repository), Use Case đóng vai trò kết nối mượt mà giữa các nguồn dữ liệu.
-
-Đổi lại, số lượng tệp tin và lớp dữ liệu trung gian tăng lên nhanh chóng trong toàn bộ dự án. Với các tính năng CRUD đơn giản, việc tạo Use Case chỉ để gọi một hàm Repository là sự lãng phí cấu trúc.
+Tách tầng như vậy giúp bạn chạy unit test mất vài phần nghìn giây và dùng lại được `Use Case` ở nhiều màn hình. Khi đi cùng mô hình [Offline-First](concept:architecture-offline-first-repository), `Use Case` cũng giúp bạn ghép nối các nguồn dữ liệu rất gọn. Đổi lại, dự án sẽ đẻ thêm khá nhiều file và lớp chuyển đổi dữ liệu trung gian. Với những màn hình chỉ đọc rồi hiện danh sách đơn giản (CRUD), tạo thêm `Use Case` chỉ để gọi một dòng `Repository` là vẽ việc.
 
 ## Nguyên lý gốc
-Nguyên lý đơn trách nhiệm: mỗi thành phần chỉ nên có một và chỉ một lý do duy nhất để thay đổi. Sự độc lập khỏi công cụ hiển thị giúp logic nghiệp vụ trường tồn qua nhiều thế hệ framework công nghệ.
+Nguyên lý đơn trách nhiệm: mỗi lớp chỉ nên có một lý do duy nhất để phải sửa code. Khi tách rời khỏi công cụ hiển thị, logic tính toán của bạn vẫn giữ nguyên dù sau này đổi sang framework giao diện khác.
 
 ## Key insight
-> Use Case không phải lớp bọc vô thưởng vô phạt, mà là tường lửa ngăn Android SDK xâm lấn vào logic nghiệp vụ.
+> `Use Case` không phải lớp bọc gọi hộ `Repository`, mà là bức tường ngăn thư viện Android tràn vào làm bẩn logic nghiệp vụ.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -58,22 +52,22 @@ class GetEligibleDiscountsUseCase(
 ```
 
 ## Bẫy & ranh giới
-Tạo Use Case chỉ làm nhiệm vụ ủy quyền một dòng duy nhất cho Repository là bẫy thừa thãi cấu trúc (*Over-engineering*). Chống chỉ định nhập (*import*) bất kỳ lớp Android nào như Context hoặc Bundle vào bên trong tầng Domain. Triệu chứng gồm lỗi kiểm thử `Method not mocked`, mã nguồn phình to và phá vỡ tính tương thích đa nền tảng (*KMP*).
+Tạo hàng loạt `Use Case` mà bên trong chỉ gọi lại đúng một dòng của `Repository` là bẫy vẽ việc (*Over-engineering*) hay gặp nhất. Bạn cũng tuyệt đối không được `import` các lớp của Android như `Context` hay `Bundle` vào tầng `Domain`. Nếu vi phạm, chạy unit test trên JVM sẽ nổ lỗi `Method not mocked`, dự án phình to và không đem sang Kotlin Multiplatform (*KMP*) được.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Có bắt buộc mọi hàm trong ViewModel đều phải đi qua Use Case không?
-Không bắt buộc. Nếu chỉ đọc dữ liệu đơn giản không có quy tắc nghiệp vụ, ViewModel có thể gọi thẳng Repository để tránh thừa code.
+Không bắt buộc. Nếu màn hình chỉ lấy danh sách hiển thị mà không tính toán hay lọc điều kiện, `ViewModel` cứ gọi thẳng `Repository`.
 
 **Hỏi:** Tại sao tầng Domain trong Clean Architecture tuyệt đối cấm import thư viện Android?
-Để bảo toàn tính độc lập nền tảng. Khi không phụ thuộc Android SDK, toàn bộ logic nghiệp vụ có thể chạy kiểm thử trên máy ảo JVM với tốc độ cực cao.
+Để giữ cho phần nghiệp vụ chạy độc lập với hệ điều hành. Khi không dính tới Android SDK, bạn chạy được toàn bộ unit test thẳng trên JVM của máy tính trong chớp mắt.
 
 **Hỏi:** Một Use Case có thể gọi một Use Case khác không?
-Có thể, nhưng cần hạn chế. Chỉ nên gọi chéo khi một quy trình nghiệp vụ lớn cần tái sử dụng một luật nghiệp vụ con đã được kiểm chứng.
+Có thể, nhưng bạn nên hạn chế. Chỉ nên gọi khi một luồng nghiệp vụ lớn cần dùng lại một bước kiểm tra hay tính toán đã viết sẵn ở `Use Case` nhỏ.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Tầng Domain và Use Case độc lập 100% khỏi Android Framework.
-- [ ] Dependency Rule: tầng ngoài phụ thuộc tầng trong qua đảo ngược phụ thuộc.
-- [ ] Tránh bẫy tạo Use Case rỗng chỉ gọi lại Repository (Over-engineering).
+- [ ] Giải thích được vì sao tầng Domain và Use Case phải thuần Kotlin, không import thư viện Android.
+- [ ] Trình bày được Dependency Rule: tầng UI và Data ở ngoài phụ thuộc ngược vào tầng Domain ở trong.
+- [ ] Chỉ ra được bẫy tạo Use Case rỗng chỉ gọi chuyển tiếp một dòng cho Repository (Over-engineering).
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu
