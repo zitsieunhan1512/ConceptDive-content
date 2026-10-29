@@ -10,35 +10,35 @@ created: 2026-09-08
 ---
 
 ## Bản 30 giây
-Khi tạm dừng hàm, máy tính cần nhớ vị trí dừng và dữ liệu dở dang mà không được khóa cứng luồng. Trình biên dịch giải quyết việc này bằng cách cắt nhỏ hàm thành một máy trạng thái có đánh số thứ tự. Dữ liệu được cất vào một gói nhớ trên Heap để khi xong việc có thể gọi hàm chạy tiếp.
+Khi bạn gọi API trên Android, hàm tạm dừng chờ mạng mà không giam cứng luồng giao diện. Trình biên dịch cắt hàm tại mỗi điểm dừng thành một máy trạng thái đánh số thứ tự bằng biến `label`. Biến cục bộ được cất vào đối tượng `Continuation` trên Heap để khi mạng trả về thì lấy ra chạy tiếp.
 
 ## Cần biết trước
 - kotlin-coroutines
 
 ## Vấn đề buộc nó ra đời
-Năm 1975, Gerald Jay Sussman và Guy L. Steele định nghĩa mô hình Continuation-Passing Style (CPS) trong ngôn ngữ Scheme.
+Năm 1975, Gerald Jay Sussman và Guy L. Steele dùng kiểu viết Continuation-Passing Style (CPS) trong ngôn ngữ Scheme. Mỗi hàm nhận thêm một tham số là phần việc còn lại và gọi nó khi chạy xong.
 
-Thời điểm đó, chuỗi hàm gọi lại (callback hell) xé nát mã nguồn tuần tự thành cây lồng nhau phân mảnh. Cấu trúc lồng nhau làm tê liệt khối `try-catch`, vỡ luồng xử lý vòng lặp và gây rò rỉ bộ nhớ luồng.
+Đến thập niên 2010, code Android và JavaScript gọi mạng bằng callback lồng nhau nên mỗi bước lại lùi sâu thêm một tầng. Khối `try-catch` bọc ngoài không bắt được lỗi ném trong callback chạy sau, còn vòng lặp bất đồng bộ phải viết thành đệ quy. Callback ẩn danh giữ tham chiếu tới Activity đã đóng còn gây rò rỉ bộ nhớ.
 
-Năm 2017, Roman Elizarov cùng đội ngũ JetBrains ứng dụng CPS kết hợp máy trạng thái vào Kotlin Coroutines. Giải pháp này giúp viết code bất đồng bộ tuần tự mà máy trạng thái ngầm tự quản lý tiến trình bên dưới.
+Roman Elizarov dẫn dắt thiết kế Coroutines dựa trên CPS, đưa vào Kotlin 1.1 (2017) bản thử nghiệm và ổn định ở Kotlin 1.3 (2018). Bạn viết code tuần tự từ trên xuống, còn trình biên dịch tự sinh máy trạng thái quản lý việc dừng và chạy tiếp.
 
 ## Nó thực sự là cái gì
-Hàm suspend KHÔNG PHẢI là hàm ma thuật tự biết đóng băng luồng đang chạy. Thực chất, trình biên dịch chia nhỏ hàm tại các điểm ngắt thành khối lệnh `when (label)` bên trong một lớp con `ContinuationImpl`. Các biến cục bộ sống qua điểm ngắt được chuyển hóa thành trường trên đối tượng Heap thay vì nằm ở ngăn xếp luồng. Điểm gọi suspend được cấp một số nhãn để máy trạng thái biết chính xác nơi cần nhảy vào sau khi được đánh thức.
+Nhiều người nghĩ hàm `suspend` có phép đóng băng luồng, nhưng thật ra trình biên dịch viết lại hàm của bạn. Nó gom thân hàm vào khối `when (label)` bên trong một lớp con của `ContinuationImpl`. Mỗi biến cục bộ cần dùng qua điểm dừng được cất thành trường của đối tượng trên Heap thay vì nằm ở ngăn xếp. Mỗi điểm gọi `suspend` được đánh một số `label` để hàm biết nhảy vào nhánh nào khi chạy lại.
 
 ## Cơ chế
-Trình biên dịch đổi chữ ký hàm bằng cách thêm tham số `completion: Continuation<Any?>` vào cuối và đổi kiểu trả về sang `Any?`. Hàm kiểm tra đối tượng truyền vào để tái sử dụng máy trạng thái hoặc cấp phát bản mới trên Heap. Trước mỗi điểm ngắt, biến `label` tăng lên và hàm con trả về hằng số `COROUTINE_SUSPENDED` để nhả luồng lập tức. Khi dữ liệu sẵn sàng, hệ thống gọi `continuation.resumeWith()` để tái kích hoạt máy trạng thái nhảy tới nhãn tiếp theo.
+Khi biên dịch, hàm của bạn nhận thêm tham số `completion: Continuation<Any?>` ở cuối và đổi kiểu trả về sang `Any?`. Lúc mới gọi, hàm kiểm tra tham số này để dùng lại đối tượng máy trạng thái cũ hoặc tạo bản mới trên Heap. Trước mỗi điểm dừng, hàm tăng số `label` lên rồi trả về hằng số `COROUTINE_SUSPENDED` để nhả luồng ngay. Khi có kết quả mạng, hệ thống gọi `continuation.resumeWith()` để chạy lại hàm và nhảy tới đúng nhánh `label` kế tiếp.
 
 ## Đánh đổi
-Bạn viết được mã bất đồng bộ tự nhiên như mã đồng bộ với đầy đủ cấu trúc vòng lặp và bắt lỗi ngoại lệ. Đổi lại, mỗi coroutine tạo thêm áp lực cấp phát đối tượng máy trạng thái `Continuation` lên bộ nhớ Heap. Lưu biến sống qua điểm ngắt trên Heap làm tăng áp lực dọn rác so với lưu trên ngăn xếp CPU thông thường.
+Khi gọi 3 API nối tiếp nhau, bạn vẫn dùng vòng lặp và `try-catch` tự nhiên như code đồng bộ. Đổi lại, mỗi lần gọi hàm có điểm dừng sẽ cấp thêm đối tượng `Continuation` trên bộ nhớ Heap. Các biến giữ qua điểm dừng cũng phải nằm trên Heap nên làm bộ dọn rác tốn thêm công thu hồi.
 
 ## Nguyên lý gốc
-Thực thể hóa dòng điều khiển (Reification of Control Flow). Biến luồng thực thi của chương trình thành đối tượng dữ liệu cụ thể để có thể lưu trữ, truyền đi và phục hồi.
+Khi hàm đang chạy giữa chừng, ta biến thông tin đang chạy tới đâu thành một đối tượng dữ liệu (Reification of Control Flow). Nhờ nằm trong đối tượng, vị trí dừng và biến dở dang có thể cất vào bộ nhớ rồi lấy ra chạy tiếp.
 
 ## Key insight
-> Máy ảo không có cơ chế tạm dừng: `suspend` thực chất là compiler biến hàm thành đối tượng `Continuation` mang nhãn trạng thái.
+> `suspend` của Kotlin không nhờ máy ảo tạm dừng, mà compiler tự biến hàm thành đối tượng `Continuation` nhớ nhãn `label`.
 
 ## Ví von
-Giống như chiếc kẹp đánh dấu trang sách khi bạn đang đọc dở. Bạn ghi chú số dòng rồi trả sách về kệ để người khác có thể mượn đọc tiếp. Khi rảnh rỗi, bạn lấy sách ra và mở đúng số trang ghi trên thẻ để tiếp tục câu chuyện.
+Hãy tưởng tượng bạn đang đọc sách tới dòng thứ 5 thì phải trả sách về kệ cho người khác mượn. Bạn kẹp một mảnh giấy ghi số trang và dòng đang đọc dở vào cuốn sách đó. Lúc rảnh, bạn lấy sách ra, nhìn mảnh giấy để mở đúng dòng thứ 5 và đọc tiếp.
 
 ## Khuôn mẫu chuẩn
 ```kotlin
@@ -57,28 +57,28 @@ fun fetchData(cont: Continuation<Any?>): Any? {
 ```
 
 ## Bẫy & ranh giới
-Bẫy nguy hiểm là khai báo từ khóa `suspend` cho các tác vụ tính toán CPU nặng nề trong vòng lặp hàng triệu phần tử. Cấp phát hàng loạt đối tượng Continuation trên Heap làm máy ảo nghẽn bộ nhớ và gây giật khung hình giao diện nghiêm trọng. Chống chỉ định dùng hàm suspend khi không có nhu cầu giải phóng luồng hoặc không gọi tới thư viện bất đồng bộ con. Với tính toán dữ liệu thuần túy, hãy dùng hàm thường kết hợp [inline function](concept:kotlin-inline-function) để giữ trọn vẹn dữ liệu trên ngăn xếp.
+Mỗi lần gọi hàm `suspend` có điểm dừng là thêm một đối tượng `Continuation` trên Heap, gọi hàng triệu lần thì tốn công dọn rác. `suspend` cũng không tự đưa việc sang luồng khác: vòng lặp tính toán nặng chạy trên Main vẫn chặn giao diện, phải bọc `withContext(Dispatchers.Default)`. Với tính toán thuần trong vòng lặp lớn, hãy dùng hàm thường hoặc [inline function](concept:kotlin-inline-function) để biến nằm trên ngăn xếp. Triệu chứng là giao diện giật hoặc ANR dù code đã là coroutine, và stack trace khi lỗi thiếu các hàm gọi trước điểm dừng.
 
 ## Câu hỏi thực chiến
 **Hỏi:** Cứ gọi hàm `suspend` là hàm đó chắc chắn sẽ nhả luồng và tạm dừng đúng không?
-Không phải. Nếu dữ liệu đã có sẵn trong bộ nhớ đệm, hàm suspend sẽ trả ngay kết quả mà không hề nhả luồng. Hàm chỉ thực sự nhả luồng khi tác vụ con chưa hoàn thành và trả về giá trị `COROUTINE_SUSPENDED`.
+Không phải. Khi bạn gọi hàm lấy ảnh đã có sẵn trong bộ nhớ đệm, hàm trả kết quả ngay mà không nhả luồng. Hàm chỉ thực sự tạm dừng và nhả luồng khi việc bên trong chưa xong và trả về `COROUTINE_SUSPENDED`.
 
 **Hỏi:** Biến cục bộ nào bên trong hàm `suspend` sẽ bị đẩy lên Heap?
-Chỉ những biến còn sống qua điểm tạm dừng mới bị lưu vào Heap. Compiler phân tích vòng đời và chỉ tạo trường trong đối tượng `Continuation` cho biến cần dùng tiếp sau đó. Những biến dùng xong trước điểm ngắt vẫn được giải phóng trên ngăn xếp luồng như hàm bình thường.
+Chỉ những biến bạn tạo trước điểm dừng và còn đọc lại sau điểm dừng đó mới được cất lên Heap. Trình biên dịch dò từng biến và chỉ tạo trường trong đối tượng `Continuation` cho các biến cần giữ qua lúc nghỉ. Biến nào dùng xong trước điểm dừng thì vẫn nằm trên ngăn xếp luồng như hàm thường.
 
 **Hỏi:** Khi gọi hàm `suspend` từ mã Java, ta thấy chữ ký hàm thay đổi thế nào?
-Hàm xuất hiện thêm một tham số `Continuation` ở cuối và đổi kiểu trả về thành `Object`. Java không có cú pháp coroutine nên bắt buộc phải truyền một đối tượng callback để nhận kết quả khi xong.
+Bạn sẽ thấy hàm có thêm một tham số `Continuation` ở cuối cùng và kiểu trả về đổi thành `Object`. Vì Java không có từ khóa `suspend`, bạn phải tự truyền một đối tượng nhận kết quả như kiểu viết callback.
 
 **Hỏi:** Thêm từ khóa `suspend` vào hàm bình thường không có điểm ngắt thì có hại gì không?
-Có, nhưng không phải hại hiệu năng. Không có điểm dừng thì compiler không sinh máy trạng thái, chỉ thêm tham số `Continuation` vào chữ ký hàm. Cái hại là mọi nơi gọi bị ép nằm trong coroutine, và IDE sẽ cảnh báo `suspend` thừa.
+Không hại về tốc độ chạy. Thân hàm không có điểm dừng thì trình biên dịch không tạo máy trạng thái, chỉ thêm tham số `Continuation` vào cuối. Cái bất tiện là mọi chỗ gọi hàm này đều bị bắt phải nằm trong coroutine, và IDE sẽ báo chữ `suspend` bị thừa.
 
 **Hỏi:** Làm sao máy trạng thái biết cần chạy tiếp đoạn code nào sau khi thức dậy?
-Nhờ vào biến `label` đóng vai trò con trỏ trạng thái. Trước mỗi lần tạm dừng, hàm tăng giá trị `label` tương ứng với vị trí đoạn mã kế tiếp. Khi hàm được gọi lại qua `resumeWith()`, khối lệnh `when (label)` sẽ nhảy ngay đến điểm dừng đó để chạy tiếp.
+Nó dựa vào số nguyên lưu trong biến `label` của đối tượng `Continuation`. Ngay trước khi gọi API và tạm nghỉ, hàm gán `label` bằng số thứ tự của đoạn code ngay sau đó. Khi mạng trả kết quả và gọi `resumeWith()`, khối `when (label)` đọc số này để nhảy thẳng tới đoạn code kế tiếp.
 
 ## Ý bắt buộc khi giải thích lại
-- [ ] Trình bày được cách compiler chèn tham số Continuation và đổi kiểu trả về thành Any?.
-- [ ] Giải thích được vai trò của biến label và khối lệnh when trong việc khôi phục điểm ngắt.
-- [ ] Phân tích được áp lực cấp phát bộ nhớ Heap của đối tượng Continuation khi lạm dụng trong vòng lặp.
+- [ ] Giải thích được cách trình biên dịch thêm tham số Continuation vào cuối hàm và đổi kiểu trả về thành Any?.
+- [ ] Trình bày được cách biến label và khối when giúp hàm nhảy tới đúng chỗ vừa dừng sau khi gọi resumeWith.
+- [ ] Nêu được chi phí tạo đối tượng Continuation trên Heap khi gọi hàm có điểm dừng trong vòng lặp lớn.
 - [ ] Viết lại được khuôn mẫu chuẩn từ trí nhớ.
 
 ## Tôi đã gặp nó ở đâu

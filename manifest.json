@@ -1,7 +1,7 @@
 {
  "version": 1,
- "generatedAt": "2026-10-22T03:17:19+00:00",
- "sourceCommit": "f0628f6",
+ "generatedAt": "2026-10-29T01:38:31+00:00",
+ "sourceCommit": "54fbf36",
  "files": [
   {
    "path": "android/activity-lifecycle.md",
@@ -220,13 +220,13 @@
   },
   {
    "path": "compose/diagrams/recomposition-slot-table-gap-buffer.png",
-   "sha256": "30ccba121152d311f7fc7cae1f45ca78991d63f2e586daf7b5baba3c39f2043e",
-   "size": 243165
+   "sha256": "50d07b6d322b352e637f0254a481c012562e4f014e23de35681e269cb665ab7a",
+   "size": 243625
   },
   {
    "path": "compose/recomposition-and-state.md",
-   "sha256": "877dca8b277fd8021d774370655fb01ddcb2cd886e17d5d964f688cb3b36a034",
-   "size": 6227
+   "sha256": "5574e762ba0049821ab6ed7c89b58e60b4401deffb5a11a076922cbfbfbb7c02",
+   "size": 6289
   },
   {
    "path": "jvm/diagrams/race-condition-memory-barriers.png",
@@ -275,8 +275,8 @@
   },
   {
    "path": "kotlin/coroutine-state-machine.md",
-   "sha256": "3d0eb549fcafcfcb088f9ad3beff16529b4fb10d4cbb53a81cda360a0ed3c26f",
-   "size": 7620
+   "sha256": "2c9d67d17f5c55e4e13983d61e21f39369a929cbb689250fea4cf1c786636f99",
+   "size": 8071
   },
   {
    "path": "kotlin/coroutines.md",
